@@ -11,6 +11,9 @@ public class CursorManager : MonoBehaviour
     [Header("カーソルの開始位置")]
     [SerializeField] private Vector2 startPosition = Vector2.zero;
 
+    [Header("カーソル用Canvas")]
+    [SerializeField] private Canvas cursorCanvas;
+
     private readonly List<GameObject> cursors = new();
 
     private void Start()
@@ -66,12 +69,31 @@ public class CursorManager : MonoBehaviour
             );
 
             GameObject cursor = Instantiate(
-                cursorPrefabs[i],
-                position,
-                Quaternion.identity
-            );
+    cursorPrefabs[i],
+    cursorCanvas.transform
+);
 
             cursor.name = "Cursor" + (i + 1) + "P";
+
+            RectTransform rect = cursor.GetComponent<RectTransform>();
+
+            if (rect != null)
+            {
+                rect.anchoredPosition = position;
+                rect.localScale = Vector3.one;
+                rect.localRotation = Quaternion.identity;
+            }
+
+            cursor.name = "Cursor" + (i + 1) + "P";
+
+            // UIより前面に表示するため、Sprite Rendererの描画順を設定
+            SpriteRenderer[] renderers =
+                cursor.GetComponentsInChildren<SpriteRenderer>(true);
+
+            foreach (SpriteRenderer sr in renderers)
+            {
+                sr.sortingOrder = 100;
+            }
 
             CursorController controller =
                 cursor.GetComponent<CursorController>();

@@ -1,26 +1,78 @@
 
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class Pointer : MonoBehaviour
 {
-    private GameObject currentTarget;
+    private CursorController controller;
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void Awake()
     {
-        if (other.CompareTag("Card") ||
-            other.CompareTag("GameButton"))
-        {
-            currentTarget = other.gameObject;
-            Debug.Log("カーソルが触れた：" + other.gameObject.name);
-        }
+        controller = GetComponentInParent<CursorController>();
     }
 
-    private void OnTriggerExit2D(Collider2D other)
+    private void Update()
     {
-        if (currentTarget == other.gameObject)
+        if (controller == null)
+            return;
+
+        int index = controller.GamepadIndex;
+
+        if (index < 0 || index >= Gamepad.all.Count)
+            return;
+
+        if (!Gamepad.all[index].buttonSouth.wasPressedThisFrame)
+            return;
+
+        if (EventSystem.current == null)
         {
-            currentTarget = null;
-            Debug.Log("カーソルが離れた");
+            Debug.LogError("EventSystem がありません");
+            return;
         }
+
+        // TipPointのワールド座標を画面座標に変換
+        Vector2 screenPosition =
+            RectTransformUtility.WorldToScreenPoint(
+                null,
+                transform.position
+            );
+
+        Debug.Log("TipPointの画面座標：" + screenPosition);
+
+        PointerEventData pointerData =
+            new PointerEventData(EventSystem.current);
+
+        pointerData.position = screenPosition;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+
+        GraphicRaycaster[] raycasters =
+            FindObjectsByType<GraphicRaycaster>(
+                FindObjectsSortMode.None
+            );
+
+        foreach (GraphicRaycaster raycaster in raycasters)
+        {
+            results.Clear();
+            raycaster.Raycast(pointerData, results);
+
+            foreach (RaycastResult result in results)
+            {
+                Button button =
+                    result.gameObject.GetComponentInParent<Button>();
+
+                if (button != null && button.interactable)
+                {
+                    Debug.Log("ボタンを押した：" + button.name);
+                    button.onClick.Invoke();
+                    return;
+                }
+            }
+        }
+
+        Debug.Log("TipPointの位置にUI Buttonがありません");
     }
 }
