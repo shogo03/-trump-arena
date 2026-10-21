@@ -1,3 +1,4 @@
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,25 +6,44 @@ public class Deck : MonoBehaviour
 {
     public List<Card> cards = new List<Card>();
 
+    [Header("カード画像（♠A、♠2、...、♣Kの順）")]
+    public Sprite[] cardImages = new Sprite[52];
+
     void Start()
     {
         CreateDeck();
         ShuffleDeck();
+
+        Debug.Log("山札の枚数：" + cards.Count);
     }
 
+    // 52枚のカードを作成する
     void CreateDeck()
     {
         cards.Clear();
 
-        for (int suit = 0; suit < 4; suit++)
+        Suit[] suits =
+        {
+            Suit.Spade,
+            Suit.Heart,
+            Suit.Diamond,
+            Suit.Club
+        };
+
+        for (int s = 0; s < suits.Length; s++)
         {
             for (int number = 1; number <= 13; number++)
             {
-                cards.Add(new Card((Suit)suit, number));
+                int imageIndex = s * 13 + number - 1;
+
+                cards.Add(
+                    new Card(suits[s], number, cardImages[imageIndex])
+                );
             }
         }
     }
 
+    // 山札をシャッフルする
     void ShuffleDeck()
     {
         for (int i = 0; i < cards.Count; i++)
@@ -36,10 +56,13 @@ public class Deck : MonoBehaviour
         }
     }
 
+    // 山札から1枚引く
     public Card DrawCard()
     {
         if (cards.Count == 0)
         {
+            Debug.Log("新しい山札を作ります");
+
             CreateDeck();
             ShuffleDeck();
         }
@@ -49,5 +72,4 @@ public class Deck : MonoBehaviour
 
         return card;
     }
-    
 }
