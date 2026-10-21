@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1047273028484838485}
   - component: {fileID: 2860489606898629822}
+  - component: {fileID: 6299539547710223843}
   m_Layer: 0
   m_Name: TipPoint
   m_TagString: Untagged
@@ -68,6 +69,18 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
+--- !u!114 &6299539547710223843
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6280192778121488612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ffdd65d78925b14f99beaf3b01f12cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CursorTip
 --- !u!1 &8767622680830113232
 GameObject:
   m_ObjectHideFlags: 0
@@ -79,7 +92,6 @@ GameObject:
   - component: {fileID: 8062009746588061614}
   - component: {fileID: 7962052116951153629}
   - component: {fileID: 5548986181684932793}
-  - component: {fileID: -1829614839643847498}
   m_Layer: 0
   m_Name: Cursor4P
   m_TagString: Untagged
@@ -175,15 +187,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CursorController
   moveSpeed: 20
---- !u!114 &-1829614839643847498
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8767622680830113232}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0ffdd65d78925b14f99beaf3b01f12cf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CursorTip

@@ -35,4 +35,5 @@ public class CursorController : MonoBehaviour
             Debug.Log((gamepadIndex + 1) + "P：決定！");
         }
     }
+    public int GamepadIndex => gamepadIndex;
 }
