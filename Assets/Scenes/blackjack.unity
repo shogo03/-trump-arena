@@ -1025,7 +1025,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BJdraw
   deck: {fileID: 353850312}
-  cardView: {fileID: 1797205434}
+  cardPrefab: {fileID: 7651527804040865790, guid: 1d123635a9df54148b7afeeac916ddfa, type: 3}
+  handArea: {fileID: 0}
+  pointText: {fileID: 0}
 --- !u!4 &2031883186
 Transform:
   m_ObjectHideFlags: 0

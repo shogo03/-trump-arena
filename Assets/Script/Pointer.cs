@@ -50,9 +50,7 @@ public class Pointer : MonoBehaviour
         List<RaycastResult> results = new List<RaycastResult>();
 
         GraphicRaycaster[] raycasters =
-            FindObjectsByType<GraphicRaycaster>(
-                FindObjectsSortMode.None
-            );
+            FindObjectsByType<GraphicRaycaster>();
 
         foreach (GraphicRaycaster raycaster in raycasters)
         {
