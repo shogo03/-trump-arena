@@ -102,5 +102,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fbcdfb02e57a6a48a711cbd0e8475ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardBurstCardView
-  cardImage: {fileID: 0}
+  cardImage: {fileID: 3890018229386272044, guid: fc94f067ecc4393459ef2c81093317f0, type: 3}
   backImage: {fileID: 0}
