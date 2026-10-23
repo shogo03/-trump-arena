@@ -2,13 +2,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CardBurstManager : MonoBehaviour
+public class MemoryBurstManager : MonoBehaviour
 {
     [Header("山札")]
-    [SerializeField] private Deck deck;
+    [SerializeField] private MemoryBurstDeck deck;
 
     [Header("カード")]
-    [SerializeField] private CardBurstCardView cardPrefab;
+    [SerializeField] private MemoryBurstCardView cardPrefab;
 
     [Header("カードを並べる場所")]
     [SerializeField] private Transform cardArea;
@@ -24,6 +24,7 @@ public class CardBurstManager : MonoBehaviour
 
     private void CreateCards()
     {
+        deck.Initialize();
         if (deck == null || cardPrefab == null || cardArea == null)
         {
             Debug.LogError(
@@ -44,7 +45,7 @@ public class CardBurstManager : MonoBehaviour
         {
             Card card = deck.DrawCard();
 
-            CardBurstCardView view =
+            MemoryBurstCardView view =
                 Instantiate(cardPrefab, cardArea);
 
             view.Setup(card);

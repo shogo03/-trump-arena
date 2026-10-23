@@ -9,6 +9,9 @@ public class Pointer : MonoBehaviour
 {
     private CursorController controller;
 
+    private readonly List<RaycastResult> results =
+        new List<RaycastResult>();
+
     private void Awake()
     {
         controller = GetComponentInParent<CursorController>();
@@ -33,21 +36,16 @@ public class Pointer : MonoBehaviour
             return;
         }
 
-        // TipPointのワールド座標を画面座標に変換
         Vector2 screenPosition =
             RectTransformUtility.WorldToScreenPoint(
                 null,
                 transform.position
             );
 
-        Debug.Log("TipPointの画面座標：" + screenPosition);
-
         PointerEventData pointerData =
             new PointerEventData(EventSystem.current);
 
         pointerData.position = screenPosition;
-
-        List<RaycastResult> results = new List<RaycastResult>();
 
         GraphicRaycaster[] raycasters =
             FindObjectsByType<GraphicRaycaster>();
@@ -59,8 +57,11 @@ public class Pointer : MonoBehaviour
 
             foreach (RaycastResult result in results)
             {
+                GameObject hitObject = result.gameObject;
+
+                // Buttonがある場合
                 Button button =
-                    result.gameObject.GetComponentInParent<Button>();
+                    hitObject.GetComponentInParent<Button>();
 
                 if (button != null && button.interactable)
                 {
@@ -68,9 +69,39 @@ public class Pointer : MonoBehaviour
                     button.onClick.Invoke();
                     return;
                 }
+
+                // Imageなど、クリックイベントを受け取る
+                // コンポーネントがある場合
+                GameObject target = null;
+
+                Transform current = hitObject.transform;
+
+                while (current != null)
+                {
+                    if (current.GetComponent<IPointerClickHandler>() != null)
+                    {
+                        target = current.gameObject;
+                        break;
+                    }
+
+                    current = current.parent;
+                }
+
+                if (target != null)
+                {
+                    Debug.Log("クリックイベントを送信：" + target.name);
+
+                    ExecuteEvents.Execute(
+                        target,
+                        pointerData,
+                        ExecuteEvents.pointerClickHandler
+                    );
+
+                    return;
+                }
             }
         }
 
-        Debug.Log("TipPointの位置にUI Buttonがありません");
+        Debug.Log("カーソル位置にクリック可能なUIがありません");
     }
 }

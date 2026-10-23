@@ -1,8 +1,9 @@
 
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class CardBurstCardView : MonoBehaviour
+public class MemoryBurstCardView : MonoBehaviour, IPointerClickHandler
 {
     [Header("カード画像")]
     [SerializeField] private Image cardImage;
@@ -33,6 +34,13 @@ public class CardBurstCardView : MonoBehaviour
 
         cardImage.sprite = backImage;
         cardImage.enabled = true;
+        cardImage.raycastTarget = true;
+    }
+
+    // マウスでクリックされたとき
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        Reveal();
     }
 
     // カードを表向きにする
@@ -48,13 +56,29 @@ public class CardBurstCardView : MonoBehaviour
         }
 
         if (cardImage == null)
+        {
+            Debug.LogError("Card Imageが設定されていません", this);
             return;
+        }
 
-        cardImage.sprite = cardData.image;
+        Sprite sprite = cardData.image;
+
+        if (sprite == null)
+        {
+            Debug.LogError(
+                $"カード画像が設定されていません：{cardData.suit} {cardData.number}",
+                this
+            );
+            return;
+        }
+
+        cardImage.sprite = sprite;
+        cardImage.enabled = true;
         isRevealed = true;
 
-        Debug.Log($"カードをめくった：{cardData.suit} {cardData.number}");
+        Debug.Log($"画像を設定しました：{sprite.name}", this);
     }
+
 
     public bool IsRevealed()
     {

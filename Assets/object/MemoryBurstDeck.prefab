@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2522663570195257691
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8179251012342193042}
+  - component: {fileID: 9093634218768387832}
+  m_Layer: 0
+  m_Name: MemoryBurstDeck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8179251012342193042
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2522663570195257691}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 960, y: 540, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9093634218768387832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2522663570195257691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2f2b1009abdf58449f28c4cbfe86866, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MemoryBurstDeck
+  cardImages:
+  - {fileID: -4798686235504483533, guid: 23d196c12b1278441865012a31f1843d, type: 3}
+  - {fileID: 21300000, guid: 39c38d3c915366a47accd7e826f04caa, type: 3}
+  - {fileID: 21300000, guid: 05ebe0262a4f7b94d900894b5c580dd8, type: 3}
+  - {fileID: -1584596158485103789, guid: 7224ca5b4bbdc16409cacd3e0141cb18, type: 3}
+  - {fileID: 3792974558124712878, guid: e5e8164d618d00543889f15c8ff6025b, type: 3}
+  - {fileID: -1122087696310482450, guid: 532fa844dbe06b8448fd55eb8bfba3f7, type: 3}
+  - {fileID: 5814720673573623092, guid: 1dbe4fbab82dcb7479000315b8666b4d, type: 3}
+  - {fileID: -5144845633420715830, guid: 0e823631e9f419540a4638eae5c1c3d1, type: 3}
+  - {fileID: -2257395747504803768, guid: ca7fb0d180e9f944d863ae46d17fdfbf, type: 3}
+  - {fileID: -7294397241261337803, guid: 560fdae7baf3bf64ba8cd878d5abed48, type: 3}
+  - {fileID: -8609792899818547491, guid: 894e29cc8691b4046b4247f5e7a5d4ef, type: 3}
+  - {fileID: 5900034042567509053, guid: f49fa6cdeda696a47ba1e2b02327b99a, type: 3}
+  - {fileID: 4819189972320616632, guid: b7561fee3bcdef745a6294bc8923fa88, type: 3}
+  - {fileID: 6086575594598197071, guid: fba40c21ecdd7674a9761bee1a5cae22, type: 3}
+  - {fileID: 5947699029866111652, guid: b61e735e612fb99448a88ab3ced39f2e, type: 3}
+  - {fileID: -5512471286592494514, guid: f1230417a85db1d4aa7a879841ef44cd, type: 3}
+  - {fileID: -2538782860702858927, guid: 17aa393d36481564a8f2538dc537b5c7, type: 3}
+  - {fileID: 597362625846584291, guid: 4a65af5aae3187744af08ffece3e8a57, type: 3}
+  - {fileID: 8380658809156677183, guid: 3be8824b82ba9e04b9ccbf255533f1bf, type: 3}
+  - {fileID: -5812220557879110006, guid: b68d228f1113c1e46a6b0d021731e206, type: 3}
+  - {fileID: -2370113832773940993, guid: d16c2fda96734094194081d9ec6e09fb, type: 3}
+  - {fileID: -89520487819898405, guid: 9ad2d7ec2bd1d1a43b28a97579fe1931, type: 3}
+  - {fileID: 212106508489382927, guid: 646f7d70f4b60c3468e893cc730bffb7, type: 3}
+  - {fileID: 58411593448168907, guid: 75f50d39268caef478c00a21ece1f039, type: 3}

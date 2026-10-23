@@ -145,7 +145,7 @@ RectTransform:
   m_GameObject: {fileID: 78408868}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1874434445}
@@ -208,7 +208,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c2123518eb9e6449b682f2f57cb342e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardBurstManager
-  deck: {fileID: 1834887678071377624, guid: 1d123635a9df54148b7afeeac916ddfa, type: 3}
+  deck: {fileID: 9093634218768387832, guid: 38dbb80b5cd33cc47a691e217dfd0410, type: 3}
   cardPrefab: {fileID: 8356994227912987825, guid: adf4c390e25c46248a2692b5b92b8433, type: 3}
   cardArea: {fileID: 78408869}
   cardCount: 24
@@ -365,7 +365,7 @@ MonoBehaviour:
   - {fileID: 6557215072619988933, guid: b30bcdc02e2be814cba1dd303a4e9f8d, type: 3}
   - {fileID: 3237490130493544105, guid: 6669f8f4903e59a49ac01f32f1f55f0d, type: 3}
   startPosition: {x: 0, y: 0}
-  cursorCanvas: {fileID: 0}
+  cursorCanvas: {fileID: 1351746314}
 --- !u!4 &1604315288
 Transform:
   m_ObjectHideFlags: 0
