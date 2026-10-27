@@ -16,6 +16,7 @@ public class BJdraw : MonoBehaviour
 
     public Text pointText3;
 
+    public Vector2 cardSize = new Vector2(60, 80);
 
     private List<Card> hand = new List<Card>();
     private List<Card> hand2 = new List<Card>();
@@ -82,7 +83,7 @@ public class BJdraw : MonoBehaviour
         RectTransform rect = obj.GetComponent<RectTransform>();
 
         // カードを小さくする
-        rect.sizeDelta = new Vector2(45, 65);
+        rect.sizeDelta = cardSize;
 
         // カードを横に並べる
         rect.anchoredPosition = new Vector2(
@@ -155,7 +156,7 @@ public class BJdraw : MonoBehaviour
         playerHand.Add(card);
 
         RectTransform rect = obj.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(45, 65);
+        rect.sizeDelta = cardSize;
         rect.anchoredPosition = new Vector2((playerHand.Count - 1) * 35, 0);
     }
     void UpdatePoint()
@@ -291,7 +292,7 @@ public class BJdraw : MonoBehaviour
         dealerHand.Add(card);
 
         RectTransform rect = obj.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(45, 65);
+        rect.sizeDelta = cardSize;
         rect.anchoredPosition = new Vector2(
             (dealerHand.Count - 1) * 35,
             0
