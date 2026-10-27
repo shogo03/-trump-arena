@@ -12,7 +12,10 @@ public class BJdraw : MonoBehaviour
     public Transform handArea3;
     public Text pointText;
     public Text pointText2;
+    public Text test;
+
     public Text pointText3;
+
 
     private List<Card> hand = new List<Card>();
     private List<Card> hand2 = new List<Card>();
