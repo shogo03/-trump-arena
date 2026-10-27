@@ -57,13 +57,13 @@ public class BJdraw : MonoBehaviour
 
         RectTransform rect = obj.GetComponent<RectTransform>();
 
-        // カードのサイズ
-        rect.sizeDelta = new Vector2(60, 87);
+        // カードを小さくする
+        rect.sizeDelta = new Vector2(45, 65);
 
         // カードを横に並べる
         rect.anchoredPosition = new Vector2(
-            (hand.Count - 1) * 65,
-            -100
+            (hand.Count - 1) * 35,
+            0
         );
         UpdatePoint();
     }
