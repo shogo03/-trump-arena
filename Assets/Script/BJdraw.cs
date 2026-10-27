@@ -14,10 +14,27 @@ public class BJdraw : MonoBehaviour
 
     public void DrawCard()
     {
-
         if (isStand)
         {
             Debug.Log("STAND中はカードを引けません");
+            return;
+        }
+
+        if (deck == null)
+        {
+            Debug.LogError("Deckが未設定！");
+            return;
+        }
+
+        if (cardPrefab == null)
+        {
+            Debug.LogError("Card Prefabが未設定！");
+            return;
+        }
+
+        if (handArea == null)
+        {
+            Debug.LogError("Hand Areaが未設定！");
             return;
         }
 
@@ -26,15 +43,28 @@ public class BJdraw : MonoBehaviour
         GameObject obj = Instantiate(cardPrefab, handArea);
 
         Image image = obj.GetComponent<Image>();
+
+        if (image == null)
+        {
+            Debug.LogError("Card PrefabにImageがない！");
+            return;
+        }
+
         image.sprite = card.image;
         image.enabled = true;
 
         hand.Add(card);
 
         RectTransform rect = obj.GetComponent<RectTransform>();
-        rect.anchoredPosition = new Vector2((hand.Count - 1) * 100, 0);
-        rect.sizeDelta = new Vector2(100, 145);
 
+        // カードのサイズ
+        rect.sizeDelta = new Vector2(60, 87);
+
+        // カードを横に並べる
+        rect.anchoredPosition = new Vector2(
+            (hand.Count - 1) * 65,
+            -100
+        );
         UpdatePoint();
     }
 
