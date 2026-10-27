@@ -18,8 +18,23 @@ public class BJdraw : MonoBehaviour
     private List<Card> hand2 = new List<Card>();
     private List<Card> hand3 = new List<Card>();
 
+    public Transform dealerHandArea;
+    public Text dealerPointText;
+
+    private List<Card> dealerHand = new List<Card>();
+
+    private bool isBust = false;
+    private bool isBust2 = false;
+    private bool isBust3 = false;
+
     public void DrawCard()
     {
+        if (isBust)
+        {
+            Debug.Log("P1はバーストしているため引けません");
+            return;
+        }
+
         if (isStand)
         {
             Debug.Log("STAND中はカードを引けません");
@@ -76,6 +91,12 @@ public class BJdraw : MonoBehaviour
 
     public void DrawCard2()
     {
+        if (isBust2)
+        {
+            Debug.Log("P2はバーストしているため引けません");
+            return;
+        }
+
         if (isStand2)
         {
             Debug.Log("2人目はSTAND中です");
@@ -88,6 +109,12 @@ public class BJdraw : MonoBehaviour
 
     public void DrawCard3()
     {
+        if (isBust3)
+        {
+            Debug.Log("P3はバーストしているため引けません");
+            return;
+        }
+
         if (isStand3)
         {
             Debug.Log("3人目はSTAND中です");
@@ -176,6 +203,13 @@ public class BJdraw : MonoBehaviour
         if (total > 21)
         {
             targetText.text = "バースト！ 合計：" + total;
+
+            if (playerHand == hand)
+                isBust = true;
+            else if (playerHand == hand2)
+                isBust2 = true;
+            else if (playerHand == hand3)
+                isBust3 = true;
         }
         else
         {
@@ -191,5 +225,80 @@ public class BJdraw : MonoBehaviour
     {
         isStand = true;
         Debug.Log("STAND：カードを引くのをやめました");
+    }
+
+    public void Stand2()
+    {
+        isStand2 = true;
+        Debug.Log("P2：STANDしました");
+    }
+
+    public void Stand3()
+    {
+        isStand3 = true;
+        Debug.Log("P3：STANDしました");
+    }
+    public void StartGame()
+    {
+        // P1に2枚配る
+        DrawCard();
+        DrawCard();
+
+        // P2に2枚配る
+        DrawCard2();
+        DrawCard2();
+
+        // P3に2枚配る
+        DrawCard3();
+        DrawCard3();
+
+        DrawDealerCard();
+        DrawDealerCard();
+    }
+
+    void Start()
+    {
+        StartGame();
+    }
+
+    public void DrawDealerCard()
+    {
+        if (deck == null || cardPrefab == null || dealerHandArea == null)
+        {
+            Debug.LogError("ディーラーの設定を確認してね！");
+            return;
+        }
+
+        Card card = deck.DrawCard();
+
+        GameObject obj = Instantiate(cardPrefab, dealerHandArea);
+
+        Image image = obj.GetComponent<Image>();
+
+        if (image == null)
+        {
+            Destroy(obj);
+            Debug.LogError("Card PrefabにImageがない！");
+            return;
+        }
+
+        image.sprite = card.image;
+        image.enabled = true;
+
+        dealerHand.Add(card);
+
+        RectTransform rect = obj.GetComponent<RectTransform>();
+        rect.sizeDelta = new Vector2(45, 65);
+        rect.anchoredPosition = new Vector2(
+            (dealerHand.Count - 1) * 35,
+            0
+        );
+
+        UpdateDealerPoint();
+    }
+
+    void UpdateDealerPoint()
+    {
+        CalculatePoint(dealerHand, dealerPointText);
     }
 }
