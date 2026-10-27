@@ -8,9 +8,15 @@ public class BJdraw : MonoBehaviour
     public Deck deck;
     public GameObject cardPrefab;
     public Transform handArea;
+    public Transform handArea2;
+    public Transform handArea3;
     public Text pointText;
+    public Text pointText2;
+    public Text pointText3;
 
     private List<Card> hand = new List<Card>();
+    private List<Card> hand2 = new List<Card>();
+    private List<Card> hand3 = new List<Card>();
 
     public void DrawCard()
     {
@@ -68,12 +74,83 @@ public class BJdraw : MonoBehaviour
         UpdatePoint();
     }
 
+    public void DrawCard2()
+    {
+        if (isStand2)
+        {
+            Debug.Log("2人目はSTAND中です");
+            return;
+        }
+
+        DrawForPlayer(hand2, handArea2);
+        UpdatePoint2();
+    }
+
+    public void DrawCard3()
+    {
+        if (isStand3)
+        {
+            Debug.Log("3人目はSTAND中です");
+            return;
+        }
+
+        DrawForPlayer(hand3, handArea3);
+        UpdatePoint3();
+    }
+
+    void DrawForPlayer(List<Card> playerHand, Transform area)
+    {
+        if (deck == null || cardPrefab == null || area == null)
+        {
+            Debug.LogError("Deck、Card Prefab、Hand Areaの設定を確認してね！");
+            return;
+        }
+
+        Card card = deck.DrawCard();
+
+        GameObject obj = Instantiate(cardPrefab, area);
+
+        Image image = obj.GetComponent<Image>();
+
+        if (image == null)
+        {
+            Debug.LogError("Card PrefabにImageがない！");
+            Destroy(obj);
+            return;
+        }
+
+        image.sprite = card.image;
+        image.enabled = true;
+
+        playerHand.Add(card);
+
+        RectTransform rect = obj.GetComponent<RectTransform>();
+        rect.sizeDelta = new Vector2(45, 65);
+        rect.anchoredPosition = new Vector2((playerHand.Count - 1) * 35, 0);
+    }
     void UpdatePoint()
     {
+        CalculatePoint(hand, pointText);
+    }
+
+    void UpdatePoint2()
+    {
+        CalculatePoint(hand2, pointText2);
+    }
+
+    void UpdatePoint3()
+    {
+        CalculatePoint(hand3, pointText3);
+    }
+
+    void CalculatePoint(List<Card> playerHand, Text targetText)
+    {
+        if (targetText == null) return;
+
         int total = 0;
         int aceCount = 0;
 
-        foreach (Card card in hand)
+        foreach (Card card in playerHand)
         {
             if (card.number == 1)
             {
@@ -96,23 +173,19 @@ public class BJdraw : MonoBehaviour
             aceCount--;
         }
 
-
         if (total > 21)
         {
-            pointText.text = "バースト！ 合計：" + total;
-            isStand = true;
+            targetText.text = "バースト！ 合計：" + total;
         }
         else
         {
-            pointText.text = "合計：" + total;
+            targetText.text = "合計：" + total;
         }
-
-
-
-
     }
 
     private bool isStand = false;
+    private bool isStand2 = false;
+    private bool isStand3 = false;
 
     public void Stand()
     {
