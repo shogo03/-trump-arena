@@ -460,3 +460,4 @@ public class BJdraw : MonoBehaviour
         return total;
     }
 }
+//‚±‚±‚©‚ç‰º •ÏX—p
