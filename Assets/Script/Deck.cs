@@ -8,6 +8,7 @@ public class Deck : MonoBehaviour
 
     [Header("カード画像（♠A、♠2、...、♣Kの順）")]
     public Sprite[] cardImages = new Sprite[52];
+    public Sprite cardBackImage;
 
     void Start()
     {
