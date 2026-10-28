@@ -28,10 +28,22 @@ public class MemoryBurstDeck : MonoBehaviour
                 return;
             }
 
-            // 1～24の番号を割り当てる
-            // Suitは表示・管理用に4種類を順番に割り当てる
-            Suit suit = (Suit)(i / 6);
-            int number = (i % 6) + 1;
+            // 同じ画像がすでに登録されていないか確認
+            for (int j = 0; j < i; j++)
+            {
+                if (cardImages[i] == cardImages[j])
+                {
+                    Debug.LogError(
+                        $"同じカード画像が重複しています：Element {i} と Element {j}",
+                        this
+                    );
+                    return;
+                }
+            }
+
+            // 最初の12枚はハート、後半の12枚はスペード
+            Suit suit = (Suit)(i / 12);
+            int number = (i % 12) + 1;
 
             cards.Add(new Card(suit, number, cardImages[i]));
         }
@@ -64,4 +76,6 @@ public class MemoryBurstDeck : MonoBehaviour
         cards.RemoveAt(0);
         return card;
     }
+
+
 }

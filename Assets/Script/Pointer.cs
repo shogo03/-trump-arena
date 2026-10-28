@@ -8,13 +8,14 @@ using UnityEngine.UI;
 public class Pointer : MonoBehaviour
 {
     private CursorController controller;
+    private MemoryBurstManager manager;
 
-    private readonly List<RaycastResult> results =
-        new List<RaycastResult>();
+    private readonly List<RaycastResult> results = new();
 
     private void Awake()
     {
         controller = GetComponentInParent<CursorController>();
+        manager = FindAnyObjectByType<MemoryBurstManager>();
     }
 
     private void Update()
@@ -24,9 +25,11 @@ public class Pointer : MonoBehaviour
 
         int index = controller.GamepadIndex;
 
+        // 接続中のコントローラーか確認
         if (index < 0 || index >= Gamepad.all.Count)
             return;
 
+        // Aボタンが押されたときだけ処理
         if (!Gamepad.all[index].buttonSouth.wasPressedThisFrame)
             return;
 
@@ -36,9 +39,20 @@ public class Pointer : MonoBehaviour
             return;
         }
 
+        // カーソル位置をスクリーン座標に変換
+        Canvas canvas = GetComponentInParent<Canvas>();
+
+        Camera eventCamera = null;
+
+        if (canvas != null &&
+            canvas.renderMode != RenderMode.ScreenSpaceOverlay)
+        {
+            eventCamera = canvas.worldCamera;
+        }
+
         Vector2 screenPosition =
             RectTransformUtility.WorldToScreenPoint(
-                null,
+                eventCamera,
                 transform.position
             );
 
@@ -47,11 +61,16 @@ public class Pointer : MonoBehaviour
 
         pointerData.position = screenPosition;
 
+        // UI の GraphicRaycaster を検索
         GraphicRaycaster[] raycasters =
             FindObjectsByType<GraphicRaycaster>();
 
         foreach (GraphicRaycaster raycaster in raycasters)
         {
+            if (raycaster == null || !raycaster.isActiveAndEnabled)
+                continue;
+
+            // カーソル位置にあるUIを取得
             results.Clear();
             raycaster.Raycast(pointerData, results);
 
@@ -59,49 +78,69 @@ public class Pointer : MonoBehaviour
             {
                 GameObject hitObject = result.gameObject;
 
-                // Buttonがある場合
+                // Buttonを検索
                 Button button =
                     hitObject.GetComponentInParent<Button>();
 
-                if (button != null && button.interactable)
+                if (button != null)
                 {
-                    Debug.Log("ボタンを押した：" + button.name);
+                    if (!button.interactable ||
+                        !button.gameObject.activeInHierarchy)
+                    {
+                        continue;
+                    }
+
+                    // カード内のButtonはターン制限を適用
+                    MemoryBurstCardView card =
+                        button.GetComponentInParent<MemoryBurstCardView>();
+
+                    if (card != null)
+                    {
+                        if (manager == null ||
+                            !manager.CanControl(index))
+                        {
+                            return;
+                        }
+                    }
+
+                    // 通常のUIボタンはターンに関係なく押せる
                     button.onClick.Invoke();
                     return;
                 }
 
-                // Imageなど、クリックイベントを受け取る
-                // コンポーネントがある場合
-                GameObject target = null;
-
+                // Button以外のクリック可能なUIを検索
                 Transform current = hitObject.transform;
 
                 while (current != null)
                 {
-                    if (current.GetComponent<IPointerClickHandler>() != null)
+                    IPointerClickHandler clickHandler =
+                        current.GetComponent<IPointerClickHandler>();
+
+                    if (clickHandler != null)
                     {
-                        target = current.gameObject;
-                        break;
+                        // カードなら自分のターンだけ操作可能
+                        MemoryBurstCardView card =
+                            current.GetComponentInParent<MemoryBurstCardView>();
+
+                        if (card != null &&
+                            (manager == null ||
+                             !manager.CanControl(index)))
+                        {
+                            return;
+                        }
+
+                        ExecuteEvents.Execute(
+                            current.gameObject,
+                            pointerData,
+                            ExecuteEvents.pointerClickHandler
+                        );
+
+                        return;
                     }
 
                     current = current.parent;
                 }
-
-                if (target != null)
-                {
-                    Debug.Log("クリックイベントを送信：" + target.name);
-
-                    ExecuteEvents.Execute(
-                        target,
-                        pointerData,
-                        ExecuteEvents.pointerClickHandler
-                    );
-
-                    return;
-                }
             }
         }
-
-        Debug.Log("カーソル位置にクリック可能なUIがありません");
     }
 }

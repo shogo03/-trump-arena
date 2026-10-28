@@ -16,11 +16,6 @@ public class CursorManager : MonoBehaviour
 
     private readonly List<GameObject> cursors = new();
 
-    private void Start()
-    {
-        UpdateCursors();
-    }
-
     private void OnEnable()
     {
         InputSystem.onDeviceChange += OnDeviceChange;
@@ -29,6 +24,11 @@ public class CursorManager : MonoBehaviour
     private void OnDisable()
     {
         InputSystem.onDeviceChange -= OnDeviceChange;
+    }
+
+    private void Start()
+    {
+        UpdateCursors();
     }
 
     private void OnDeviceChange(
@@ -47,6 +47,12 @@ public class CursorManager : MonoBehaviour
 
     private void UpdateCursors()
     {
+        if (cursorCanvas == null)
+        {
+            Debug.LogError("Cursor Canvasを設定してください。", this);
+            return;
+        }
+
         foreach (GameObject cursor in cursors)
         {
             if (cursor != null)
@@ -62,35 +68,28 @@ public class CursorManager : MonoBehaviour
             if (cursorPrefabs[i] == null)
                 continue;
 
-            Vector3 position = new Vector3(
-                startPosition.x + i * 1.5f,
-                startPosition.y,
-                0f
+            GameObject cursor = Instantiate(
+                cursorPrefabs[i],
+                cursorCanvas.transform
             );
 
-            GameObject cursor = Instantiate(
-    cursorPrefabs[i],
-    cursorCanvas.transform
-);
-
-            cursor.name = "Cursor" + (i + 1) + "P";
+            cursor.name = $"Cursor{i + 1}P";
 
             RectTransform rect = cursor.GetComponent<RectTransform>();
 
             if (rect != null)
             {
-                rect.anchoredPosition = position;
+                rect.anchoredPosition = new Vector2(
+                    startPosition.x + i * 60f,
+                    startPosition.y
+                );
+
                 rect.localScale = Vector3.one;
                 rect.localRotation = Quaternion.identity;
             }
 
-            cursor.name = "Cursor" + (i + 1) + "P";
-
-            // UIより前面に表示するため、Sprite Rendererの描画順を設定
-            SpriteRenderer[] renderers =
-                cursor.GetComponentsInChildren<SpriteRenderer>(true);
-
-            foreach (SpriteRenderer sr in renderers)
+            foreach (SpriteRenderer sr in
+                cursor.GetComponentsInChildren<SpriteRenderer>(true))
             {
                 sr.sortingOrder = 100;
             }
@@ -104,6 +103,6 @@ public class CursorManager : MonoBehaviour
             cursors.Add(cursor);
         }
 
-        Debug.Log("接続コントローラー数：" + count);
+        Debug.Log($"接続コントローラー数：{count}");
     }
 }
