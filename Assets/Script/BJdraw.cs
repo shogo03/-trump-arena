@@ -456,6 +456,7 @@ public class BJdraw : MonoBehaviour
             aceCount--;
         }
 
+
         return total;
     }
 }
