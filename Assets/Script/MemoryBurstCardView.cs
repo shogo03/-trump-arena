@@ -1,4 +1,5 @@
 
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -8,80 +9,78 @@ public class MemoryBurstCardView : MonoBehaviour, IPointerClickHandler
     [Header("カード画像")]
     [SerializeField] private Image cardImage;
 
-    [Header("カードの裏面画像")]
-    [SerializeField] private Sprite backImage;
-
     private Card cardData;
-    private bool isRevealed;
+    private Sprite backImage;
+    private Action<MemoryBurstCardView> onClicked;
 
-    // カードを設定して裏向きにする
-    public void Setup(Card card)
+    private bool isRevealed;
+    private bool isMatched;
+
+    public int Number => cardData != null ? cardData.number : -1;
+    public bool IsRevealed => isRevealed;
+    public bool IsMatched => isMatched;
+
+    public void Setup(
+        Card card,
+        Sprite back,
+        Action<MemoryBurstCardView> clickCallback)
     {
         cardData = card;
+        backImage = back;
+        onClicked = clickCallback;
+
         isRevealed = false;
+        isMatched = false;
 
-        if (cardImage == null)
+        if (cardImage == null || cardData == null || backImage == null)
         {
-            Debug.LogError("Card Imageが設定されていません", this);
+            Debug.LogError("カードの設定を確認してください。", this);
             return;
         }
 
-        if (backImage == null)
-        {
-            Debug.LogError("カードの裏面画像が設定されていません", this);
-            return;
-        }
+        Color color = cardImage.color;
+        color.a = 1f;
+        cardImage.color = color;
 
         cardImage.sprite = backImage;
-        cardImage.enabled = true;
         cardImage.raycastTarget = true;
     }
 
-    // マウスでクリックされたとき
     public void OnPointerClick(PointerEventData eventData)
     {
-        Reveal();
+        if (isRevealed || isMatched)
+            return;
+
+        onClicked?.Invoke(this);
     }
 
-    // カードを表向きにする
     public void Reveal()
     {
-        if (isRevealed)
+        if (isRevealed || isMatched || cardData == null)
             return;
 
-        if (cardData == null)
-        {
-            Debug.LogError("カードデータが設定されていません", this);
-            return;
-        }
-
-        if (cardImage == null)
-        {
-            Debug.LogError("Card Imageが設定されていません", this);
-            return;
-        }
-
-        Sprite sprite = cardData.image;
-
-        if (sprite == null)
-        {
-            Debug.LogError(
-                $"カード画像が設定されていません：{cardData.suit} {cardData.number}",
-                this
-            );
-            return;
-        }
-
-        cardImage.sprite = sprite;
-        cardImage.enabled = true;
+        cardImage.sprite = cardData.image;
         isRevealed = true;
-
-        Debug.Log($"画像を設定しました：{sprite.name}", this);
     }
 
-
-    public bool IsRevealed()
+    public void FlipBack()
     {
-        return isRevealed;
+        if (isMatched)
+            return;
+
+        cardImage.sprite = backImage;
+        isRevealed = false;
+    }
+
+    public void SetMatched()
+    {
+        isMatched = true;
+        isRevealed = true;
+
+        Color color = cardImage.color;
+        color.a = 0f;
+        cardImage.color = color;
+
+        cardImage.raycastTarget = false;
     }
 }

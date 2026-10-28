@@ -1,21 +1,24 @@
-
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class CursorController : MonoBehaviour
 {
-    [Header("カーソル設定")]
-    [SerializeField] private float moveSpeed = 800f;
-
-    private int gamepadIndex;
-
-    public int GamepadIndex => gamepadIndex;
+    public int gamepadIndex;
+    public float moveSpeed = 800f;
 
     private RectTransform rectTransform;
+    private RectTransform canvasRect;
+
+    public int GamepadIndex => gamepadIndex;
 
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
+
+        Canvas canvas = GetComponentInParent<Canvas>();
+
+        if (canvas != null)
+            canvasRect = canvas.transform as RectTransform;
     }
 
     public void SetGamepadIndex(int index)
@@ -28,46 +31,31 @@ public class CursorController : MonoBehaviour
         if (gamepadIndex < 0 || gamepadIndex >= Gamepad.all.Count)
             return;
 
-        Gamepad pad = Gamepad.all[gamepadIndex];
+        if (rectTransform == null || canvasRect == null)
+            return;
 
-        Vector2 stick = pad.leftStick.ReadValue();
+        Vector2 stick =
+            Gamepad.all[gamepadIndex].leftStick.ReadValue();
 
-        Vector3 movement = new Vector3(
-            stick.x,
-            stick.y,
-            0f
-        ) * moveSpeed * Time.unscaledDeltaTime;
+        rectTransform.anchoredPosition +=
+            stick * moveSpeed * Time.unscaledDeltaTime;
 
-        transform.position += movement;
+        // Canvas の範囲内に制限
+        Vector2 pos = rectTransform.anchoredPosition;
+        Rect rect = canvasRect.rect;
 
-        // カーソルが画面外に出ないように制限
-        Vector3 position = transform.position;
-
-        float halfWidth = 0f;
-        float halfHeight = 0f;
-
-        if (rectTransform != null)
-        {
-            halfWidth = rectTransform.rect.width
-                * rectTransform.lossyScale.x / 2f;
-
-            halfHeight = rectTransform.rect.height
-                * rectTransform.lossyScale.y / 2f;
-        }
-
-        position.x = Mathf.Clamp(
-            position.x,
-            halfWidth,
-            Screen.width - halfWidth
+        pos.x = Mathf.Clamp(
+            pos.x,
+            rect.xMin,
+            rect.xMax
         );
 
-        position.y = Mathf.Clamp(
-            position.y,
-            halfHeight,
-            Screen.height - halfHeight
+        pos.y = Mathf.Clamp(
+            pos.y,
+            rect.yMin,
+            rect.yMax
         );
 
-        position.z = transform.position.z;
-        transform.position = position;
+        rectTransform.anchoredPosition = pos;
     }
 }

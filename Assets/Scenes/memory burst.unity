@@ -210,9 +210,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CardBurstManager
   deck: {fileID: 9093634218768387832, guid: 38dbb80b5cd33cc47a691e217dfd0410, type: 3}
   cardPrefab: {fileID: 8356994227912987825, guid: adf4c390e25c46248a2692b5b92b8433, type: 3}
+  backImage: {fileID: 7880817723055296925, guid: 7322349cbf914fb4fab6ed09fbacd4c6, type: 3}
   cardArea: {fileID: 78408869}
   cardCount: 24
   columns: 6
+  flipBackDelay: 1
+  matchedDisplayTime: 1
+  playerScoreTexts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  turnText: {fileID: 0}
 --- !u!4 &252949338
 Transform:
   m_ObjectHideFlags: 0
