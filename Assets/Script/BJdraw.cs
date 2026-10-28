@@ -18,6 +18,7 @@ public class BJdraw : MonoBehaviour
 
     public Vector2 cardSize = new Vector2(60, 80);
 
+
     private List<Card> hand = new List<Card>();
     private List<Card> hand2 = new List<Card>();
     private List<Card> hand3 = new List<Card>();
