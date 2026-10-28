@@ -12,11 +12,11 @@ public class BJdraw : MonoBehaviour
     public Transform handArea3;
     public Text pointText;
     public Text pointText2;
-    public Text test;
-
     public Text pointText3;
 
-    
+    public Text resultText;
+    public Text resultText2;
+    public Text resultText3;
 
     private List<Card> hand = new List<Card>();
     private List<Card> hand2 = new List<Card>();
@@ -324,7 +324,7 @@ public class BJdraw : MonoBehaviour
     {
         if (isStand && isStand2 && isStand3)
         {
-            RevealDealerCards();
+            DealerTurn();
         }
     }
 
@@ -338,4 +338,123 @@ public class BJdraw : MonoBehaviour
         UpdateDealerPoint();
     }
 
+    int GetDealerTotal()
+    {
+        int total = 0;
+        int aceCount = 0;
+
+        foreach (Card card in dealerHand)
+        {
+            if (card.number == 1)
+            {
+                total += 11;
+                aceCount++;
+            }
+            else if (card.number >= 11)
+            {
+                total += 10;
+            }
+            else
+            {
+                total += card.number;
+            }
+        }
+
+        while (total > 21 && aceCount > 0)
+        {
+            total -= 10;
+            aceCount--;
+        }
+
+        return total;
+    }
+
+    void DealerTurn()
+    {
+        // 17を超えるまでカードを引く
+        while (GetDealerTotal() < 17)
+        {
+            DrawDealerCard();
+        }
+
+        // 引き終わったらカードを表にする
+        RevealDealerCards();
+
+        Debug.Log("ディーラーの最終点数：" + GetDealerTotal());
+
+        CheckWinner();
+    }
+
+    void CheckWinner()
+    {
+        int dealerTotal = GetDealerTotal();
+
+        CheckPlayerWinner(hand, resultText, "P1", dealerTotal, isBust);
+        CheckPlayerWinner(hand2, resultText2, "P2", dealerTotal, isBust2);
+        CheckPlayerWinner(hand3, resultText3, "P3", dealerTotal, isBust3);
+    }
+
+    void CheckPlayerWinner(
+        List<Card> playerHand,
+        Text targetText,
+        string playerName,
+        int dealerTotal,
+        bool playerBust)
+    {
+        if (targetText == null) return;
+
+        int playerTotal = CalculateHandTotal(playerHand);
+
+        if (playerBust)
+        {
+            targetText.text = "負け！";
+        }
+        else if (dealerTotal > 21)
+        {
+            targetText.text = "勝ち！";
+        }
+        else if (playerTotal > dealerTotal)
+        {
+            targetText.text = "勝ち！";
+        }
+        else if (playerTotal < dealerTotal)
+        {
+            targetText.text = "負け！";
+        }
+        else
+        {
+            targetText.text = "引き分け！";
+        }
+    }
+
+    int CalculateHandTotal(List<Card> playerHand)
+    {
+        int total = 0;
+        int aceCount = 0;
+
+        foreach (Card card in playerHand)
+        {
+            if (card.number == 1)
+            {
+                total += 11;
+                aceCount++;
+            }
+            else if (card.number >= 11)
+            {
+                total += 10;
+            }
+            else
+            {
+                total += card.number;
+            }
+        }
+
+        while (total > 21 && aceCount > 0)
+        {
+            total -= 10;
+            aceCount--;
+        }
+
+        return total;
+    }
 }
