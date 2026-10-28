@@ -18,6 +18,7 @@ public class BJdraw : MonoBehaviour
     public Text resultText2;
     public Text resultText3;
 
+    public MoneyManager moneyManager;
 
     private List<Card> hand = new List<Card>();
     private List<Card> hand2 = new List<Card>();
@@ -396,35 +397,60 @@ public class BJdraw : MonoBehaviour
     }
 
     void CheckPlayerWinner(
-        List<Card> playerHand,
-        Text targetText,
-        string playerName,
-        int dealerTotal,
-        bool playerBust)
+    List<Card> playerHand,
+    Text targetText,
+    string playerName,
+    int dealerTotal,
+    bool playerBust)
     {
         if (targetText == null) return;
 
         int playerTotal = CalculateHandTotal(playerHand);
 
+        int playerNumber = 0;
+
+        if (playerName == "P1")
+            playerNumber = 1;
+        else if (playerName == "P2")
+            playerNumber = 2;
+        else if (playerName == "P3")
+            playerNumber = 3;
+
+
         if (playerBust)
         {
             targetText.text = "負け！";
+
+            if (moneyManager != null)
+                moneyManager.Lose(playerNumber);
         }
         else if (dealerTotal > 21)
         {
             targetText.text = "勝ち！";
+
+            if (moneyManager != null)
+                moneyManager.Win(playerNumber);
         }
         else if (playerTotal > dealerTotal)
         {
             targetText.text = "勝ち！";
+
+            if (moneyManager != null)
+                moneyManager.Win(playerNumber);
         }
         else if (playerTotal < dealerTotal)
         {
             targetText.text = "負け！";
+
+            if (moneyManager != null)
+                moneyManager.Lose(playerNumber);
         }
         else
         {
             targetText.text = "引き分け！";
+
+            if (moneyManager != null)
+                moneyManager.Draw(playerNumber);
         }
     }
 
