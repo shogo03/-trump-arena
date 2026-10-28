@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class MemoryBurstManager : MonoBehaviour
 {
@@ -30,6 +31,10 @@ public class MemoryBurstManager : MonoBehaviour
 
     [Header("ターン表示")]
     [SerializeField] private TextMeshProUGUI turnText;
+
+    [Header("妨害能力")]
+    [SerializeField] private Button shuffleButton;
+    [SerializeField] private Button shuffleButton2;
 
     private readonly List<MemoryBurstCardView> cards = new();
 
@@ -198,6 +203,11 @@ public class MemoryBurstManager : MonoBehaviour
 
         isChecking = false;
         UpdateUI();
+
+        if (shuffleButton != null)
+        {
+            shuffleButton.onClick.AddListener(ShuffleUnmatchedCards);
+        }
     }
 
     private void UpdateUI()
@@ -252,5 +262,84 @@ public class MemoryBurstManager : MonoBehaviour
 
         Debug.Log(turnText.text);
     }
+
+
+    // シャッフル妨害能力
+    public void ShuffleUnmatchedCards()
+    {
+        Debug.Log("シャッフルボタンが押されました！");
+
+        // ゲーム終了中・ペア判定中・1枚目を選択中は使えない
+        if (isGameOver || isChecking ||
+            firstCard != null || secondCard != null)
+        {
+            return;
+        }
+
+        // 裏向きで、まだ獲得されていないカードを集める
+        List<MemoryBurstCardView> targets = cards.FindAll(
+            card => card != null &&
+                    !card.IsMatched &&
+                    !card.IsRevealed
+        );
+
+        if (targets.Count < 2)
+        {
+            Debug.Log("シャッフルできるカードが2枚未満です。", this);
+            return;
+        }
+
+        // カードエリア内の現在の並び順を保存
+        List<Transform> order = new List<Transform>();
+
+        for (int i = 0; i < cardArea.childCount; i++)
+        {
+            order.Add(cardArea.GetChild(i));
+        }
+
+        // シャッフル対象カードが占めている位置を記録
+        List<int> slots = new List<int>();
+
+        foreach (MemoryBurstCardView card in targets)
+        {
+            slots.Add(card.transform.GetSiblingIndex());
+        }
+
+        // Fisher-Yates法で対象カードをランダムに並べ替える
+        for (int i = targets.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+
+            (targets[i], targets[j]) = (targets[j], targets[i]);
+        }
+
+        // 対象カードの位置だけを入れ替えた並び順を作る
+        for (int i = 0; i < slots.Count; i++)
+        {
+            order[slots[i]] = targets[i].transform;
+        }
+
+        // 最終的な並び順を適用
+        for (int i = 0; i < order.Count; i++)
+        {
+            order[i].SetSiblingIndex(i);
+        }
+
+        Debug.Log(
+            $"シャッフル妨害発動！ 対象カード：{targets.Count}枚",
+            this
+        );
+
+    }
+    private void OnDestroy()
+    {
+        if (shuffleButton != null)
+        {
+            shuffleButton.onClick.RemoveListener(
+                ShuffleUnmatchedCards
+            );
+        }
+    }
+
 
 }
