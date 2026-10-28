@@ -14,39 +14,45 @@ public class Pointer : MonoBehaviour
 
     private void Awake()
     {
-        // 親オブジェクトからカーソル制御を取得
         controller = GetComponentInParent<CursorController>();
-
-        // ゲーム管理クラスを取得
         manager = FindAnyObjectByType<MemoryBurstManager>();
     }
 
     private void Update()
     {
-        if (controller == null || manager == null)
+        if (controller == null)
             return;
 
         int index = controller.GamepadIndex;
 
-        // コントローラーの接続確認
+        // 接続中のコントローラーか確認
         if (index < 0 || index >= Gamepad.all.Count)
             return;
 
-        // Aボタンが押されていなければ何もしない
+        // Aボタンが押されたときだけ処理
         if (!Gamepad.all[index].buttonSouth.wasPressedThisFrame)
             return;
 
-        // EventSystem の確認
         if (EventSystem.current == null)
         {
             Debug.LogError("EventSystem がありません");
             return;
         }
 
-        // カーソルのワールド座標をスクリーン座標に変換
+        // カーソル位置をスクリーン座標に変換
+        Canvas canvas = GetComponentInParent<Canvas>();
+
+        Camera eventCamera = null;
+
+        if (canvas != null &&
+            canvas.renderMode != RenderMode.ScreenSpaceOverlay)
+        {
+            eventCamera = canvas.worldCamera;
+        }
+
         Vector2 screenPosition =
             RectTransformUtility.WorldToScreenPoint(
-                null,
+                eventCamera,
                 transform.position
             );
 
@@ -55,7 +61,7 @@ public class Pointer : MonoBehaviour
 
         pointerData.position = screenPosition;
 
-        // UI の GraphicRaycaster を取得
+        // UI の GraphicRaycaster を検索
         GraphicRaycaster[] raycasters =
             FindObjectsByType<GraphicRaycaster>();
 
@@ -64,6 +70,7 @@ public class Pointer : MonoBehaviour
             if (raycaster == null || !raycaster.isActiveAndEnabled)
                 continue;
 
+            // カーソル位置にあるUIを取得
             results.Clear();
             raycaster.Raycast(pointerData, results);
 
@@ -71,32 +78,57 @@ public class Pointer : MonoBehaviour
             {
                 GameObject hitObject = result.gameObject;
 
-                // ターン判定：自分のターン以外は選択不可
-                if (!manager.CanControl(index))
-                    return;
-
-                // Button があればクリック
+                // Buttonを検索
                 Button button =
                     hitObject.GetComponentInParent<Button>();
 
                 if (button != null)
                 {
-                    if (button.interactable)
+                    if (!button.interactable ||
+                        !button.gameObject.activeInHierarchy)
                     {
-                        button.onClick.Invoke();
-                        return;
+                        continue;
                     }
 
-                    continue;
+                    // カード内のButtonはターン制限を適用
+                    MemoryBurstCardView card =
+                        button.GetComponentInParent<MemoryBurstCardView>();
+
+                    if (card != null)
+                    {
+                        if (manager == null ||
+                            !manager.CanControl(index))
+                        {
+                            return;
+                        }
+                    }
+
+                    // 通常のUIボタンはターンに関係なく押せる
+                    button.onClick.Invoke();
+                    return;
                 }
 
-                // Button 以外のクリック可能な UI を検索
+                // Button以外のクリック可能なUIを検索
                 Transform current = hitObject.transform;
 
                 while (current != null)
                 {
-                    if (current.GetComponent<IPointerClickHandler>() != null)
+                    IPointerClickHandler clickHandler =
+                        current.GetComponent<IPointerClickHandler>();
+
+                    if (clickHandler != null)
                     {
+                        // カードなら自分のターンだけ操作可能
+                        MemoryBurstCardView card =
+                            current.GetComponentInParent<MemoryBurstCardView>();
+
+                        if (card != null &&
+                            (manager == null ||
+                             !manager.CanControl(index)))
+                        {
+                            return;
+                        }
+
                         ExecuteEvents.Execute(
                             current.gameObject,
                             pointerData,
