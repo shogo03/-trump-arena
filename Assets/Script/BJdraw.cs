@@ -30,12 +30,24 @@ public class BJdraw : MonoBehaviour
    
     public Vector2 cardSize = new Vector2(60, 80);
 
+    // 現在のターン（1=P1、2=P2、3=P3）
+    private int currentTurn = 1;
+
+    // 最初のカード配布中かどうか
+    private bool isInitialDeal = true;
+
     private bool isBust = false;
     private bool isBust2 = false;
     private bool isBust3 = false;
 
     public void DrawCard()
     {
+        if (!isInitialDeal && currentTurn != 1)
+        {
+            Debug.Log("現在はP1のターンではありません");
+            return;
+        }
+
         if (isBust)
         {
             Debug.Log("P1はバーストしているため引けません");
@@ -98,6 +110,12 @@ public class BJdraw : MonoBehaviour
 
     public void DrawCard2()
     {
+        if (!isInitialDeal && currentTurn != 2)
+        {
+            Debug.Log("現在はP2のターンではありません");
+            return;
+        }
+
         if (isBust2)
         {
             Debug.Log("P2はバーストしているため引けません");
@@ -116,6 +134,12 @@ public class BJdraw : MonoBehaviour
 
     public void DrawCard3()
     {
+        if (!isInitialDeal && currentTurn != 3)
+        {
+            Debug.Log("現在はP3のターンではありません");
+            return;
+        }
+
         if (isBust3)
         {
             Debug.Log("P3はバーストしているため引けません");
@@ -230,7 +254,10 @@ public class BJdraw : MonoBehaviour
                 Debug.Log("P3はバースト！強制STAND！");
             }
 
-            CheckAllStand();
+            if (!isInitialDeal)
+            {
+                NextTurn();
+            }
         }
         else
         {
@@ -244,41 +271,58 @@ public class BJdraw : MonoBehaviour
 
     public void Stand()
     {
+        if (currentTurn != 1) return;
+        if (isStand || isBust) return;
+
         isStand = true;
-        Debug.Log("P1：STANDしました");
-        CheckAllStand();
+        Debug.Log("P1：STAND！");
+        NextTurn();
     }
 
     public void Stand2()
     {
+        if (currentTurn != 2) return;
+        if (isStand2 || isBust2) return;
+
         isStand2 = true;
-        Debug.Log("P2：STANDしました");
-        CheckAllStand();
+        Debug.Log("P2：STAND！");
+        NextTurn();
     }
 
     public void Stand3()
     {
+        if (currentTurn != 3) return;
+        if (isStand3 || isBust3) return;
+
         isStand3 = true;
-        Debug.Log("P3：STANDしました");
-        CheckAllStand();
+        Debug.Log("P3：STAND！");
+        NextTurn();
     }
     public void StartGame()
     {
-        // P1に2枚配る
+        isInitialDeal = true;
+
+        // P1に2枚
         DrawCard();
         DrawCard();
 
-        // P2に2枚配る
+        // P2に2枚
         DrawCard2();
         DrawCard2();
 
-        // P3に2枚配る
+        // P3に2枚
         DrawCard3();
         DrawCard3();
 
-        // ディーラーに2枚配る
+        // ディーラーに2枚
         bjDealer.DrawDealerCard();
         bjDealer.DrawDealerCard();
+
+        // 通常のターン制開始
+        isInitialDeal = false;
+        currentTurn = 1;
+
+        Debug.Log("P1のターン！");
     }
 
     void Start()
@@ -294,7 +338,6 @@ public class BJdraw : MonoBehaviour
             DealerTurn();
         }
     }
-
 
     void DealerTurn()
     {
@@ -316,6 +359,39 @@ public class BJdraw : MonoBehaviour
 
         bjResult.CheckWinner(hand3, resultText3, "P3",
             dealerTotal, isBust3, moneyManager);
+    }
+
+    void NextTurn()
+    {
+        currentTurn++;
+
+        // 終了しているプレイヤーは飛ばす
+        while (currentTurn <= 3)
+        {
+            if (currentTurn == 1 && !isStand && !isBust)
+            {
+                Debug.Log("P1のターン！");
+                return;
+            }
+
+            if (currentTurn == 2 && !isStand2 && !isBust2)
+            {
+                Debug.Log("P2のターン！");
+                return;
+            }
+
+            if (currentTurn == 3 && !isStand3 && !isBust3)
+            {
+                Debug.Log("P3のターン！");
+                return;
+            }
+
+            currentTurn++;
+        }
+
+        // 全員終了
+        Debug.Log("全員終了！ディーラーのターン！");
+        DealerTurn();
     }
 }
 //ここから下 変更用
