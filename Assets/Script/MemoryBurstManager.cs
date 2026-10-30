@@ -1,4 +1,4 @@
-
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -31,6 +31,9 @@ public class MemoryBurstManager : MonoBehaviour
 
     [Header("ターン表示")]
     [SerializeField] private TextMeshProUGUI turnText;
+
+    [Header("リザルト")]
+    [SerializeField] private string resultSceneName = "MemoryBurstResult";
 
     [Header("妨害能力")]
     [SerializeField] private Button shuffleButton;
@@ -237,30 +240,32 @@ public class MemoryBurstManager : MonoBehaviour
 
     private void ShowResult()
     {
-        if (turnText == null)
-            return;
-
-        int maxScore = -1;
+        int maxScore = 0;
 
         for (int i = 0; i < playerCount; i++)
+        {
             maxScore = Mathf.Max(maxScore, scores[i]);
+        }
 
-        List<string> winners = new();
+        List<int> winners = new();
 
         for (int i = 0; i < playerCount; i++)
         {
             if (scores[i] == maxScore)
-                winners.Add($"プレイヤー{i + 1}");
+            {
+                winners.Add(i + 1);
+            }
         }
 
-        if (playerCount == 1)
-            turnText.text = $"ゲームクリア！ 得点：{scores[0]}点";
-        else if (winners.Count > 1)
-            turnText.text = $"引き分け！\n{string.Join("・", winners)}";
-        else
-            turnText.text = $"{winners[0]}の勝利！";
+        // リザルトシーンへ得点と勝者を引き継ぐ
+        GameResultData.PlayerCount = playerCount;
+        GameResultData.Scores = (int[])scores.Clone();
+        GameResultData.Winners = winners.ToArray();
+        GameResultData.IsSinglePlayer = playerCount == 1;
 
-        Debug.Log(turnText.text);
+        Debug.Log("ゲーム終了！リザルトシーンへ移動します。");
+
+        SceneManager.LoadScene(resultSceneName);
     }
 
 

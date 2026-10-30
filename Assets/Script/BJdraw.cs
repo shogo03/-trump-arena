@@ -251,15 +251,6 @@ public class BJdraw : MonoBehaviour
     }
     public void StartGame()
     {
-
-<<<<<<< HEAD
-=======
-        // ベット
->>>>>>> ac21a4cf24cc0383cff0cb01b89315b7cab5aa71
-        moneyManager.PlaceBet(1);
-        moneyManager.PlaceBet(2);
-        moneyManager.PlaceBet(3);
-
         // P1に2枚配る
         DrawCard();
         DrawCard();

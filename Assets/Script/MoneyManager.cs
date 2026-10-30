@@ -1,5 +1,6 @@
 using UnityEngine;
-using TMPro;
+using UnityEngine.UI;
+
 public class MoneyManager : MonoBehaviour
 {
     // 所持金
@@ -8,6 +9,10 @@ public class MoneyManager : MonoBehaviour
     public int money2 = 1000;
     public int money3 = 1000;
 
+    // 画面に表示するText
+    public Text moneyText1;
+    public Text moneyText2;
+    public Text moneyText3;
 
     // ベット額
 
@@ -35,29 +40,11 @@ public class MoneyManager : MonoBehaviour
     {
         if (player == 1)
         {
-            if (money1 >= bet1)
-            {
-                money1 -= bet1;
-                Debug.Log("P1 ベット：" + bet1);
-            }
-            else
-            {
-                Debug.Log("P1は所持金不足！");
-                return;
-            }
+            money1 += 100;
         }
         else if (player == 2)
         {
-            if (money2 >= bet2)
-            {
-                money2 -= bet2;
-                Debug.Log("P2 ベット：" + bet2);
-            }
-            else
-            {
-                Debug.Log("P2は所持金不足！");
-                return;
-            }
+            money2 += 100;
         }
         else if (player == 3)
         {
