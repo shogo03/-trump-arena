@@ -212,11 +212,25 @@ public class BJdraw : MonoBehaviour
             targetText.text = "バースト！ 合計：" + total;
 
             if (playerHand == hand)
+            {
                 isBust = true;
+                isStand = true;
+                Debug.Log("P1はバースト！強制STAND！");
+            }
             else if (playerHand == hand2)
+            {
                 isBust2 = true;
+                isStand2 = true;
+                Debug.Log("P2はバースト！強制STAND！");
+            }
             else if (playerHand == hand3)
+            {
                 isBust3 = true;
+                isStand3 = true;
+                Debug.Log("P3はバースト！強制STAND！");
+            }
+
+            CheckAllStand();
         }
         else
         {
