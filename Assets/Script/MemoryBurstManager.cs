@@ -35,9 +35,13 @@ public class MemoryBurstManager : MonoBehaviour
     [Header("リザルト")]
     [SerializeField] private string resultSceneName = "MemoryBurstResult";
 
-    [Header("妨害能力")]
+    [Header("プレイヤー１の妨害能力")]
     [SerializeField] private Button shuffleButton;
+    
+
+    [Header("プレイヤー2の妨害能力")]
     [SerializeField] private Button shuffleButton2;
+
 
     private readonly List<MemoryBurstCardView> cards = new();
 
@@ -51,6 +55,8 @@ public class MemoryBurstManager : MonoBehaviour
     private bool isChecking;
     private bool isGameOver;
     private int remainingCards;
+   
+    private bool[] abilityUsed = new bool[4];
 
     public int CurrentPlayer => currentPlayer;
 
@@ -74,6 +80,17 @@ public class MemoryBurstManager : MonoBehaviour
 
         Debug.Log($"コントローラー接続数：{controllerCount}");
         Debug.Log($"プレイヤー人数：{playerCount}");
+
+        // シャッフルボタンのイベント登録
+        if (shuffleButton != null)
+        {
+            shuffleButton.onClick.AddListener(ShuffleUnmatchedCardsPlayer1);
+        }
+
+        if (shuffleButton2 != null)
+        {
+            shuffleButton2.onClick.AddListener(ShuffleUnmatchedCardsPlayer2);
+        }
 
         CreateCards();
         UpdateUI();
@@ -110,6 +127,7 @@ public class MemoryBurstManager : MonoBehaviour
         isChecking = false;
         isGameOver = false;
         remainingCards = 0;
+        abilityUsed = new bool[4];
 
         for (int i = 0; i < cardCount; i++)
         {
@@ -131,6 +149,27 @@ public class MemoryBurstManager : MonoBehaviour
         }
 
         UpdateUI();
+    }
+
+    // 妨害能力を使用できるかの判定
+    private bool CanUseAbility(int player)
+    {
+        if (isGameOver || isChecking)
+            return false;
+
+        if (firstCard != null || secondCard != null)
+            return false;
+
+        if (currentPlayer != player)
+            return false;
+
+        if (player < 1 || player > playerCount)
+            return false;
+
+        if (abilityUsed[player - 1])
+            return false;
+
+        return true;
     }
 
     private void OnCardClicked(MemoryBurstCardView card)
@@ -207,10 +246,7 @@ public class MemoryBurstManager : MonoBehaviour
         isChecking = false;
         UpdateUI();
 
-        if (shuffleButton != null)
-        {
-            shuffleButton.onClick.AddListener(ShuffleUnmatchedCards);
-        }
+      
     }
 
     private void UpdateUI()
@@ -236,6 +272,23 @@ public class MemoryBurstManager : MonoBehaviour
                 ? "カード判定中..."
                 : $"プレイヤー{currentPlayer}のターン";
         }
+
+        // プレイヤー1の妨害ボタン
+        bool player1CanUse = CanUseAbility(1);
+
+        if (shuffleButton != null)
+            shuffleButton.interactable = player1CanUse;
+
+      
+
+
+        // プレイヤー2の妨害ボタン
+        bool player2CanUse = CanUseAbility(2);
+
+        if (shuffleButton2 != null)
+            shuffleButton2.interactable = player2CanUse;
+
+        
     }
 
     private void ShowResult()
@@ -269,16 +322,16 @@ public class MemoryBurstManager : MonoBehaviour
     }
 
 
-    // シャッフル妨害能力
-    public void ShuffleUnmatchedCards()
+    
+    // シャッフル妨害能力（共通処理）
+    private bool ShuffleCards()
     {
-        Debug.Log("シャッフルボタンが押されました！");
-
+       
         // ゲーム終了中・ペア判定中・1枚目を選択中は使えない
         if (isGameOver || isChecking ||
             firstCard != null || secondCard != null)
         {
-            return;
+            return false;
         }
 
         // 裏向きで、まだ獲得されていないカードを集める
@@ -291,10 +344,10 @@ public class MemoryBurstManager : MonoBehaviour
         if (targets.Count < 2)
         {
             Debug.Log("シャッフルできるカードが2枚未満です。", this);
-            return;
+            return false;
         }
 
-        // カードエリア内の現在の並び順を保存
+        // 現在の並び順を保存
         List<Transform> order = new List<Transform>();
 
         for (int i = 0; i < cardArea.childCount; i++)
@@ -302,7 +355,7 @@ public class MemoryBurstManager : MonoBehaviour
             order.Add(cardArea.GetChild(i));
         }
 
-        // シャッフル対象カードが占めている位置を記録
+        // シャッフル対象の位置を記録
         List<int> slots = new List<int>();
 
         foreach (MemoryBurstCardView card in targets)
@@ -310,7 +363,7 @@ public class MemoryBurstManager : MonoBehaviour
             slots.Add(card.transform.GetSiblingIndex());
         }
 
-        // Fisher-Yates法で対象カードをランダムに並べ替える
+        // Fisher-Yates法
         for (int i = targets.Count - 1; i > 0; i--)
         {
             int j = Random.Range(0, i + 1);
@@ -318,7 +371,7 @@ public class MemoryBurstManager : MonoBehaviour
             (targets[i], targets[j]) = (targets[j], targets[i]);
         }
 
-        // 対象カードの位置だけを入れ替えた並び順を作る
+        // 対象カードの位置を入れ替える
         for (int i = 0; i < slots.Count; i++)
         {
             order[slots[i]] = targets[i].transform;
@@ -330,19 +383,79 @@ public class MemoryBurstManager : MonoBehaviour
             order[i].SetSiblingIndex(i);
         }
 
-        Debug.Log(
-            $"シャッフル妨害発動！ 対象カード：{targets.Count}枚",
-            this
-        );
+        Debug.Log("シャッフル成功！", this);
 
+        return true;
     }
+
+
+
+    // プレイヤー1の妨害能力使用
+    public void ShuffleUnmatchedCardsPlayer1()
+    {
+        if (!TryUseAbility(1))
+            return;
+
+        if (!ShuffleCards())
+            return;
+
+        CompleteAbility(1);
+    }
+
+    // プレイヤー2の妨害能力使用
+    public void ShuffleUnmatchedCardsPlayer2()
+    {
+        if (!TryUseAbility(2))
+            return;
+
+        if (!ShuffleCards())
+            return;
+
+        CompleteAbility(2);
+    }
+
+
+
+
+    //妨害能力共通処理
+    private bool TryUseAbility(int player)
+    {
+        if (!CanUseAbility(player))
+            return false;
+
+        abilityUsed[player - 1] = true;
+
+        UpdateUI();
+
+        Debug.Log($"プレイヤー{player}が妨害能力を使用しました！");
+
+        return true;
+    }
+
+    // 妨害能力の使用完了処理
+    private void CompleteAbility(int player)
+    {
+        // 使用済みにする
+        abilityUsed[player - 1] = true;
+
+        // ボタンの状態を更新
+        UpdateUI();
+
+        Debug.Log($"プレイヤー{player}は妨害能力を使用済みにしました！");
+    }
+
     private void OnDestroy()
     {
         if (shuffleButton != null)
         {
             shuffleButton.onClick.RemoveListener(
-                ShuffleUnmatchedCards
+                ShuffleUnmatchedCardsPlayer1
             );
+        }
+        if(shuffleButton2 != null)
+        {
+            shuffleButton2.onClick.RemoveListener(
+                ShuffleUnmatchedCardsPlayer2);
         }
     }
 
