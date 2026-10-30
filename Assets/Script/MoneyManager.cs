@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class MoneyManager : MonoBehaviour
 {
@@ -10,9 +10,9 @@ public class MoneyManager : MonoBehaviour
     public int money3 = 1000;
 
     // 画面に表示するText
-    public Text moneyText1;
-    public Text moneyText2;
-    public Text moneyText3;
+    public TMP_Text moneyText1;
+    public TMP_Text moneyText2;
+    public TMP_Text moneyText3;
 
     // ベット額
 
@@ -23,10 +23,7 @@ public class MoneyManager : MonoBehaviour
 
     // UI
 
-    public TMP_Text moneyText1;
-    public TMP_Text moneyText2;
-    public TMP_Text moneyText3;
-
+   
 
     void Start()
     {
