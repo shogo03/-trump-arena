@@ -24,12 +24,17 @@ public class BJdraw : MonoBehaviour
     private List<Card> hand2 = new List<Card>();
     private List<Card> hand3 = new List<Card>();
 
-    public Transform dealerHandArea;
-    public Text dealerPointText;
-    private List<Image> dealerCardImages = new List<Image>();
+    public BJDealer bjDealer;
+    public BJResult bjResult;
 
-    private List<Card> dealerHand = new List<Card>();
+   
     public Vector2 cardSize = new Vector2(60, 80);
+
+    // 現在のターン（1=P1、2=P2、3=P3）
+    private int currentTurn = 1;
+
+    // 最初のカード配布中かどうか
+    private bool isInitialDeal = true;
 
     private bool isBust = false;
     private bool isBust2 = false;
@@ -37,6 +42,12 @@ public class BJdraw : MonoBehaviour
 
     public void DrawCard()
     {
+        if (!isInitialDeal && currentTurn != 1)
+        {
+            Debug.Log("現在はP1のターンではありません");
+            return;
+        }
+
         if (isBust)
         {
             Debug.Log("P1はバーストしているため引けません");
@@ -99,6 +110,12 @@ public class BJdraw : MonoBehaviour
 
     public void DrawCard2()
     {
+        if (!isInitialDeal && currentTurn != 2)
+        {
+            Debug.Log("現在はP2のターンではありません");
+            return;
+        }
+
         if (isBust2)
         {
             Debug.Log("P2はバーストしているため引けません");
@@ -117,6 +134,12 @@ public class BJdraw : MonoBehaviour
 
     public void DrawCard3()
     {
+        if (!isInitialDeal && currentTurn != 3)
+        {
+            Debug.Log("現在はP3のターンではありません");
+            return;
+        }
+
         if (isBust3)
         {
             Debug.Log("P3はバーストしているため引けません");
@@ -213,11 +236,28 @@ public class BJdraw : MonoBehaviour
             targetText.text = "バースト！ 合計：" + total;
 
             if (playerHand == hand)
+            {
                 isBust = true;
+                isStand = true;
+                Debug.Log("P1はバースト！強制STAND！");
+            }
             else if (playerHand == hand2)
+            {
                 isBust2 = true;
+                isStand2 = true;
+                Debug.Log("P2はバースト！強制STAND！");
+            }
             else if (playerHand == hand3)
+            {
                 isBust3 = true;
+                isStand3 = true;
+                Debug.Log("P3はバースト！強制STAND！");
+            }
+
+            if (!isInitialDeal)
+            {
+                NextTurn();
+            }
         }
         else
         {
@@ -231,40 +271,58 @@ public class BJdraw : MonoBehaviour
 
     public void Stand()
     {
+        if (currentTurn != 1) return;
+        if (isStand || isBust) return;
+
         isStand = true;
-        Debug.Log("P1：STANDしました");
-        CheckAllStand();
+        Debug.Log("P1：STAND！");
+        NextTurn();
     }
 
     public void Stand2()
     {
+        if (currentTurn != 2) return;
+        if (isStand2 || isBust2) return;
+
         isStand2 = true;
-        Debug.Log("P2：STANDしました");
-        CheckAllStand();
+        Debug.Log("P2：STAND！");
+        NextTurn();
     }
 
     public void Stand3()
     {
+        if (currentTurn != 3) return;
+        if (isStand3 || isBust3) return;
+
         isStand3 = true;
-        Debug.Log("P3：STANDしました");
-        CheckAllStand();
+        Debug.Log("P3：STAND！");
+        NextTurn();
     }
     public void StartGame()
     {
-        // P1に2枚配る
+        isInitialDeal = true;
+
+        // P1に2枚
         DrawCard();
         DrawCard();
 
-        // P2に2枚配る
+        // P2に2枚
         DrawCard2();
         DrawCard2();
 
-        // P3に2枚配る
+        // P3に2枚
         DrawCard3();
         DrawCard3();
 
-        DrawDealerCard();
-        DrawDealerCard();
+        // ディーラーに2枚
+        bjDealer.DrawDealerCard();
+        bjDealer.DrawDealerCard();
+
+        // 通常のターン制開始
+        isInitialDeal = false;
+        currentTurn = 1;
+
+        Debug.Log("P1のターン！");
     }
 
     void Start()
@@ -272,55 +330,6 @@ public class BJdraw : MonoBehaviour
         StartGame();
     }
 
-    public void DrawDealerCard()
-    {
-        if (deck == null || cardPrefab == null || dealerHandArea == null)
-        {
-            Debug.LogError("ディーラーの設定を確認してね！");
-            return;
-        }
-
-        Card card = deck.DrawCard();
-
-        GameObject obj = Instantiate(cardPrefab, dealerHandArea);
-
-        Image image = obj.GetComponent<Image>();
-
-        if (image == null)
-        {
-            Destroy(obj);
-            Debug.LogError("Card PrefabにImageがない！");
-            return;
-        }
-
-        // 1枚目は裏向き、2枚目以降は表向き
-        if (dealerHand.Count == 0)
-        {
-            image.sprite = deck.cardBackImage;
-        }
-        else
-        {
-            image.sprite = card.image;
-        }
-
-        image.enabled = true;
-        dealerCardImages.Add(image);
-        dealerHand.Add(card);
-
-        RectTransform rect = obj.GetComponent<RectTransform>();
-        rect.sizeDelta = cardSize;
-        rect.anchoredPosition = new Vector2(
-            (dealerHand.Count - 1) * 35,
-            0
-        );
-
-        UpdateDealerPoint();
-    }
-
-    void UpdateDealerPoint()
-    {
-        CalculatePoint(dealerHand, dealerPointText);
-    }
 
     void CheckAllStand()
     {
@@ -330,162 +339,63 @@ public class BJdraw : MonoBehaviour
         }
     }
 
-    public void RevealDealerCards()
-    {
-        for (int i = 0; i < dealerHand.Count; i++)
-        {
-            dealerCardImages[i].sprite = dealerHand[i].image;
-        }
-
-        UpdateDealerPoint();
-    }
-
-    int GetDealerTotal()
-    {
-        int total = 0;
-        int aceCount = 0;
-
-        foreach (Card card in dealerHand)
-        {
-            if (card.number == 1)
-            {
-                total += 11;
-                aceCount++;
-            }
-            else if (card.number >= 11)
-            {
-                total += 10;
-            }
-            else
-            {
-                total += card.number;
-            }
-        }
-
-        while (total > 21 && aceCount > 0)
-        {
-            total -= 10;
-            aceCount--;
-        }
-
-        return total;
-    }
-
     void DealerTurn()
     {
-        // 17を超えるまでカードを引く
-        while (GetDealerTotal() < 17)
+        if (bjDealer == null || bjResult == null)
         {
-            DrawDealerCard();
+            Debug.LogError("BJDealerまたはBJResultが設定されていません！");
+            return;
         }
 
-        // 引き終わったらカードを表にする
-        RevealDealerCards();
+        // ディーラーのターンを実行
+        int dealerTotal = bjDealer.DealerTurn();
 
-        Debug.Log("ディーラーの最終点数：" + GetDealerTotal());
+        // 3人それぞれの勝敗を判定
+        bjResult.CheckWinner(hand, resultText, "P1",
+            dealerTotal, isBust, moneyManager);
 
-        CheckWinner();
+        bjResult.CheckWinner(hand2, resultText2, "P2",
+            dealerTotal, isBust2, moneyManager);
+
+        bjResult.CheckWinner(hand3, resultText3, "P3",
+            dealerTotal, isBust3, moneyManager);
     }
 
-    void CheckWinner()
+    void NextTurn()
     {
-        int dealerTotal = GetDealerTotal();
+        currentTurn++;
 
-        CheckPlayerWinner(hand, resultText, "P1", dealerTotal, isBust);
-        CheckPlayerWinner(hand2, resultText2, "P2", dealerTotal, isBust2);
-        CheckPlayerWinner(hand3, resultText3, "P3", dealerTotal, isBust3);
-    }
-
-    void CheckPlayerWinner(
-    List<Card> playerHand,
-    Text targetText,
-    string playerName,
-    int dealerTotal,
-    bool playerBust)
-    {
-        if (targetText == null) return;
-
-        int playerTotal = CalculateHandTotal(playerHand);
-
-        int playerNumber = 0;
-
-        if (playerName == "P1")
-            playerNumber = 1;
-        else if (playerName == "P2")
-            playerNumber = 2;
-        else if (playerName == "P3")
-            playerNumber = 3;
-
-
-        if (playerBust)
+        // 終了しているプレイヤーは飛ばす
+        while (currentTurn <= 3)
         {
-            targetText.text = "負け！";
-
-            if (moneyManager != null)
-                moneyManager.Lose(playerNumber);
-        }
-        else if (dealerTotal > 21)
-        {
-            targetText.text = "勝ち！";
-
-            if (moneyManager != null)
-                moneyManager.Win(playerNumber);
-        }
-        else if (playerTotal > dealerTotal)
-        {
-            targetText.text = "勝ち！";
-
-            if (moneyManager != null)
-                moneyManager.Win(playerNumber);
-        }
-        else if (playerTotal < dealerTotal)
-        {
-            targetText.text = "負け！";
-
-            if (moneyManager != null)
-                moneyManager.Lose(playerNumber);
-        }
-        else
-        {
-            targetText.text = "引き分け！";
-
-            if (moneyManager != null)
-                moneyManager.Draw(playerNumber);
-        }
-    }
-
-    int CalculateHandTotal(List<Card> playerHand)
-    {
-        int total = 0;
-        int aceCount = 0;
-
-        foreach (Card card in playerHand)
-        {
-            if (card.number == 1)
+            if (currentTurn == 1 && !isStand && !isBust)
             {
-                total += 11;
-                aceCount++;
+                Debug.Log("P1のターン！");
+                return;
             }
-            else if (card.number >= 11)
+
+            if (currentTurn == 2 && !isStand2 && !isBust2)
             {
-                total += 10;
+                Debug.Log("P2のターン！");
+                return;
             }
-            else
+
+            if (currentTurn == 3 && !isStand3 && !isBust3)
             {
-                total += card.number;
+                Debug.Log("P3のターン！");
+                return;
             }
+
+            currentTurn++;
         }
 
-        while (total > 21 && aceCount > 0)
-        {
-            total -= 10;
-            aceCount--;
-        }
-
-
-        return total;
+        // 全員終了
+        Debug.Log("全員終了！ディーラーのターン！");
+        DealerTurn();
     }
 }
 //ここから下 変更用
 //a
 //i
+//u
+//e

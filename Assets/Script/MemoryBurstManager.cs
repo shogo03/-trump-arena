@@ -31,12 +31,16 @@ public class MemoryBurstManager : MonoBehaviour
 
     [Header("ターン表示")]
     [SerializeField] private TextMeshProUGUI turnText;
+    [SerializeField] private float turnTimeLimit = 15f;
+    [SerializeField] private TextMeshProUGUI timerText;
+
 
     [Header("リザルト")]
     [SerializeField] private string resultSceneName = "MemoryBurstResult";
 
     [Header("プレイヤー１の妨害能力")]
     [SerializeField] private Button shuffleButton;
+
     
 
     [Header("プレイヤー2の妨害能力")]
@@ -55,8 +59,11 @@ public class MemoryBurstManager : MonoBehaviour
     private bool isChecking;
     private bool isGameOver;
     private int remainingCards;
-   
+    private float remainingTurnTime;
+
+
     private bool[] abilityUsed = new bool[4];
+    private bool turnFailed;
 
     public int CurrentPlayer => currentPlayer;
 
@@ -101,6 +108,28 @@ public class MemoryBurstManager : MonoBehaviour
         UpdateUI();
     }
 
+   
+       private void Update()
+    {
+        if (isGameOver)
+            return;
+
+        remainingTurnTime -= Time.deltaTime;
+
+        if (timerText != null)
+        {
+            timerText.text =
+                $"残り時間 : {Mathf.CeilToInt(remainingTurnTime)}秒";
+        }
+        
+
+        if (remainingTurnTime <= 0f)
+        {
+            EndTurnByTimeout();
+        }
+    }
+
+
     private void CreateCards()
     {
         if (deck == null || cardPrefab == null ||
@@ -133,6 +162,7 @@ public class MemoryBurstManager : MonoBehaviour
         isGameOver = false;
         remainingCards = 0;
         abilityUsed = new bool[4];
+        remainingTurnTime = turnTimeLimit;
 
         for (int i = 0; i < cardCount; i++)
         {
@@ -159,10 +189,7 @@ public class MemoryBurstManager : MonoBehaviour
     // 妨害能力を使用できるかの判定
     private bool CanUseAbility(int player)
     {
-        if (isGameOver || isChecking)
-            return false;
-
-        if (firstCard != null || secondCard != null)
+        if (isGameOver)
             return false;
 
         if (currentPlayer != player)
@@ -174,12 +201,13 @@ public class MemoryBurstManager : MonoBehaviour
         if (abilityUsed[player - 1])
             return false;
 
+
         return true;
     }
 
     private void OnCardClicked(MemoryBurstCardView card)
     {
-        if (isChecking || isGameOver || card == null)
+        if (isChecking || isGameOver || turnFailed || card == null)
             return;
 
         if (firstCard == card || secondCard == card)
@@ -224,12 +252,13 @@ public class MemoryBurstManager : MonoBehaviour
             {
                 isGameOver = true;
                 isChecking = false;
+
                 UpdateUI();
                 ShowResult();
                 yield break;
             }
 
-            // ペア成立時は同じプレイヤーのターンを継続
+            // ペア成立してもターンは継続
         }
         else
         {
@@ -244,38 +273,44 @@ public class MemoryBurstManager : MonoBehaviour
             firstCard = null;
             secondCard = null;
 
-            // ペア不成立なら次のプレイヤーへ
-            currentPlayer = currentPlayer % playerCount + 1;
+            //このターンはもうカードが捲れない
+            turnFailed = true;
+
         }
 
         isChecking = false;
         UpdateUI();
-
-      
     }
+
+
+
+
 
     private void UpdateUI()
     {
-        for (int i = 0; i < 4; i++)
+        // ターン表示
+        if (turnText != null)
         {
-            if (playerScoreTexts == null ||
-                i >= playerScoreTexts.Length ||
-                playerScoreTexts[i] == null)
-                continue;
-
-            bool active = i < playerCount;
-            playerScoreTexts[i].gameObject.SetActive(active);
-
-            if (active)
-                playerScoreTexts[i].text =
-                    $"プレイヤー{i + 1}：{scores[i]}点";
+            if (isGameOver)
+            {
+                turnText.text = "GAME SET";
+            }
+            else if (isChecking)
+            {
+                turnText.text = "カード判定中...";
+            }
+            else
+            {
+                turnText.text =
+                    $"PLAYER {currentPlayer} TURN";
+            }
         }
 
-        if (turnText != null && !isGameOver)
+        // タイマー表示
+        if (timerText != null)
         {
-            turnText.text = isChecking
-                ? "カード判定中..."
-                : $"プレイヤー{currentPlayer}のターン";
+            timerText.text =
+                $"残り時間：{Mathf.CeilToInt(remainingTurnTime)}秒";
         }
 
         // プレイヤー1の妨害ボタン
@@ -333,8 +368,8 @@ public class MemoryBurstManager : MonoBehaviour
     {
        
         // ゲーム終了中・ペア判定中・1枚目を選択中は使えない
-        if (isGameOver || isChecking ||
-            firstCard != null || secondCard != null)
+        if (isGameOver || isChecking )
+           
         {
             return false;
         }
@@ -422,17 +457,12 @@ public class MemoryBurstManager : MonoBehaviour
 
 
 
-    //妨害能力共通処理
+    //妨害能力が使用できるかどうか
     private bool TryUseAbility(int player)
     {
         if (!CanUseAbility(player))
             return false;
 
-        abilityUsed[player - 1] = true;
-
-        UpdateUI();
-
-        Debug.Log($"プレイヤー{player}が妨害能力を使用しました！");
 
         return true;
     }
@@ -440,13 +470,13 @@ public class MemoryBurstManager : MonoBehaviour
     // 妨害能力の使用完了処理
     private void CompleteAbility(int player)
     {
-        // 使用済みにする
         abilityUsed[player - 1] = true;
 
-        // ボタンの状態を更新
         UpdateUI();
 
-        Debug.Log($"プレイヤー{player}は妨害能力を使用済みにしました！");
+        Debug.Log(
+            $"プレイヤー{player}が妨害能力を使用しました！"
+        );
     }
 
     private void OnDestroy()
@@ -462,6 +492,36 @@ public class MemoryBurstManager : MonoBehaviour
             shuffleButton2.onClick.RemoveListener(
                 ShuffleUnmatchedCardsPlayer2);
         }
+    }
+    // タイムアウトによるターン終了処理
+
+    private void EndTurnByTimeout()
+    {
+        Debug.Log($"プレイヤー{currentPlayer}の時間切れ！");
+
+        // 表向きのカードを裏返す
+        if (firstCard != null)
+        {
+            firstCard.FlipBack();
+            firstCard = null;
+        }
+
+        if (secondCard != null)
+        {
+            secondCard.FlipBack();
+            secondCard = null;
+        }
+
+        // 次のプレイヤーへ
+        currentPlayer = currentPlayer % playerCount + 1;
+
+        // ターン失敗フラグをリセット
+        turnFailed = false;
+
+        // 15秒にリセット
+        remainingTurnTime = turnTimeLimit;
+
+        UpdateUI();
     }
 
 
