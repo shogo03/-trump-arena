@@ -619,6 +619,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 119637324}
   m_CullTransparentMesh: 1
+--- !u!1 &158460382
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 158460384}
+  - component: {fileID: 158460383}
+  m_Layer: 0
+  m_Name: BJResult
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &158460383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 158460382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8af58a8c5a53374993d85fb337adf93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BJResult
+--- !u!4 &158460384
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 158460382}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &201086659
 GameObject:
   m_ObjectHideFlags: 0
@@ -3330,6 +3374,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1534051480}
   m_CullTransparentMesh: 1
+--- !u!1 &1546058316 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7651527804040865790, guid: 1d123635a9df54148b7afeeac916ddfa, type: 3}
+  m_PrefabInstance: {fileID: 5853070288065955709}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1590567204
 GameObject:
   m_ObjectHideFlags: 0
@@ -3640,6 +3689,55 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 960, y: 490, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1892295525
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1892295527}
+  - component: {fileID: 1892295526}
+  m_Layer: 0
+  m_Name: BJDealer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1892295526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1892295525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11c51d9b7a085d847a97fb53d20a3ecf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BJDealer
+  deck: {fileID: 1195274876}
+  cardPrefab: {fileID: 1546058316}
+  dealerHandArea: {fileID: 85635098}
+  dealerPointText: {fileID: 1400130156}
+  cardSize: {x: 160, y: 180}
+--- !u!4 &1892295527
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1892295525}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4053,9 +4151,9 @@ MonoBehaviour:
   resultText: {fileID: 1456386899}
   resultText2: {fileID: 783629021}
   resultText3: {fileID: 1931044977}
-  moneyManager: {fileID: 0}
-  dealerHandArea: {fileID: 85635098}
-  dealerPointText: {fileID: 1400130156}
+  moneyManager: {fileID: 93316395}
+  bjDealer: {fileID: 1892295526}
+  bjResult: {fileID: 158460383}
   cardSize: {x: 160, y: 180}
 --- !u!4 &2031883186
 Transform:
@@ -4513,3 +4611,5 @@ SceneRoots:
   - {fileID: 93316396}
   - {fileID: 2070873685}
   - {fileID: 1769354768}
+  - {fileID: 1892295527}
+  - {fileID: 158460384}

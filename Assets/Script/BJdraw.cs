@@ -24,11 +24,10 @@ public class BJdraw : MonoBehaviour
     private List<Card> hand2 = new List<Card>();
     private List<Card> hand3 = new List<Card>();
 
-    public Transform dealerHandArea;
-    public Text dealerPointText;
-    private List<Image> dealerCardImages = new List<Image>();
+    public BJDealer bjDealer;
+    public BJResult bjResult;
 
-    private List<Card> dealerHand = new List<Card>();
+   
     public Vector2 cardSize = new Vector2(60, 80);
 
     private bool isBust = false;
@@ -263,8 +262,9 @@ public class BJdraw : MonoBehaviour
         DrawCard3();
         DrawCard3();
 
-        DrawDealerCard();
-        DrawDealerCard();
+        // ディーラーに2枚配る
+        bjDealer.DrawDealerCard();
+        bjDealer.DrawDealerCard();
     }
 
     void Start()
@@ -272,55 +272,6 @@ public class BJdraw : MonoBehaviour
         StartGame();
     }
 
-    public void DrawDealerCard()
-    {
-        if (deck == null || cardPrefab == null || dealerHandArea == null)
-        {
-            Debug.LogError("ディーラーの設定を確認してね！");
-            return;
-        }
-
-        Card card = deck.DrawCard();
-
-        GameObject obj = Instantiate(cardPrefab, dealerHandArea);
-
-        Image image = obj.GetComponent<Image>();
-
-        if (image == null)
-        {
-            Destroy(obj);
-            Debug.LogError("Card PrefabにImageがない！");
-            return;
-        }
-
-        // 1枚目は裏向き、2枚目以降は表向き
-        if (dealerHand.Count == 0)
-        {
-            image.sprite = deck.cardBackImage;
-        }
-        else
-        {
-            image.sprite = card.image;
-        }
-
-        image.enabled = true;
-        dealerCardImages.Add(image);
-        dealerHand.Add(card);
-
-        RectTransform rect = obj.GetComponent<RectTransform>();
-        rect.sizeDelta = cardSize;
-        rect.anchoredPosition = new Vector2(
-            (dealerHand.Count - 1) * 35,
-            0
-        );
-
-        UpdateDealerPoint();
-    }
-
-    void UpdateDealerPoint()
-    {
-        CalculatePoint(dealerHand, dealerPointText);
-    }
 
     void CheckAllStand()
     {
@@ -330,160 +281,27 @@ public class BJdraw : MonoBehaviour
         }
     }
 
-    public void RevealDealerCards()
-    {
-        for (int i = 0; i < dealerHand.Count; i++)
-        {
-            dealerCardImages[i].sprite = dealerHand[i].image;
-        }
-
-        UpdateDealerPoint();
-    }
-
-    int GetDealerTotal()
-    {
-        int total = 0;
-        int aceCount = 0;
-
-        foreach (Card card in dealerHand)
-        {
-            if (card.number == 1)
-            {
-                total += 11;
-                aceCount++;
-            }
-            else if (card.number >= 11)
-            {
-                total += 10;
-            }
-            else
-            {
-                total += card.number;
-            }
-        }
-
-        while (total > 21 && aceCount > 0)
-        {
-            total -= 10;
-            aceCount--;
-        }
-
-        return total;
-    }
 
     void DealerTurn()
     {
-        // 17を超えるまでカードを引く
-        while (GetDealerTotal() < 17)
+        if (bjDealer == null || bjResult == null)
         {
-            DrawDealerCard();
+            Debug.LogError("BJDealerまたはBJResultが設定されていません！");
+            return;
         }
 
-        // 引き終わったらカードを表にする
-        RevealDealerCards();
+        // ディーラーのターンを実行
+        int dealerTotal = bjDealer.DealerTurn();
 
-        Debug.Log("ディーラーの最終点数：" + GetDealerTotal());
+        // 3人それぞれの勝敗を判定
+        bjResult.CheckWinner(hand, resultText, "P1",
+            dealerTotal, isBust, moneyManager);
 
-        CheckWinner();
-    }
+        bjResult.CheckWinner(hand2, resultText2, "P2",
+            dealerTotal, isBust2, moneyManager);
 
-    void CheckWinner()
-    {
-        int dealerTotal = GetDealerTotal();
-
-        CheckPlayerWinner(hand, resultText, "P1", dealerTotal, isBust);
-        CheckPlayerWinner(hand2, resultText2, "P2", dealerTotal, isBust2);
-        CheckPlayerWinner(hand3, resultText3, "P3", dealerTotal, isBust3);
-    }
-
-    void CheckPlayerWinner(
-    List<Card> playerHand,
-    Text targetText,
-    string playerName,
-    int dealerTotal,
-    bool playerBust)
-    {
-        if (targetText == null) return;
-
-        int playerTotal = CalculateHandTotal(playerHand);
-
-        int playerNumber = 0;
-
-        if (playerName == "P1")
-            playerNumber = 1;
-        else if (playerName == "P2")
-            playerNumber = 2;
-        else if (playerName == "P3")
-            playerNumber = 3;
-
-
-        if (playerBust)
-        {
-            targetText.text = "負け！";
-
-            if (moneyManager != null)
-                moneyManager.Lose(playerNumber);
-        }
-        else if (dealerTotal > 21)
-        {
-            targetText.text = "勝ち！";
-
-            if (moneyManager != null)
-                moneyManager.Win(playerNumber);
-        }
-        else if (playerTotal > dealerTotal)
-        {
-            targetText.text = "勝ち！";
-
-            if (moneyManager != null)
-                moneyManager.Win(playerNumber);
-        }
-        else if (playerTotal < dealerTotal)
-        {
-            targetText.text = "負け！";
-
-            if (moneyManager != null)
-                moneyManager.Lose(playerNumber);
-        }
-        else
-        {
-            targetText.text = "引き分け！";
-
-            if (moneyManager != null)
-                moneyManager.Draw(playerNumber);
-        }
-    }
-
-    int CalculateHandTotal(List<Card> playerHand)
-    {
-        int total = 0;
-        int aceCount = 0;
-
-        foreach (Card card in playerHand)
-        {
-            if (card.number == 1)
-            {
-                total += 11;
-                aceCount++;
-            }
-            else if (card.number >= 11)
-            {
-                total += 10;
-            }
-            else
-            {
-                total += card.number;
-            }
-        }
-
-        while (total > 21 && aceCount > 0)
-        {
-            total -= 10;
-            aceCount--;
-        }
-
-
-        return total;
+        bjResult.CheckWinner(hand3, resultText3, "P3",
+            dealerTotal, isBust3, moneyManager);
     }
 }
 //ここから下 変更用
