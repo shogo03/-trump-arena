@@ -61,24 +61,29 @@ public class MemoryBurstManager : MonoBehaviour
     public int CurrentPlayer => currentPlayer;
 
     // 現在のプレイヤーに対応するコントローラーだけ操作可能
+    // 現在のプレイヤーをコントローラーで操作できるか
     public bool CanControl(int gamepadIndex)
     {
         if (isChecking || isGameOver)
             return false;
 
+        // 人間プレイヤーの人数を超えていたらCPUのターン
+        if (currentPlayer > GameSettings.HumanPlayerCount)
+            return false;
+
+        // コントローラーの接続確認
         if (gamepadIndex < 0 ||
             gamepadIndex >= Gamepad.all.Count)
             return false;
 
+        // プレイヤー番号とコントローラー番号を対応させる
         return gamepadIndex == currentPlayer - 1;
     }
 
     private void Start()
     {
-        int controllerCount = Gamepad.all.Count;
-        playerCount = Mathf.Clamp(controllerCount, 1, 4);
+        playerCount = GameSettings.TotalPlayerCount;
 
-        Debug.Log($"コントローラー接続数：{controllerCount}");
         Debug.Log($"プレイヤー人数：{playerCount}");
 
         // シャッフルボタンのイベント登録
