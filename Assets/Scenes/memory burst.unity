@@ -500,9 +500,9 @@ MonoBehaviour:
   timerText: {fileID: 1678539942}
   resultSceneName: MemoryBurstResult
   shuffleButton: {fileID: 369834734}
-  skipButton: {fileID: 0}
+  skipButton: {fileID: 2073086359}
   shuffleButton2: {fileID: 403018807}
-  skipButton2: {fileID: 0}
+  skipButton2: {fileID: 1799991816}
 --- !u!4 &252949338
 Transform:
   m_ObjectHideFlags: 0

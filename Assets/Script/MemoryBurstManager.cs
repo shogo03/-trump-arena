@@ -116,14 +116,17 @@ public class MemoryBurstManager : MonoBehaviour
         if (isGameOver)
             return;
 
+        // カード判定中はタイマーを止める
+        if (isChecking)
+            return;
+
         remainingTurnTime -= Time.deltaTime;
 
         if (timerText != null)
         {
             timerText.text =
-                $"残り時間 : {Mathf.CeilToInt(remainingTurnTime)}秒";
+                $"残り時間：{Mathf.CeilToInt(remainingTurnTime)}秒";
         }
-        
 
         if (remainingTurnTime <= 0f)
         {
@@ -321,7 +324,10 @@ public class MemoryBurstManager : MonoBehaviour
         if (shuffleButton != null)
             shuffleButton.interactable = player1CanUse;
 
-      
+        if (skipButton != null)
+            skipButton.interactable = player1CanUse;
+
+
 
 
         // プレイヤー2の妨害ボタン
@@ -330,7 +336,10 @@ public class MemoryBurstManager : MonoBehaviour
         if (shuffleButton2 != null)
             shuffleButton2.interactable = player2CanUse;
 
-        
+        if (skipButton2 != null)
+            skipButton2.interactable = player2CanUse;
+
+
     }
 
     private void ShowResult()
@@ -365,70 +374,9 @@ public class MemoryBurstManager : MonoBehaviour
 
 
     
-    // シャッフル妨害能力（共通処理）
-    private bool ShuffleCards()
-    {
-       
-        // ゲーム終了中・ペア判定中・1枚目を選択中は使えない
-        if (isGameOver || isChecking )
-           
-        {
-            return false;
-        }
+    
 
-        // 裏向きで、まだ獲得されていないカードを集める
-        List<MemoryBurstCardView> targets = cards.FindAll(
-            card => card != null &&
-                    !card.IsMatched &&
-                    !card.IsRevealed
-        );
-
-        if (targets.Count < 2)
-        {
-            Debug.Log("シャッフルできるカードが2枚未満です。", this);
-            return false;
-        }
-
-        // 現在の並び順を保存
-        List<Transform> order = new List<Transform>();
-
-        for (int i = 0; i < cardArea.childCount; i++)
-        {
-            order.Add(cardArea.GetChild(i));
-        }
-
-        // シャッフル対象の位置を記録
-        List<int> slots = new List<int>();
-
-        foreach (MemoryBurstCardView card in targets)
-        {
-            slots.Add(card.transform.GetSiblingIndex());
-        }
-
-        // Fisher-Yates法
-        for (int i = targets.Count - 1; i > 0; i--)
-        {
-            int j = Random.Range(0, i + 1);
-
-            (targets[i], targets[j]) = (targets[j], targets[i]);
-        }
-
-        // 対象カードの位置を入れ替える
-        for (int i = 0; i < slots.Count; i++)
-        {
-            order[slots[i]] = targets[i].transform;
-        }
-
-        // 最終的な並び順を適用
-        for (int i = 0; i < order.Count; i++)
-        {
-            order[i].SetSiblingIndex(i);
-        }
-
-        Debug.Log("シャッフル成功！", this);
-
-        return true;
-    }
+   
 
 
 
@@ -499,6 +447,9 @@ public class MemoryBurstManager : MonoBehaviour
 
     private void EndTurnByTimeout()
     {
+        if (isGameOver)
+            return;
+
         Debug.Log($"プレイヤー{currentPlayer}の時間切れ！");
 
         // 表向きのカードを裏返す
@@ -514,13 +465,15 @@ public class MemoryBurstManager : MonoBehaviour
             secondCard = null;
         }
 
-        // 次のプレイヤーへ
-        currentPlayer = currentPlayer % playerCount + 1;
-
         // ターン失敗フラグをリセット
         turnFailed = false;
 
-        // 15秒にリセット
+        // 次のプレイヤーへ
+        currentPlayer = currentPlayer % playerCount + 1;
+
+        Debug.Log($"次のプレイヤー：{currentPlayer}");
+
+        // タイマーをリセット
         remainingTurnTime = turnTimeLimit;
 
         UpdateUI();
