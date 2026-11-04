@@ -40,11 +40,13 @@ public class MemoryBurstManager : MonoBehaviour
 
     [Header("プレイヤー１の妨害能力")]
     [SerializeField] private Button shuffleButton;
+    [SerializeField] private Button skipButton;
 
     
 
     [Header("プレイヤー2の妨害能力")]
     [SerializeField] private Button shuffleButton2;
+    [SerializeField] private Button skipButton2;
 
 
     private readonly List<MemoryBurstCardView> cards = new();
