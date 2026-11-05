@@ -1,69 +1,104 @@
-using UnityEngine;
+
 using System;
+using TMPro;
+using UnityEngine;
 
 public class MemoryBurstTurnManager : MonoBehaviour
 {
+    [Header("ターン表示")]
+    [SerializeField] private TextMeshProUGUI turnText;
+
+    [Header("タイマー表示")]
+    [SerializeField] private TextMeshProUGUI timerText;
+
+    [Header("制限時間")]
     [SerializeField] private float turnTimeLimit = 15f;
 
-    public int CurrentPlayer { get; private set; } = 1;
-    public float RemainingTime { get; private set; }
+    private int currentPlayer = 1;
+    private int playerCount = 1;
+    private float remainingTurnTime;
+    private bool isGameOver;
 
-    public bool IsTimeUp { get; private set; }
+    public int CurrentPlayer => currentPlayer;
+    public float RemainingTurnTime => remainingTurnTime;
 
     public event Action<int> OnTurnChanged;
-    public event Action<int> OnTimeUp;
-
-    private int playerCount;
-    private bool isPaused;
+    public event Action OnTurnTimeout;
 
     public void Initialize(int count)
     {
-        playerCount = Mathf.Clamp(count, 1, 4);
-        CurrentPlayer = 1;
-        RemainingTime = turnTimeLimit;
-        IsTimeUp = false;
-        isPaused = false;
+        playerCount = count;
+        currentPlayer = 1;
+        remainingTurnTime = turnTimeLimit;
+        isGameOver = false;
 
-        OnTurnChanged?.Invoke(CurrentPlayer);
+        UpdateUI();
     }
 
-    private void Update()
+    public void Tick(bool paused)
     {
-        if (isPaused || IsTimeUp || playerCount <= 0)
+        if (isGameOver || paused)
             return;
 
-        RemainingTime -= Time.deltaTime;
+        remainingTurnTime -= Time.deltaTime;
 
-        if (RemainingTime <= 0f)
+        if (remainingTurnTime <= 0f)
         {
-            RemainingTime = 0f;
-            IsTimeUp = true;
-
-            OnTimeUp?.Invoke(CurrentPlayer);
-        }
-    }
-
-    public void NextTurn()
-    {
-        if (playerCount <= 0)
+            remainingTurnTime = 0f;
+            UpdateUI();
+            OnTurnTimeout?.Invoke();
             return;
+        }
 
-        CurrentPlayer = CurrentPlayer % playerCount + 1;
-
-        RemainingTime = turnTimeLimit;
-        IsTimeUp = false;
-
-        OnTurnChanged?.Invoke(CurrentPlayer);
+        UpdateUI();
     }
 
-    public void PauseTimer(bool pause)
-    {
-        isPaused = pause;
-    }
-
+    // タイマーだけリセット（プレイヤーは交代しない）
     public void ResetTimer()
     {
-        RemainingTime = turnTimeLimit;
-        IsTimeUp = false;
+        if (isGameOver)
+            return;
+
+        remainingTurnTime = turnTimeLimit;
+        UpdateUI();
+
+        Debug.Log($"プレイヤー{currentPlayer}のタイマーをリセット！");
+    }
+
+    // 次のプレイヤーへ交代
+    public void NextTurn()
+    {
+        if (isGameOver)
+            return;
+
+        currentPlayer = currentPlayer % playerCount + 1;
+        remainingTurnTime = turnTimeLimit;
+
+        UpdateUI();
+        OnTurnChanged?.Invoke(currentPlayer);
+
+        Debug.Log($"次のプレイヤー：{currentPlayer}");
+    }
+
+    public void SetGameOver()
+    {
+        isGameOver = true;
+        UpdateUI();
+    }
+
+    private void UpdateUI()
+    {
+        if (turnText != null)
+        {
+            turnText.text = isGameOver
+                ? "GAME SET"
+                : $"PLAYER {currentPlayer} TURN";
+        }
+
+        if (timerText != null)
+        {
+            timerText.text =
+                $"残り時間：{Mathf.CeilToInt(remainingTurnTime)}秒";
+        }
     }
 }

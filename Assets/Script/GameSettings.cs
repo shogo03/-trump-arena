@@ -1,6 +1,6 @@
 public static class GameSettings
 {
-    public static int HumanPlayerCount = 1;
+    public static int HumanPlayerCount = 2;
     public static int CPUCount = 0;
     public static int CPULevel = 1;
 
