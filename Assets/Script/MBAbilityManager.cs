@@ -14,6 +14,17 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     [SerializeField] private Button skipButton2;
     [SerializeField] private Button randomButton2;
 
+    [Header("プレイヤー3の能力")]
+    [SerializeField] private Button shuffleButton3;
+    [SerializeField] private Button skipButton3;
+    [SerializeField] private Button randomButton3;
+
+    [Header("プレイヤー4の能力")]
+    [SerializeField] private Button shuffleButton4;
+    [SerializeField] private Button skipButton4;
+    [SerializeField] private Button randomButton4;
+
+
     // 能力のゲーム中使用状況
     private bool[] shuffleUsed = new bool[4];
     private bool[] skipUsed = new bool[4];
@@ -61,23 +72,48 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         }
 
         // ボタンのイベント登録
+
+        //シャッフルボタン
         if (shuffleButton != null)
             shuffleButton.onClick.AddListener(ShufflePlayer1);
 
         if (shuffleButton2 != null)
             shuffleButton2.onClick.AddListener(ShufflePlayer2);
+       
+        if (shuffleButton3 != null)
+            shuffleButton3.onClick.AddListener(ShufflePlayer3);
+        
+        if (shuffleButton4 != null)
+            shuffleButton4.onClick.AddListener(ShufflePlayer4);
 
+        //スキップボタン
         if (skipButton != null)
             skipButton.onClick.AddListener(SkipPlayer1);
 
         if (skipButton2 != null)
             skipButton2.onClick.AddListener(SkipPlayer2);
 
+        if (skipButton3 != null)
+            skipButton3.onClick.AddListener(SkipPlayer3);
+
+        if (skipButton4 != null)
+            skipButton4.onClick.AddListener(SkipPlayer4);
+
+
+        //ランダム公開ボタン
         if (randomButton != null)
             randomButton.onClick.AddListener(RandomPlayer1);
 
         if (randomButton2 != null)
             randomButton2.onClick.AddListener(RandomPlayer2);
+
+        if (randomButton3 != null)
+            randomButton3.onClick.AddListener(RandomPlayer3);
+        
+        if (randomButton4 != null)
+            randomButton4.onClick.AddListener(RandomPlayer4);
+
+
 
         // ターン変更イベント登録
         turnManager.OnTurnChanged += OnTurnChanged;
@@ -209,6 +245,16 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         UseShuffle(2);
     }
 
+    private void ShufflePlayer3()
+    {
+        UseShuffle(3);
+    }
+
+    private void ShufflePlayer4()
+    {
+        UseShuffle(4);
+    }
+
     private void UseShuffle(int player)
     {
         if (!CanUseAbility(player))
@@ -241,6 +287,15 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     private void SkipPlayer2()
     {
         UseSkip(2);
+    }
+
+    private void SkipPlayer3()
+    {
+        UseSkip(3);
+    }
+    private void SkipPlayer4()
+    {
+        UseSkip(4);
     }
 
     private void UseSkip(int player)
@@ -278,6 +333,16 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     private void RandomPlayer2()
     {
         UseRandom(2);
+    }
+
+    private void RandomPlayer3()
+    {
+        UseRandom(3);
+    }
+
+    private void RandomPlayer4()
+    {
+        UseRandom(4);
     }
 
     private void UseRandom(int player)
@@ -319,23 +384,45 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         isGameOver = true;
         pendingRandomPlayer = 0;
 
+        //シャッフル無効化
         if (shuffleButton != null)
             shuffleButton.interactable = false;
 
         if (shuffleButton2 != null)
             shuffleButton2.interactable = false;
 
+        if (shuffleButton3 != null)
+            shuffleButton3.interactable = false;
+
+        if (shuffleButton4 != null)
+            shuffleButton4.interactable = false;
+        
+        //スキップ無効化
         if (skipButton != null)
             skipButton.interactable = false;
 
         if (skipButton2 != null)
             skipButton2.interactable = false;
 
+        if (skipButton3 != null)
+            skipButton3.interactable = false;
+
+        if (skipButton4 != null)
+            skipButton4.interactable = false;
+
+        //ランダム公開無効化
         if (randomButton != null)
             randomButton.interactable = false;
 
         if (randomButton2 != null)
             randomButton2.interactable = false;
+        
+        if (randomButton3 != null)
+            randomButton3.interactable = false;
+
+        if (randomButton4 != null)
+            randomButton4.interactable = false;
+
 
         Debug.Log("AbilityManager：ゲーム終了。能力を無効化しました。");
     }
@@ -349,22 +436,43 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         if (turnManager != null)
             turnManager.OnTurnChanged -= OnTurnChanged;
 
+        //シャッフルイベント解除
         if (shuffleButton != null)
             shuffleButton.onClick.RemoveListener(ShufflePlayer1);
 
         if (shuffleButton2 != null)
             shuffleButton2.onClick.RemoveListener(ShufflePlayer2);
 
+        if (shuffleButton3 != null)
+            shuffleButton3.onClick.RemoveListener(ShufflePlayer3);
+
+        if (shuffleButton4 != null)
+            shuffleButton4.onClick.RemoveListener(ShufflePlayer4);
+
+        //スキップイベント解除
         if (skipButton != null)
             skipButton.onClick.RemoveListener(SkipPlayer1);
 
         if (skipButton2 != null)
             skipButton2.onClick.RemoveListener(SkipPlayer2);
 
+        if (skipButton3 != null)
+            skipButton3.onClick.RemoveListener(SkipPlayer3);
+
+        if (skipButton4 != null)
+            skipButton4.onClick.RemoveListener(SkipPlayer4);
+
+        //ランダム公開イベント解除
         if (randomButton != null)
             randomButton.onClick.RemoveListener(RandomPlayer1);
 
         if (randomButton2 != null)
             randomButton2.onClick.RemoveListener(RandomPlayer2);
+
+        if (randomButton3 != null)
+            randomButton3.onClick.RemoveListener(RandomPlayer3);
+
+        if (randomButton4 != null)
+            randomButton4.onClick.RemoveListener(RandomPlayer4);
     }
 }
