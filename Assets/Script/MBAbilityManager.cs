@@ -4,22 +4,26 @@ using UnityEngine.UI;
 
 public class MemoryBurstAbilityManager : MonoBehaviour
 {
-    [Header("プレイヤー1の能力")]
+    [Header("プレイヤー1の能力UI")]
+    [SerializeField] private GameObject player1UI;
     [SerializeField] private Button shuffleButton;
     [SerializeField] private Button skipButton;
     [SerializeField] private Button randomButton;
 
     [Header("プレイヤー2の能力")]
+    [SerializeField] private GameObject player2UI;
     [SerializeField] private Button shuffleButton2;
     [SerializeField] private Button skipButton2;
     [SerializeField] private Button randomButton2;
 
     [Header("プレイヤー3の能力")]
+    [SerializeField] private GameObject player3UI;
     [SerializeField] private Button shuffleButton3;
     [SerializeField] private Button skipButton3;
     [SerializeField] private Button randomButton3;
 
     [Header("プレイヤー4の能力")]
+    [SerializeField] private GameObject player4UI;
     [SerializeField] private Button shuffleButton4;
     [SerializeField] private Button skipButton4;
     [SerializeField] private Button randomButton4;
@@ -121,6 +125,11 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         UpdateButtons();
 
         Debug.Log("AbilityManager：初期化完了！");
+
+       
+
+      // 選択されたプレイヤー人数に応じてUIを表示
+        UpdatePlayerUI(playerCount);
     }
 
     // =================================
@@ -375,6 +384,62 @@ public class MemoryBurstAbilityManager : MonoBehaviour
 
         UpdateButtons();
     }
+
+
+    // =================================
+    // プレイヤー人数に応じたUI表示
+    // =================================
+
+    private void UpdatePlayerUI(int playerCount)
+    {
+        // Player 1
+        SetPlayerUI(1 <= playerCount,
+            shuffleButton, skipButton, randomButton);
+
+        // Player 2
+        SetPlayerUI(2 <= playerCount,
+            shuffleButton2, skipButton2, randomButton2);
+
+        // Player 3
+        SetPlayerUI(3 <= playerCount,
+            shuffleButton3, skipButton3, randomButton3);
+
+        // Player 4
+        SetPlayerUI(4 <= playerCount,
+            shuffleButton4, skipButton4, randomButton4);
+
+        if (player1UI != null)
+            player1UI.SetActive(playerCount >= 1);
+
+        if (player2UI != null)
+            player2UI.SetActive(playerCount >= 2);
+
+        if (player3UI != null)
+            player3UI.SetActive(playerCount >= 3);
+
+        if (player4UI != null)
+            player4UI.SetActive(playerCount >= 4);
+    }
+
+   
+
+    private void SetPlayerUI(
+        bool visible,
+        Button shuffle,
+        Button skip,
+        Button random)
+    {
+        if (shuffle != null)
+            shuffle.gameObject.SetActive(visible);
+
+        if (skip != null)
+            skip.gameObject.SetActive(visible);
+
+        if (random != null)
+            random.gameObject.SetActive(visible);
+    }
+
+
 
     // =================================
     // ゲーム終了
