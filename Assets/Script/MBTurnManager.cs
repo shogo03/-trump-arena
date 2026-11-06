@@ -17,7 +17,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
     private int currentPlayer = 1;
     private float remainingTurnTime;
     private bool isGameOver;
-    private bool skipNextTurn = false;
+    private bool skipNextTurn;
 
     public int CurrentPlayer => currentPlayer;
     public float RemainingTurnTime => remainingTurnTime;
@@ -69,7 +69,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
         UpdateUI();
     }
 
-    // タイマーだけリセット
+    // タイマーをリセット
     public void ResetTimer()
     {
         if (isGameOver)
@@ -87,38 +87,49 @@ public class MemoryBurstTurnManager : MonoBehaviour
         if (isGameOver)
             return;
 
-        // 通常は次のプレイヤーへ
-        currentPlayer = currentPlayer % playerCount + 1;
-
-        // スキップ予約があれば、そのプレイヤーを飛ばす
-        if (skipNextTurn)
+        // 次の参加プレイヤーを探す
+        for (int i = 0; i < 4; i++)
         {
-            Debug.Log($"プレイヤー{currentPlayer}のターンをスキップ！");
+            currentPlayer++;
 
-            currentPlayer = currentPlayer % playerCount + 1;
+            if (currentPlayer > 4)
+                currentPlayer = 1;
 
-            skipNextTurn = false;
-        }
+            int index = currentPlayer - 1;
 
-        remainingTurnTime = turnTimeLimit;
+            // 参加していないプレイヤーは飛ばす
+            if (!GameSettings.IsActive[index])
+                continue;
 
-                UpdateUI();
-                OnTurnChanged?.Invoke(currentPlayer);
-
-                Debug.Log($"次のプレイヤー：{currentPlayer}");
-
-                return;
+            // スキップ予約があれば、このプレイヤーを飛ばす
+            if (skipNextTurn)
+            {
+                Debug.Log($"プレイヤー{currentPlayer}のターンをスキップ！");
+                skipNextTurn = false;
+                continue;
             }
+
+            remainingTurnTime = turnTimeLimit;
+
+            UpdateUI();
+            OnTurnChanged?.Invoke(currentPlayer);
+
+            Debug.Log($"次のプレイヤー：P{currentPlayer}");
+            return;
         }
 
-        Debug.LogError("参加プレイヤーが見つかりません！");
+        // 全員がスキップ対象になった場合
+        skipNextTurn = false;
+
+        Debug.LogError("次の参加プレイヤーが見つかりません！");
     }
 
-    //次のプレイヤーのターンをスキップ予約
+    // 次のプレイヤーのターンをスキップ予約
     public void RequestSkipNextTurn()
     {
         if (isGameOver)
             return;
+
         skipNextTurn = true;
 
         Debug.Log("次のプレイヤーのスキップを予約しました");
