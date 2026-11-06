@@ -1,131 +1,176 @@
+
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class PlayerLobbyManager : MonoBehaviour
 {
-    [Header("CPU追加ボタン（2～4枠目）")]
-    [SerializeField] private Button[] cpuAddButtons;
+    [Header("2P～4Pの選択ボタン")]
+    [SerializeField] private Button[] playerButtons;
+    [SerializeField] private Button[] cpuButtons;
 
-    [Header("CPU削除ボタン（2～4枠目）")]
-    [SerializeField] private Button[] cpuRemoveButtons;
+    [Header("2P～4Pの表示テキスト")]
+    [SerializeField] private TextMeshProUGUI[] slotTexts;
 
-    [Header("空き枠の表示")]
-    [SerializeField] private GameObject[] emptyObjects;
-
-    [Header("CPU表示")]
-    [SerializeField] private GameObject[] cpuObjects;
-
-    [Header("CPUレベル")]
-    [SerializeField] private TMP_Dropdown cpuLevelDropdown;
+    [Header("CPUごとの難易度Dropdown")]
+    [SerializeField] private TMP_Dropdown[] cpuLevelDropdowns;
 
     [Header("人数表示")]
     [SerializeField] private TextMeshProUGUI playerCountText;
 
-    private bool[] cpuSlots = new bool[4];
+    [Header("開始ボタン")]
+    [SerializeField] private Button startButton;
+
+    private bool[] isSelected = new bool[4];
+    private bool[] isCPU = new bool[4];
 
     private void Start()
     {
-        // 初期状態は自分だけ
-        for (int i = 0; i < 4; i++)
-        {
-            cpuSlots[i] = false;
-        }
+        // 1Pは最初から人間プレイヤー
+        isSelected[0] = true;
+        isCPU[0] = false;
 
-        // ボタン登録
+        // 2P～4Pのボタン登録
         for (int i = 0; i < 3; i++)
         {
             int slot = i + 1;
 
-            if (cpuAddButtons[i] != null)
-            {
-                cpuAddButtons[i].onClick.AddListener(
-                    () => AddCPU(slot)
-                );
-            }
+            playerButtons[i].onClick.AddListener(
+                () => SelectPlayer(slot)
+            );
 
-            if (cpuRemoveButtons[i] != null)
+            cpuButtons[i].onClick.AddListener(
+                () => SelectCPU(slot)
+            );
+
+            // 難易度Dropdownの初期設定
+            if (cpuLevelDropdowns[i] != null)
             {
-                cpuRemoveButtons[i].onClick.AddListener(
-                    () => RemoveCPU(slot)
+                cpuLevelDropdowns[i].ClearOptions();
+                cpuLevelDropdowns[i].AddOptions(
+                    new System.Collections.Generic.List<string>
+                    {
+                        "Easy",
+                        "Normal",
+                        "Hard"
+                    }
                 );
+
+                cpuLevelDropdowns[i].value = 1;
+                cpuLevelDropdowns[i].gameObject.SetActive(false);
             }
+        }
+
+        // 開始ボタンの登録
+        if (startButton != null)
+        {
+            startButton.onClick.AddListener(StartGame);
         }
 
         UpdateUI();
     }
 
-    // CPU追加
-    public void AddCPU(int slot)
+    // 人間プレイヤーを選択
+    public void SelectPlayer(int slot)
     {
-        if (slot < 1 || slot > 3)
+        if (!CanSelect(slot))
             return;
 
-        if (cpuSlots[slot])
-            return;
-
-        cpuSlots[slot] = true;
+        isSelected[slot] = true;
+        isCPU[slot] = false;
 
         UpdateUI();
     }
 
-    // CPU削除
-    public void RemoveCPU(int slot)
+    // CPUを選択
+    public void SelectCPU(int slot)
     {
-        if (slot < 1 || slot > 3)
+        if (!CanSelect(slot))
             return;
 
-        cpuSlots[slot] = false;
+        isSelected[slot] = true;
+        isCPU[slot] = true;
 
         UpdateUI();
     }
 
-    // 画面更新
+    // 選択できるか確認
+    private bool CanSelect(int slot)
+    {
+        if (slot < 1 || slot > 3)
+            return false;
+
+        if (slot >= 2 && !isSelected[slot - 1])
+            return false;
+
+        return true;
+    }
+
+    // 表示更新
     private void UpdateUI()
     {
+        int humanCount = 0;
         int cpuCount = 0;
 
-        for (int i = 1; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
-            if (cpuSlots[i])
-                cpuCount++;
+            if (isSelected[i])
+            {
+                if (isCPU[i])
+                    cpuCount++;
+                else
+                    humanCount++;
+            }
 
-            if (emptyObjects[i - 1] != null)
-                emptyObjects[i - 1].SetActive(!cpuSlots[i]);
+            if (i > 0)
+            {
+                slotTexts[i - 1].text =
+                    !isSelected[i]
+                    ? $"{i + 1}P：未選択"
+                    : isCPU[i]
+                        ? $"{i + 1}P：CPU"
+                        : $"{i + 1}P：プレイヤー";
 
-            if (cpuObjects[i - 1] != null)
-                cpuObjects[i - 1].SetActive(cpuSlots[i]);
-
-            if (cpuAddButtons[i - 1] != null)
-                cpuAddButtons[i - 1].gameObject.SetActive(!cpuSlots[i]);
-
-            if (cpuRemoveButtons[i - 1] != null)
-                cpuRemoveButtons[i - 1].gameObject.SetActive(cpuSlots[i]);
+                // CPUを選択した枠だけ難易度を表示
+                if (cpuLevelDropdowns[i - 1] != null)
+                {
+                    cpuLevelDropdowns[i - 1]
+                        .gameObject.SetActive(
+                            isSelected[i] && isCPU[i]
+                        );
+                }
+            }
         }
 
-        GameSettings.HumanPlayerCount = 1;
+        GameSettings.HumanPlayerCount = humanCount;
         GameSettings.CPUCount = cpuCount;
+
+        GameSettings.IsCPU = (bool[])isCPU.Clone();
+        GameSettings.IsActive = (bool[])isSelected.Clone();
 
         if (playerCountText != null)
         {
             playerCountText.text =
-                $"参加人数：{1 + cpuCount} / 4";
+                $"参加人数：{humanCount + cpuCount} / 4";
         }
+
+        if (startButton != null)
+            startButton.interactable = true;
     }
 
     // ゲーム開始
     public void StartGame()
     {
-        if (GameSettings.TotalPlayerCount < 1)
-            return;
+        for (int i = 1; i < 4; i++)
+        {
+            if (isCPU[i] && cpuLevelDropdowns[i - 1] != null)
+            {
+                GameSettings.CPULevels[i] =
+                    cpuLevelDropdowns[i - 1].value + 1;
+            }
+        }
 
-        GameSettings.IsCPU = (bool[])cpuSlots.Clone();
-
-        if (cpuLevelDropdown != null)
-            GameSettings.CPULevel = cpuLevelDropdown.value + 1;
-
-        UnityEngine.SceneManagement.SceneManager.LoadScene(
-            "MemoryBurst"
-        );
+        SceneManager.LoadScene("MemoryBurst");
     }
 }
