@@ -18,6 +18,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
     private int playerCount = 1;
     private float remainingTurnTime;
     private bool isGameOver;
+    private bool skipNextTurn = false;
 
     public int CurrentPlayer => currentPlayer;
     public float RemainingTurnTime => remainingTurnTime;
@@ -31,6 +32,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
         currentPlayer = 1;
         remainingTurnTime = turnTimeLimit;
         isGameOver = false;
+        skipNextTurn = false;
 
         UpdateUI();
     }
@@ -71,13 +73,35 @@ public class MemoryBurstTurnManager : MonoBehaviour
         if (isGameOver)
             return;
 
+        // 通常は次のプレイヤーへ
         currentPlayer = currentPlayer % playerCount + 1;
+
+        // スキップ予約があれば、そのプレイヤーを飛ばす
+        if (skipNextTurn)
+        {
+            Debug.Log($"プレイヤー{currentPlayer}のターンをスキップ！");
+
+            currentPlayer = currentPlayer % playerCount + 1;
+
+            skipNextTurn = false;
+        }
+
         remainingTurnTime = turnTimeLimit;
 
         UpdateUI();
         OnTurnChanged?.Invoke(currentPlayer);
 
         Debug.Log($"次のプレイヤー：{currentPlayer}");
+    }
+
+    //次のプレイヤーのターンをスキップ予約
+    public void RequestSkipNextTurn()
+    {
+        if (isGameOver)
+            return;
+        skipNextTurn = true;
+
+        Debug.Log("次のプレイヤーのスキップを予約しました");
     }
 
     public void SetGameOver()
@@ -92,7 +116,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
         {
             turnText.text = isGameOver
                 ? "GAME SET"
-                : $"PLAYER {currentPlayer} TURN";
+                : $"P{currentPlayer}のターン";
         }
 
         if (timerText != null)

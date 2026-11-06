@@ -171,6 +171,12 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         UpdatePlayerButtons(
             2, shuffleButton2, skipButton2, randomButton2
         );
+
+        UpdatePlayerButtons(
+            3, shuffleButton3, skipButton3, randomButton3);
+
+        UpdatePlayerButtons(
+            4, shuffleButton4, skipButton4, randomButton4);
     }
 
     private void UpdatePlayerButtons(
@@ -310,13 +316,8 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         skipUsed[player - 1] = true;
         abilityUsedThisTurn[player - 1] = true;
 
-        Debug.Log($"プレイヤー{player}が相手のターンをスキップ！");
-
-        // 相手のターンへ移動
-        turnManager.NextTurn();
-
-        // 相手のターンを飛ばして使用者に戻す
-        turnManager.NextTurn();
+        // 次のプレイヤーのターンをスキップ予約
+        turnManager.RequestSkipNextTurn();
 
         UpdateButtons();
     }
