@@ -4096,15 +4096,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ecdf27758392574dbfdb91b10ade29e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MemoryBurstAbilityManager
+  player1UI: {fileID: 736203731}
   shuffleButton: {fileID: 369834734}
   skipButton: {fileID: 2073086359}
   randomButton: {fileID: 496783258}
+  player2UI: {fileID: 1900532007}
   shuffleButton2: {fileID: 403018807}
   skipButton2: {fileID: 1799991816}
   randomButton2: {fileID: 749448191}
+  player3UI: {fileID: 1453377918}
   shuffleButton3: {fileID: 97632811}
   skipButton3: {fileID: 1277555418}
   randomButton3: {fileID: 246292258}
+  player4UI: {fileID: 89299106}
   shuffleButton4: {fileID: 2142201294}
   skipButton4: {fileID: 1669355234}
   randomButton4: {fileID: 1018162531}
