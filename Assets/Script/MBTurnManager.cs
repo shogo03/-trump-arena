@@ -17,6 +17,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
     private int currentPlayer = 1;
     private float remainingTurnTime;
     private bool isGameOver;
+    private bool skipNextTurn = false;
 
     public int CurrentPlayer => currentPlayer;
     public float RemainingTurnTime => remainingTurnTime;
@@ -42,6 +43,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
         currentPlayer = 1;
         remainingTurnTime = turnTimeLimit;
         isGameOver = false;
+        skipNextTurn = false;
 
         UpdateUI();
 
@@ -85,19 +87,20 @@ public class MemoryBurstTurnManager : MonoBehaviour
         if (isGameOver)
             return;
 
-        // 最大4人分を確認
-        for (int i = 0; i < 4; i++)
+        // 通常は次のプレイヤーへ
+        currentPlayer = currentPlayer % playerCount + 1;
+
+        // スキップ予約があれば、そのプレイヤーを飛ばす
+        if (skipNextTurn)
         {
-            currentPlayer++;
+            Debug.Log($"プレイヤー{currentPlayer}のターンをスキップ！");
 
-            // 4Pの次は1P
-            if (currentPlayer > 4)
-                currentPlayer = 1;
+            currentPlayer = currentPlayer % playerCount + 1;
 
-            // 参加しているプレイヤーならターンを開始
-            if (GameSettings.IsActive[currentPlayer - 1])
-            {
-                remainingTurnTime = turnTimeLimit;
+            skipNextTurn = false;
+        }
+
+        remainingTurnTime = turnTimeLimit;
 
                 UpdateUI();
                 OnTurnChanged?.Invoke(currentPlayer);
@@ -109,6 +112,16 @@ public class MemoryBurstTurnManager : MonoBehaviour
         }
 
         Debug.LogError("参加プレイヤーが見つかりません！");
+    }
+
+    //次のプレイヤーのターンをスキップ予約
+    public void RequestSkipNextTurn()
+    {
+        if (isGameOver)
+            return;
+        skipNextTurn = true;
+
+        Debug.Log("次のプレイヤーのスキップを予約しました");
     }
 
     public void SetGameOver()
@@ -123,7 +136,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
         {
             turnText.text = isGameOver
                 ? "GAME SET"
-                : $"PLAYER {currentPlayer} TURN";
+                : $"P{currentPlayer}のターン";
         }
 
         if (timerText != null)

@@ -302,6 +302,11 @@ public class BJdraw : MonoBehaviour
     {
         isInitialDeal = true;
 
+        // ƒQ[ƒ€ŠJn‚ÉBET
+        moneyManager.PlaceBet(1);
+        moneyManager.PlaceBet(2);
+        moneyManager.PlaceBet(3);
+
         // P1‚É2–‡
         DrawCard();
         DrawCard();
