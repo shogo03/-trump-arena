@@ -9,11 +9,6 @@ public class MoneyManager : MonoBehaviour
     public int money2 = 1000;
     public int money3 = 1000;
 
-    // 画面に表示するText
-    public TMP_Text moneyText1;
-    public TMP_Text moneyText2;
-    public TMP_Text moneyText3;
-
     // ベット額
 
     public int bet1 = 100;
@@ -21,27 +16,48 @@ public class MoneyManager : MonoBehaviour
     public int bet3 = 100;
 
 
-    // UI
+    // 表示用
+ 
+    public TMP_Text moneyText1;
+    public TMP_Text moneyText2;
+    public TMP_Text moneyText3;
 
-   
 
     void Start()
     {
         UpdateUI();
     }
 
-
     // ベットする
+ 
 
     public void PlaceBet(int player)
     {
         if (player == 1)
         {
-            money1 += 100;
+            if (money1 >= bet1)
+            {
+                money1 -= bet1;
+                Debug.Log("P1 ベット：" + bet1);
+            }
+            else
+            {
+                Debug.Log("P1は所持金不足！");
+                return;
+            }
         }
         else if (player == 2)
         {
-            money2 += 100;
+            if (money2 >= bet2)
+            {
+                money2 -= bet2;
+                Debug.Log("P2 ベット：" + bet2);
+            }
+            else
+            {
+                Debug.Log("P2は所持金不足！");
+                return;
+            }
         }
         else if (player == 3)
         {
@@ -59,7 +75,6 @@ public class MoneyManager : MonoBehaviour
 
         UpdateUI();
     }
-
 
     // 勝ち
 
@@ -85,17 +100,16 @@ public class MoneyManager : MonoBehaviour
 
 
     // 負け
-
+   
     public void Lose(int player)
     {
-        // ベット時にすでに所持金から引いているので
+        // BETした時点でお金を引いているので、
         // 負けた場合は何もしない
 
         Debug.Log("P" + player + " 負け！");
 
         UpdateUI();
     }
-
 
     // 引き分け
 
@@ -120,7 +134,35 @@ public class MoneyManager : MonoBehaviour
     }
 
 
+    // P1 BET +10
+
+    public void IncreaseBet1()
+    {
+        bet1 += 10;
+
+        if (bet1 > 500)
+            bet1 = 500;
+
+        UpdateUI();
+    }
+
+
+
+    // P1 BET -10
+ 
+    public void DecreaseBet1()
+    {
+        bet1 -= 10;
+
+        if (bet1 < 10)
+            bet1 = 10;
+
+        UpdateUI();
+    }
+
+
     // UI更新
+ 
 
     void UpdateUI()
     {
