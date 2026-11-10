@@ -58,6 +58,7 @@ public class Deck : MonoBehaviour
     }
 
     // 山札から1枚引く
+    // 山札から1枚引く
     public Card DrawCard()
     {
         if (cards.Count == 0)
@@ -70,6 +71,8 @@ public class Deck : MonoBehaviour
 
         Card card = cards[0];
         cards.RemoveAt(0);
+
+        Debug.Log("山札の残り枚数：" + cards.Count);
 
         return card;
     }

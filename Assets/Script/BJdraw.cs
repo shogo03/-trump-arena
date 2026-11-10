@@ -1,7 +1,9 @@
 
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+
 
 public class BJdraw : MonoBehaviour
 {
@@ -33,12 +35,24 @@ public class BJdraw : MonoBehaviour
     // 現在のターン（1=P1、2=P2、3=P3）
     private int currentTurn = 1;
 
+    // ラウンド管理
+    private int currentRound = 1;
+    private int maxRound = 10;
+    
+
+    public Text roundText;
+    public Text gameEndText;
+
     // 最初のカード配布中かどうか
     private bool isInitialDeal = true;
 
     private bool isBust = false;
     private bool isBust2 = false;
     private bool isBust3 = false;
+
+    private bool betConfirmed1 = false;
+    private bool betConfirmed2 = false;
+    private bool betConfirmed3 = false;
 
     public void DrawCard()
     {
@@ -59,6 +73,14 @@ public class BJdraw : MonoBehaviour
             Debug.Log("STAND中はカードを引けません");
             return;
         }
+
+        if (!isInitialDeal && !betConfirmed1)
+        {
+            Debug.Log("先にBETを確定してください！");
+            return;
+        }
+
+        
 
         if (deck == null)
         {
@@ -90,7 +112,15 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        image.sprite = card.image;
+        // 初期配布中は裏向き、それ以外は表向き
+        if (isInitialDeal)
+        {
+            image.sprite = deck.cardBackImage;
+        }
+        else
+        {
+            image.sprite = card.image;
+        }
         image.enabled = true;
 
         hand.Add(card);
@@ -128,6 +158,12 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
+        if (!isInitialDeal && !betConfirmed2)
+        {
+            Debug.Log("先にBETを確定してください！");
+            return;
+        }
+
         DrawForPlayer(hand2, handArea2);
         UpdatePoint2();
     }
@@ -149,6 +185,12 @@ public class BJdraw : MonoBehaviour
         if (isStand3)
         {
             Debug.Log("3人目はSTAND中です");
+            return;
+        }
+
+        if (!isInitialDeal && !betConfirmed3)
+        {
+            Debug.Log("先にBETを確定してください！");
             return;
         }
 
@@ -177,7 +219,17 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        image.sprite = card.image;
+        // 初期配布中は裏向き、それ以外は表向き
+        if (isInitialDeal)
+        {
+            image.sprite = deck.cardBackImage;
+        }
+        else
+        {
+            image.sprite = card.image;
+        }
+
+        image.enabled = true;
         image.enabled = true;
 
         playerHand.Add(card);
@@ -186,6 +238,60 @@ public class BJdraw : MonoBehaviour
         rect.sizeDelta = cardSize;
         rect.anchoredPosition = new Vector2((playerHand.Count - 1) * 35, 0);
     }
+
+    // プレイヤーの手札を表向きにする
+    void RevealPlayerCards(List<Card> playerHand, Transform area)
+    {
+        for (int i = 0; i < playerHand.Count; i++)
+        {
+            Image image = area.GetChild(i).GetComponent<Image>();
+
+            if (image != null)
+            {
+                image.sprite = playerHand[i].image;
+            }
+        }
+    }
+
+    public void ConfirmBet1()
+    {
+        if (currentTurn != 1 || betConfirmed1)
+            return;
+
+        moneyManager.PlaceBet(1);
+        betConfirmed1 = true;
+
+        RevealPlayerCards(hand, handArea);
+        UpdatePoint();
+        Debug.Log("プレイヤー1のBET確定！");
+    }
+
+    public void ConfirmBet2()
+    {
+        if (currentTurn != 2 || betConfirmed2)
+            return;
+
+        moneyManager.PlaceBet(2);
+        betConfirmed2 = true;
+
+        RevealPlayerCards(hand2, handArea2);
+        UpdatePoint2();
+        Debug.Log("プレイヤー2のBET確定！");
+    }
+
+    public void ConfirmBet3()
+    {
+        if (currentTurn != 3 || betConfirmed3)
+            return;
+
+        moneyManager.PlaceBet(3);
+        betConfirmed3 = true;
+
+        RevealPlayerCards(hand3, handArea3);
+        UpdatePoint3();
+        Debug.Log("プレイヤー3のBET確定！");
+    }
+
     void UpdatePoint()
     {
         CalculatePoint(hand, pointText);
@@ -231,6 +337,13 @@ public class BJdraw : MonoBehaviour
             aceCount--;
         }
 
+        // 初期配布中は合計点数を隠す
+        if (isInitialDeal)
+        {
+            targetText.text = "";
+            return;
+        }
+
         if (total > 21)
         {
             targetText.text = "バースト！ 合計：" + total;
@@ -271,6 +384,12 @@ public class BJdraw : MonoBehaviour
 
     public void Stand()
     {
+        if (!isInitialDeal && !betConfirmed1)
+        {
+            Debug.Log("先にBETを確定してください！");
+            return;
+        }
+
         if (currentTurn != 1) return;
         if (isStand || isBust) return;
 
@@ -281,6 +400,13 @@ public class BJdraw : MonoBehaviour
 
     public void Stand2()
     {
+
+        if (!isInitialDeal && !betConfirmed2)
+        {
+            Debug.Log("先にBETを確定してください！");
+            return;
+        }
+
         if (currentTurn != 2) return;
         if (isStand2 || isBust2) return;
 
@@ -291,6 +417,13 @@ public class BJdraw : MonoBehaviour
 
     public void Stand3()
     {
+
+        if (!isInitialDeal && !betConfirmed3)
+        {
+            Debug.Log("先にBETを確定してください！");
+            return;
+        }
+
         if (currentTurn != 3) return;
         if (isStand3 || isBust3) return;
 
@@ -300,12 +433,14 @@ public class BJdraw : MonoBehaviour
     }
     public void StartGame()
     {
+        UpdateRoundText();
+
         isInitialDeal = true;
 
-        // ゲーム開始時にBET
-        moneyManager.PlaceBet(1);
-        moneyManager.PlaceBet(2);
-        moneyManager.PlaceBet(3);
+        // BET確定状態をリセット
+        betConfirmed1 = false;
+        betConfirmed2 = false;
+        betConfirmed3 = false;
 
         // P1に2枚
         DrawCard();
@@ -323,11 +458,9 @@ public class BJdraw : MonoBehaviour
         bjDealer.DrawDealerCard();
         bjDealer.DrawDealerCard();
 
-        // 通常のターン制開始
         isInitialDeal = false;
-        currentTurn = 1;
 
-        Debug.Log("P1のターン！");
+        Debug.Log("カードを配りました。BETを確定してください！");
     }
 
     void Start()
@@ -364,6 +497,8 @@ public class BJdraw : MonoBehaviour
 
         bjResult.CheckWinner(hand3, resultText3, "P3",
             dealerTotal, isBust3, moneyManager);
+
+        StartCoroutine(WaitNextRound());
     }
 
     void NextTurn()
@@ -397,6 +532,127 @@ public class BJdraw : MonoBehaviour
         // 全員終了
         Debug.Log("全員終了！ディーラーのターン！");
         DealerTurn();
+    }
+
+    void UpdateRoundText()
+    {
+        if (roundText != null)
+        {
+            roundText.text = "ROUND " + currentRound + " / " + maxRound;
+        }
+    }
+
+    IEnumerator WaitNextRound()
+    {
+        // 結果を3秒間表示
+        yield return new WaitForSeconds(3f);
+
+        NextRound();
+    }
+
+    void NextRound()
+    {
+        if (currentRound >= maxRound)
+        {
+            
+
+            Debug.Log("全10ラウンド終了！");
+            ShowFinalResult();
+
+            return;
+        }
+
+        currentRound++;
+        StartNextRound();
+    }
+
+    void StartNextRound()
+    {
+        Debug.Log(currentRound + "ラウンド目開始！");
+
+        // 手札をリセット
+        hand.Clear();
+        hand2.Clear();
+        hand3.Clear();
+
+        // 画面上のカードを削除
+        ClearHandArea(handArea);
+        ClearHandArea(handArea2);
+        ClearHandArea(handArea3);
+
+        // ディーラーの手札をリセット
+        bjDealer.ResetDealer();
+
+        // 点数と結果をリセット
+        if (pointText != null) pointText.text = "合計：0";
+        if (pointText2 != null) pointText2.text = "合計：0";
+        if (pointText3 != null) pointText3.text = "合計：0";
+
+        if (resultText != null) resultText.text = "";
+        if (resultText2 != null) resultText2.text = "";
+        if (resultText3 != null) resultText3.text = "";
+
+        // プレイヤーの状態をリセット
+        isBust = false;
+        isBust2 = false;
+        isBust3 = false;
+
+        isStand = false;
+        isStand2 = false;
+        isStand3 = false;
+
+        currentTurn = 1;
+
+        UpdateRoundText();
+
+        // 次のラウンド開始
+        StartGame();
+    }
+
+    void ClearHandArea(Transform area)
+    {
+        if (area == null) return;
+
+        foreach (Transform child in area)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
+    void ShowFinalResult()
+    {
+        int p1 = moneyManager.money1;
+        int p2 = moneyManager.money2;
+        int p3 = moneyManager.money3;
+
+        string result = "最終結果\n";
+
+        if (p1 == p2 && p2 == p3)
+        {
+            result += "全員同率1位！";
+        }
+        else
+        {
+            int maxMoney = Mathf.Max(p1, p2, p3);
+
+            if (p1 == maxMoney)
+                result += "P1 1位！\n";
+
+            if (p2 == maxMoney)
+                result += "P2 1位！\n";
+
+            if (p3 == maxMoney)
+                result += "P3 1位！\n";
+        }
+
+        result += "\nP1：" + p1 + " チップ";
+        result += "\nP2：" + p2 + " チップ";
+        result += "\nP3：" + p3 + " チップ";
+
+        if (gameEndText != null)
+            gameEndText.text = result;
+
+        Debug.Log(result);
     }
 }
 //ここから下 変更用
