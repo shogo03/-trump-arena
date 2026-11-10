@@ -29,6 +29,11 @@ public class MoneyManager : MonoBehaviour
     public int winStage2 = 0;
     public int winStage3 = 0;
 
+
+    public int betUpStage1 = 0;
+    public int betUpStage2 = 0;
+    public int betUpStage3 = 0;
+
     void Start()
     {
         UpdateUI();
@@ -175,23 +180,61 @@ public class MoneyManager : MonoBehaviour
         UpdateUI();
     }
 
+    public int GetBetLimit(int player)
+    {
+        if (player == 1)
+            return 500 + betUpStage1 * 50;
 
+        else if (player == 2)
+            return 500 + betUpStage2 * 50;
+
+        else if (player == 3)
+            return 500 + betUpStage3 * 50;
+
+        return 500;
+    }
     // P1 BET +10
 
     public void IncreaseBet1()
     {
         bet1 += 10;
 
-        if (bet1 > 500)
-            bet1 = 500;
+        int limit = GetBetLimit(1);
+
+        if (bet1 > limit)
+            bet1 = limit;
 
         UpdateUI();
     }
 
+    // P2 BET +10
+    public void IncreaseBet2()
+    {
+        bet2 += 10;
 
+        int limit = GetBetLimit(2);
+
+        if (bet2 > limit)
+            bet2 = limit;
+
+        UpdateUI();
+    }
+
+    // P3 BET +10
+    public void IncreaseBet3()
+    {
+        bet3 += 10;
+
+        int limit = GetBetLimit(3);
+
+        if (bet3 > limit)
+            bet3 = limit;
+
+        UpdateUI();
+    }
 
     // P1 BET -10
- 
+
     public void DecreaseBet1()
     {
         bet1 -= 10;
@@ -202,9 +245,29 @@ public class MoneyManager : MonoBehaviour
         UpdateUI();
     }
 
+    // P2 BET -10
+    public void DecreaseBet2()
+    {
+        bet2 -= 10;
 
+        if (bet2 < 10)
+            bet2 = 10;
+
+        UpdateUI();
+    }
+
+    // P3 BET -10
+    public void DecreaseBet3()
+    {
+        bet3 -= 10;
+
+        if (bet3 < 10)
+            bet3 = 10;
+
+        UpdateUI();
+    }
     // UI更新
- 
+
 
     void UpdateUI()
     {
@@ -255,5 +318,37 @@ public class MoneyManager : MonoBehaviour
     {
         currentShopPlayer = player;
         Debug.Log("P" + player + " のショップを開きました");
+    }
+
+    public void BuyBetUp()
+    {
+        int price = 100;
+        int player = currentShopPlayer;
+
+        if (player == 1)
+        {
+            if (betUpStage1 >= 10 || money1 < price) return;
+
+            money1 -= price;
+            betUpStage1++;
+        }
+        else if (player == 2)
+        {
+            if (betUpStage2 >= 10 || money2 < price) return;
+
+            money2 -= price;
+            betUpStage2++;
+        }
+        else if (player == 3)
+        {
+            if (betUpStage3 >= 10 || money3 < price) return;
+
+            money3 -= price;
+            betUpStage3++;
+        }
+
+        Debug.Log("P" + player + " 掛け金UP！");
+
+        UpdateUI();
     }
 }
