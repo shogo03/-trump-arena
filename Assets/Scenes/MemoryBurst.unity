@@ -487,8 +487,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 780, y: -260}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 740, y: -260}
+  m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &89299108
 MonoBehaviour:
@@ -510,10 +510,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: P4
+  m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1859d7d9cbd368247b1de26779abff00, type: 2}
+  m_sharedMaterial: {fileID: -6511529363218702964, guid: 1859d7d9cbd368247b1de26779abff00, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1186,7 +1186,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MemoryBurstTurnManager
   turnText: {fileID: 58437193}
   timerText: {fileID: 1678539942}
-  turnTimeLimit: 15
+  turnTimeLimit: 8
+  playerColors:
+  - {r: 1, g: 1, b: 1, a: 0}
+  - {r: 0.9547169, g: 0.012609419, b: 0.012609419, a: 0}
+  - {r: 0.035037242, g: 0.14988717, b: 0.97735846, a: 0}
+  - {r: 1, g: 0.9296725, b: 0, a: 0}
 --- !u!4 &294210558
 Transform:
   m_ObjectHideFlags: 0
@@ -2061,8 +2066,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -670, y: 340}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -720, y: 340}
+  m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &736203733
 MonoBehaviour:
@@ -2084,10 +2089,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: P1
+  m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1859d7d9cbd368247b1de26779abff00, type: 2}
+  m_sharedMaterial: {fileID: -6511529363218702964, guid: 1859d7d9cbd368247b1de26779abff00, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2710,10 +2715,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MemoryBurstScoreManager
   playerScoreTexts:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 736203733}
+  - {fileID: 1900532009}
+  - {fileID: 1453377920}
+  - {fileID: 89299108}
+  scores: 00000000000000000000000000000000
 --- !u!4 &1184973876
 Transform:
   m_ObjectHideFlags: 0
@@ -3260,8 +3266,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -670, y: -260}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -720, y: -260}
+  m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1453377920
 MonoBehaviour:
@@ -3283,10 +3289,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: P3
+  m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1859d7d9cbd368247b1de26779abff00, type: 2}
+  m_sharedMaterial: {fileID: -6511529363218702964, guid: 1859d7d9cbd368247b1de26779abff00, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4282,8 +4288,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 780, y: 340}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 740, y: 340}
+  m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1900532009
 MonoBehaviour:
@@ -4305,10 +4311,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: P2
+  m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1859d7d9cbd368247b1de26779abff00, type: 2}
+  m_sharedMaterial: {fileID: -6511529363218702964, guid: 1859d7d9cbd368247b1de26779abff00, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
