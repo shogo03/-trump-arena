@@ -755,3 +755,4 @@ public class BJdraw : MonoBehaviour
 //u
 //e
 //o
+//ka
