@@ -743,6 +743,11 @@ public class BJdraw : MonoBehaviour
 
         Debug.Log(result);
     }
+
+    public int GetCurrentTurn()
+    {
+        return currentTurn;
+    }
 }
 //‚±‚±‚©‚ç‰º •ÏX—p
 //a
