@@ -15,13 +15,19 @@ public class MoneyManager : MonoBehaviour
     public int bet2 = 100;
     public int bet3 = 100;
 
+    // 現在ショップを開いているプレイヤー
+    public int currentShopPlayer = 1;
 
     // 表示用
- 
+
     public TMP_Text moneyText1;
     public TMP_Text moneyText2;
     public TMP_Text moneyText3;
 
+    // 勝ち金UPの段階
+    public int winStage1 = 0;
+    public int winStage2 = 0;
+    public int winStage3 = 0;
 
     void Start()
     {
@@ -76,31 +82,67 @@ public class MoneyManager : MonoBehaviour
         UpdateUI();
     }
 
+    // ダブルダウンの追加BET
+    public void DoubleDown(int player)
+    {
+        if (player == 1)
+        {
+            money1 -= bet1;
+            bet1 *= 2;
+        }
+        else if (player == 2)
+        {
+            money2 -= bet2;
+            bet2 *= 2;
+        }
+        else if (player == 3)
+        {
+            money3 -= bet3;
+            bet3 *= 2;
+        }
+
+        Debug.Log("P" + player + " ダブルダウン！");
+        UpdateUI();
+    }
+
     // 勝ち
 
     public void Win(int player)
     {
+        int bet = 0;
+        int stage = 0;
+
         if (player == 1)
         {
-            money1 += bet1 * 2;
+            bet = bet1;
+            stage = winStage1;
         }
         else if (player == 2)
         {
-            money2 += bet2 * 2;
+            bet = bet2;
+            stage = winStage2;
         }
         else if (player == 3)
         {
-            money3 += bet3 * 2;
+            bet = bet3;
+            stage = winStage3;
         }
 
-        Debug.Log("P" + player + " 勝ち！");
+        float[] multipliers = { 1.0f, 1.2f, 1.5f, 2.0f };
 
+        int reward = bet + Mathf.RoundToInt(bet * multipliers[stage]);
+
+        if (player == 1) money1 += reward;
+        else if (player == 2) money2 += reward;
+        else if (player == 3) money3 += reward;
+
+        Debug.Log("P" + player + " 勝ち！報酬：" + reward);
         UpdateUI();
     }
 
 
     // 負け
-   
+
     public void Lose(int player)
     {
         // BETした時点でお金を引いているので、
@@ -174,5 +216,44 @@ public class MoneyManager : MonoBehaviour
 
         if (moneyText3 != null)
             moneyText3.text = "Money: " + money3 + "\nBET: " + bet3;
+    }
+
+    public void BuyWinUp()
+    {
+        int price = 250;
+        int player = currentShopPlayer;
+
+        if (player == 1)
+        {
+            if (winStage1 >= 3 || money1 < price) return;
+
+            money1 -= price;
+            winStage1++;
+        }
+        else if (player == 2)
+        {
+            if (winStage2 >= 3 || money2 < price) return;
+
+            money2 -= price;
+            winStage2++;
+        }
+        else if (player == 3)
+        {
+            if (winStage3 >= 3 || money3 < price) return;
+
+            money3 -= price;
+            winStage3++;
+        }
+
+        Debug.Log("P" + player + " 勝ち金UP！現在の段階：" +
+            (player == 1 ? winStage1 : player == 2 ? winStage2 : winStage3));
+
+        UpdateUI();
+    }
+
+    public void SetShopPlayer(int player)
+    {
+        currentShopPlayer = player;
+        Debug.Log("P" + player + " のショップを開きました");
     }
 }
