@@ -128,4 +128,25 @@ public class BJDealer : MonoBehaviour
 
         return GetDealerTotal();
     }
+
+    // 次のラウンドに向けてディーラーをリセット
+    // 次のラウンドに向けてディーラーをリセット
+    public void ResetDealer()
+    {
+        dealerHand.Clear();
+        dealerCardImages.Clear();
+
+        if (dealerHandArea != null)
+        {
+            foreach (Transform child in dealerHandArea)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        if (dealerPointText != null)
+        {
+            dealerPointText.text = "合計：0";
+        }
+    }
 }

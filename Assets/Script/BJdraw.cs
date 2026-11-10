@@ -1,7 +1,9 @@
 
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+
 
 public class BJdraw : MonoBehaviour
 {
@@ -32,6 +34,14 @@ public class BJdraw : MonoBehaviour
 
     // 現在のターン（1=P1、2=P2、3=P3）
     private int currentTurn = 1;
+
+    // ラウンド管理
+    private int currentRound = 1;
+    private int maxRound = 10;
+    private bool isGameEnd = false;
+
+    public Text roundText;
+    public Text gameEndText;
 
     // 最初のカード配布中かどうか
     private bool isInitialDeal = true;
@@ -300,6 +310,8 @@ public class BJdraw : MonoBehaviour
     }
     public void StartGame()
     {
+        UpdateRoundText();
+
         isInitialDeal = true;
 
         // ゲーム開始時にBET
@@ -327,7 +339,15 @@ public class BJdraw : MonoBehaviour
         isInitialDeal = false;
         currentTurn = 1;
 
-        Debug.Log("P1のターン！");
+        // 最初から終了しているプレイヤーを飛ばす
+        if (isBust || isStand)
+        {
+            NextTurn();
+        }
+        else
+        {
+            Debug.Log("P1のターン！");
+        }
     }
 
     void Start()
@@ -364,6 +384,8 @@ public class BJdraw : MonoBehaviour
 
         bjResult.CheckWinner(hand3, resultText3, "P3",
             dealerTotal, isBust3, moneyManager);
+
+        StartCoroutine(WaitNextRound());
     }
 
     void NextTurn()
@@ -397,6 +419,127 @@ public class BJdraw : MonoBehaviour
         // 全員終了
         Debug.Log("全員終了！ディーラーのターン！");
         DealerTurn();
+    }
+
+    void UpdateRoundText()
+    {
+        if (roundText != null)
+        {
+            roundText.text = "ROUND " + currentRound + " / " + maxRound;
+        }
+    }
+
+    IEnumerator WaitNextRound()
+    {
+        // 結果を3秒間表示
+        yield return new WaitForSeconds(3f);
+
+        NextRound();
+    }
+
+    void NextRound()
+    {
+        if (currentRound >= maxRound)
+        {
+            isGameEnd = true;
+
+            Debug.Log("全10ラウンド終了！");
+            ShowFinalResult();
+
+            return;
+        }
+
+        currentRound++;
+        StartNextRound();
+    }
+
+    void StartNextRound()
+    {
+        Debug.Log(currentRound + "ラウンド目開始！");
+
+        // 手札をリセット
+        hand.Clear();
+        hand2.Clear();
+        hand3.Clear();
+
+        // 画面上のカードを削除
+        ClearHandArea(handArea);
+        ClearHandArea(handArea2);
+        ClearHandArea(handArea3);
+
+        // ディーラーの手札をリセット
+        bjDealer.ResetDealer();
+
+        // 点数と結果をリセット
+        if (pointText != null) pointText.text = "合計：0";
+        if (pointText2 != null) pointText2.text = "合計：0";
+        if (pointText3 != null) pointText3.text = "合計：0";
+
+        if (resultText != null) resultText.text = "";
+        if (resultText2 != null) resultText2.text = "";
+        if (resultText3 != null) resultText3.text = "";
+
+        // プレイヤーの状態をリセット
+        isBust = false;
+        isBust2 = false;
+        isBust3 = false;
+
+        isStand = false;
+        isStand2 = false;
+        isStand3 = false;
+
+        currentTurn = 1;
+
+        UpdateRoundText();
+
+        // 次のラウンド開始
+        StartGame();
+    }
+
+    void ClearHandArea(Transform area)
+    {
+        if (area == null) return;
+
+        foreach (Transform child in area)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
+    void ShowFinalResult()
+    {
+        int p1 = moneyManager.money1;
+        int p2 = moneyManager.money2;
+        int p3 = moneyManager.money3;
+
+        string result = "最終結果\n";
+
+        if (p1 == p2 && p2 == p3)
+        {
+            result += "全員同率1位！";
+        }
+        else
+        {
+            int maxMoney = Mathf.Max(p1, p2, p3);
+
+            if (p1 == maxMoney)
+                result += "P1 1位！\n";
+
+            if (p2 == maxMoney)
+                result += "P2 1位！\n";
+
+            if (p3 == maxMoney)
+                result += "P3 1位！\n";
+        }
+
+        result += "\nP1：" + p1 + " チップ";
+        result += "\nP2：" + p2 + " チップ";
+        result += "\nP3：" + p3 + " チップ";
+
+        if (gameEndText != null)
+            gameEndText.text = result;
+
+        Debug.Log(result);
     }
 }
 //ここから下 変更用
