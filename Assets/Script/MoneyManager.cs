@@ -76,6 +76,29 @@ public class MoneyManager : MonoBehaviour
         UpdateUI();
     }
 
+    // ダブルダウンの追加BET
+    public void DoubleDown(int player)
+    {
+        if (player == 1)
+        {
+            money1 -= bet1;
+            bet1 *= 2;
+        }
+        else if (player == 2)
+        {
+            money2 -= bet2;
+            bet2 *= 2;
+        }
+        else if (player == 3)
+        {
+            money3 -= bet3;
+            bet3 *= 2;
+        }
+
+        Debug.Log("P" + player + " ダブルダウン！");
+        UpdateUI();
+    }
+
     // 勝ち
 
     public void Win(int player)

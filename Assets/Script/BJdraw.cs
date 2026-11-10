@@ -54,6 +54,11 @@ public class BJdraw : MonoBehaviour
     private bool betConfirmed2 = false;
     private bool betConfirmed3 = false;
 
+    // ダブルダウンを使用したか
+    private bool doubleDown1 = false;
+    private bool doubleDown2 = false;
+    private bool doubleDown3 = false;
+
     public void DrawCard()
     {
         if (!isInitialDeal && currentTurn != 1)
@@ -292,6 +297,77 @@ public class BJdraw : MonoBehaviour
         Debug.Log("プレイヤー3のBET確定！");
     }
 
+    public void DoubleDown1()
+    {
+        if (currentTurn != 1 || !betConfirmed1 || doubleDown1)
+            return;
+
+        if (hand.Count != 2)
+            return;
+
+        moneyManager.DoubleDown(1);
+        doubleDown1 = true;
+
+        DrawCard();
+
+        if (!isBust)
+        {
+            isStand = true;
+            Debug.Log("P1：ダブルダウン！");
+            NextTurn();
+        }
+    }
+
+    public void DoubleDown2()
+    {
+        if (currentTurn != 2 || !betConfirmed2 || doubleDown2)
+            return;
+
+        // 最初の2枚だけで使用可能
+        if (hand2.Count != 2)
+            return;
+
+        moneyManager.DoubleDown(2);
+
+        doubleDown2 = true;
+
+        // カードを1枚だけ引く
+        DrawCard2();
+
+        // バーストしていなければ強制STAND
+        if (!isBust2)
+        {
+            isStand2 = true;
+            Debug.Log("P2：ダブルダウン！");
+            NextTurn();
+        }
+    }
+
+    public void DoubleDown3()
+    {
+        if (currentTurn != 3 || !betConfirmed3 || doubleDown3)
+            return;
+
+        // 最初の2枚だけで使用可能
+        if (hand3.Count != 2)
+            return;
+
+        moneyManager.DoubleDown(3);
+
+        doubleDown3 = true;
+
+        // カードを1枚だけ引く
+        DrawCard3();
+
+        // バーストしていなければ強制STAND
+        if (!isBust3)
+        {
+            isStand3 = true;
+            Debug.Log("P3：ダブルダウン！");
+            NextTurn();
+        }
+    }
+
     void UpdatePoint()
     {
         CalculatePoint(hand, pointText);
@@ -461,6 +537,11 @@ public class BJdraw : MonoBehaviour
         isInitialDeal = false;
 
         Debug.Log("カードを配りました。BETを確定してください！");
+
+        // ダブルダウン使用状態をリセット
+        doubleDown1 = false;
+        doubleDown2 = false;
+        doubleDown3 = false;
     }
 
     void Start()
@@ -569,7 +650,15 @@ public class BJdraw : MonoBehaviour
     void StartNextRound()
     {
         Debug.Log(currentRound + "ラウンド目開始！");
+        // ダブルダウンしたBET額を元に戻す
+        if (doubleDown1)
+            moneyManager.bet1 /= 2;
 
+        if (doubleDown2)
+            moneyManager.bet2 /= 2;
+
+        if (doubleDown3)
+            moneyManager.bet3 /= 2;
         // 手札をリセット
         hand.Clear();
         hand2.Clear();
