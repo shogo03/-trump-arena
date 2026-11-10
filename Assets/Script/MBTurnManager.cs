@@ -14,6 +14,9 @@ public class MemoryBurstTurnManager : MonoBehaviour
     [Header("制限時間")]
     [SerializeField] private float turnTimeLimit = 15f;
 
+    [Header("プレイヤーごとの文字色")]
+    [SerializeField] private Color[] playerColors = new Color[4];
+
     private int currentPlayer = 1;
     private float remainingTurnTime;
     private bool isGameOver;
@@ -145,13 +148,25 @@ public class MemoryBurstTurnManager : MonoBehaviour
     {
         if (turnText != null)
         {
-            turnText.text = isGameOver
-                ? "GAME SET"
-                : $"P{currentPlayer}のターン";
+            turnText.gameObject.SetActive(true);
+            turnText.text = $"P{currentPlayer}のターン";
+            turnText.color = Color.white;
+        }
+
+        int index = currentPlayer - 1;
+        if (index >= 0 && index < playerColors.Length)
+        {
+            Color color = playerColors[index];
+
+            // 透明度を必ず100%にする
+            color.a = 1f;
+
+            turnText.color = color;
         }
 
         if (timerText != null)
         {
+            timerText.gameObject.SetActive(true);
             timerText.text =
                 $"残り時間：{Mathf.CeilToInt(remainingTurnTime)}秒";
         }

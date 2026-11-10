@@ -1,3 +1,4 @@
+
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -31,7 +32,6 @@ public class MemoryBurstResult : MonoBehaviour
             return;
         }
 
-        // 勝者を表示
         if (playerCount == 1)
         {
             winnerText.text = "ゲームクリア！";
@@ -49,26 +49,27 @@ public class MemoryBurstResult : MonoBehaviour
             winnerText.text = "ゲーム終了";
         }
 
-        // 全プレイヤーの得点を表示
         StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < playerCount; i++)
+        for (int i = 0; i < playerCount && i < scores.Length; i++)
         {
-            sb.AppendLine(
-                $"プレイヤー{i + 1}：{scores[i]}点"
-            );
+            sb.AppendLine($"プレイヤー{i + 1}：{scores[i]}点");
         }
 
         scoreText.text = sb.ToString();
     }
 
+    // リトライ
     public void RetryGame()
     {
+        Debug.Log("リトライボタンが押されました");
         SceneManager.LoadScene(gameSceneName);
     }
 
+    // タイトルへ戻る
     public void ReturnToTitle()
     {
+        Debug.Log("タイトルボタンが押されました");
         SceneManager.LoadScene(titleSceneName);
     }
 }

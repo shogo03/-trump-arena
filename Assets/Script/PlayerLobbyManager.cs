@@ -19,6 +19,9 @@ public class PlayerLobbyManager : MonoBehaviour
     [Header("人数表示")]
     [SerializeField] private TextMeshProUGUI playerCountText;
 
+    [Header("2P～4Pの解除ボタン")]
+    [SerializeField] private Button[] deselectButtons;
+
     [Header("開始ボタン")]
     [SerializeField] private Button startButton;
 
@@ -42,6 +45,10 @@ public class PlayerLobbyManager : MonoBehaviour
 
             cpuButtons[i].onClick.AddListener(
                 () => SelectCPU(slot)
+            );
+
+            deselectButtons[i].onClick.AddListener(
+                () => DeselectPlayer(slot)
             );
 
             // 難易度Dropdownの初期設定
@@ -159,6 +166,22 @@ public class PlayerLobbyManager : MonoBehaviour
             startButton.interactable = true;
     }
 
+    // プレイヤーの選択を解除
+    public void DeselectPlayer(int slot)
+    {
+        if (slot < 1 || slot > 3)
+            return;
+
+        // 指定した枠と、それより後ろの枠を解除
+        for (int i = slot; i < 4; i++)
+        {
+            isSelected[i] = false;
+            isCPU[i] = false;
+        }
+
+        UpdateUI();
+    }
+
     // ゲーム開始
     public void StartGame()
     {
@@ -171,6 +194,6 @@ public class PlayerLobbyManager : MonoBehaviour
             }
         }
 
-        SceneManager.LoadScene("MemoryBurst");
+        SceneManager.LoadScene("GameSelect");
     }
 }
