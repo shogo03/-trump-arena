@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class MemoryBurstCursorManager : MonoBehaviour
+public class CursorManager : MonoBehaviour
 {
     [Header("プレイヤーごとのカーソルPrefab")]
     [SerializeField] private GameObject[] cursorPrefabs = new GameObject[4];

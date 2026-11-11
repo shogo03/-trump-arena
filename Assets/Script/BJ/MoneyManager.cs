@@ -3,6 +3,8 @@ using TMPro;
 
 public class MoneyManager : MonoBehaviour
 {
+    private static MoneyManager instance;
+
     // 所持金
 
     public int money1 = 1000;
@@ -11,9 +13,9 @@ public class MoneyManager : MonoBehaviour
 
     // ベット額
 
-    public int bet1 = 100;
-    public int bet2 = 100;
-    public int bet3 = 100;
+    public int bet1 = 0;
+    public int bet2 = 0;
+    public int bet3 = 0;
 
     // 現在ショップを開いているプレイヤー
     public int currentShopPlayer = 1;
@@ -34,54 +36,44 @@ public class MoneyManager : MonoBehaviour
     public int betUpStage2 = 0;
     public int betUpStage3 = 0;
 
+
+    void Awake()
+    {
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
+
     void Start()
     {
         UpdateUI();
     }
 
     // ベットする
- 
+
 
     public void PlaceBet(int player)
     {
         if (player == 1)
         {
-            if (money1 >= bet1)
-            {
-                money1 -= bet1;
-                Debug.Log("P1 ベット：" + bet1);
-            }
-            else
-            {
-                Debug.Log("P1は所持金不足！");
-                return;
-            }
+            money1 -= bet1;
+            Debug.Log("P1 ベット後の所持金：" + money1);
         }
         else if (player == 2)
         {
-            if (money2 >= bet2)
-            {
-                money2 -= bet2;
-                Debug.Log("P2 ベット：" + bet2);
-            }
-            else
-            {
-                Debug.Log("P2は所持金不足！");
-                return;
-            }
+            money2 -= bet2;
+            Debug.Log("P2 ベット後の所持金：" + money2);
         }
         else if (player == 3)
         {
-            if (money3 >= bet3)
-            {
-                money3 -= bet3;
-                Debug.Log("P3 ベット：" + bet3);
-            }
-            else
-            {
-                Debug.Log("P3は所持金不足！");
-                return;
-            }
+            money3 -= bet3;
+            Debug.Log("P3 ベット後の所持金：" + money3);
         }
 
         UpdateUI();
@@ -350,5 +342,16 @@ public class MoneyManager : MonoBehaviour
         Debug.Log("P" + player + " 掛け金UP！");
 
         UpdateUI();
+    }
+
+    public void ResetBet()
+    {
+        bet1 = 0;
+        bet2 = 0;
+        bet3 = 0;
+
+        UpdateUI();
+
+        Debug.Log("全プレイヤーのBETをリセットしました");
     }
 }
