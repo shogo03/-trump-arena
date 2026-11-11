@@ -5,14 +5,14 @@ using UnityEngine.SceneManagement;
 public class TitleManager : MonoBehaviour
 {
     [Header("シーン名")]
-    [SerializeField] private string playerSelectSceneName = "PlayerSelect";
+    [SerializeField] private string GameSelectSceneName = "GameSelect";
 
 
 
     // スタートボタン
     public void StartGame()
     {
-        SceneManager.LoadScene(playerSelectSceneName);
+        SceneManager.LoadScene(GameSelectSceneName);
     }
 
     // ゲーム終了

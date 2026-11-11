@@ -650,15 +650,10 @@ public class BJdraw : MonoBehaviour
     void StartNextRound()
     {
         Debug.Log(currentRound + "ラウンド目開始！");
-        // ダブルダウンしたBET額を元に戻す
-        if (doubleDown1)
-            moneyManager.bet1 /= 2;
 
-        if (doubleDown2)
-            moneyManager.bet2 /= 2;
+        // 全プレイヤーのBETを0にする
+        moneyManager.ResetBet();
 
-        if (doubleDown3)
-            moneyManager.bet3 /= 2;
         // 手札をリセット
         hand.Clear();
         hand2.Clear();

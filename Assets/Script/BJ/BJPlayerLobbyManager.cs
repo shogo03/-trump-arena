@@ -4,13 +4,13 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
 
-public class PlayerLobbyManager : MonoBehaviour
+public class BJPlayerLobbyManager : MonoBehaviour
 {
-    [Header("2P～4Pの選択ボタン")]
+    [Header("2P～3Pの選択ボタン")]
     [SerializeField] private Button[] playerButtons;
     [SerializeField] private Button[] cpuButtons;
 
-    [Header("2P～4Pの表示テキスト")]
+    [Header("2P～3Pの表示テキスト")]
     [SerializeField] private TextMeshProUGUI[] slotTexts;
 
     [Header("CPUごとの難易度Dropdown")]
@@ -19,14 +19,14 @@ public class PlayerLobbyManager : MonoBehaviour
     [Header("人数表示")]
     [SerializeField] private TextMeshProUGUI playerCountText;
 
-    [Header("2P～4Pの解除ボタン")]
+    [Header("2P～3Pの解除ボタン")]
     [SerializeField] private Button[] deselectButtons;
 
     [Header("開始ボタン")]
     [SerializeField] private Button startButton;
 
-    private bool[] isSelected = new bool[4];
-    private bool[] isCPU = new bool[4];
+    private bool[] isSelected = new bool[3];
+    private bool[] isCPU = new bool[3];
 
     private void Start()
     {
@@ -35,7 +35,7 @@ public class PlayerLobbyManager : MonoBehaviour
         isCPU[0] = false;
 
         // 2P～4Pのボタン登録
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 2; i++)
         {
             int slot = i + 1;
 
@@ -120,7 +120,7 @@ public class PlayerLobbyManager : MonoBehaviour
         int humanCount = 0;
         int cpuCount = 0;
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 3; i++)
         {
             if (isSelected[i])
             {
@@ -159,7 +159,7 @@ public class PlayerLobbyManager : MonoBehaviour
         if (playerCountText != null)
         {
             playerCountText.text =
-                $"参加人数：{humanCount + cpuCount} / 4";
+                $"参加人数：{humanCount + cpuCount} / 3";
         }
 
         if (startButton != null)
@@ -169,11 +169,11 @@ public class PlayerLobbyManager : MonoBehaviour
     // プレイヤーの選択を解除
     public void DeselectPlayer(int slot)
     {
-        if (slot < 1 || slot > 3)
+        if (slot < 1 || slot > 2)
             return;
 
         // 指定した枠と、それより後ろの枠を解除
-        for (int i = slot; i < 4; i++)
+        for (int i = slot; i < 3; i++)
         {
             isSelected[i] = false;
             isCPU[i] = false;
@@ -185,7 +185,7 @@ public class PlayerLobbyManager : MonoBehaviour
     // ゲーム開始
     public void StartGame()
     {
-        for (int i = 1; i < 4; i++)
+        for (int i = 1; i < 3; i++)
         {
             if (isCPU[i] && cpuLevelDropdowns[i - 1] != null)
             {
@@ -194,6 +194,6 @@ public class PlayerLobbyManager : MonoBehaviour
             }
         }
 
-        SceneManager.LoadScene("GameSelect");
+        SceneManager.LoadScene("blackjack");
     }
 }
