@@ -7610,12 +7610,12 @@ RectTransform:
   m_Children:
   - {fileID: 1400130155}
   - {fileID: 85635098}
-  - {fileID: 668462278}
-  - {fileID: 1534051481}
   - {fileID: 1983398138}
   - {fileID: 83771518}
   - {fileID: 1154354581}
   - {fileID: 412959911}
+  - {fileID: 668462278}
+  - {fileID: 1534051481}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}

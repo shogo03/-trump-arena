@@ -40,48 +40,24 @@ public class MoneyManager : MonoBehaviour
     }
 
     // ベットする
- 
+
 
     public void PlaceBet(int player)
     {
         if (player == 1)
         {
-            if (money1 >= bet1)
-            {
-                money1 -= bet1;
-                Debug.Log("P1 ベット：" + bet1);
-            }
-            else
-            {
-                Debug.Log("P1は所持金不足！");
-                return;
-            }
+            money1 -= bet1;
+            Debug.Log("P1 ベット後の所持金：" + money1);
         }
         else if (player == 2)
         {
-            if (money2 >= bet2)
-            {
-                money2 -= bet2;
-                Debug.Log("P2 ベット：" + bet2);
-            }
-            else
-            {
-                Debug.Log("P2は所持金不足！");
-                return;
-            }
+            money2 -= bet2;
+            Debug.Log("P2 ベット後の所持金：" + money2);
         }
         else if (player == 3)
         {
-            if (money3 >= bet3)
-            {
-                money3 -= bet3;
-                Debug.Log("P3 ベット：" + bet3);
-            }
-            else
-            {
-                Debug.Log("P3は所持金不足！");
-                return;
-            }
+            money3 -= bet3;
+            Debug.Log("P3 ベット後の所持金：" + money3);
         }
 
         UpdateUI();
