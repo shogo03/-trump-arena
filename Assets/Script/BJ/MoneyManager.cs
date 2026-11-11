@@ -11,9 +11,9 @@ public class MoneyManager : MonoBehaviour
 
     // ベット額
 
-    public int bet1 = 100;
-    public int bet2 = 100;
-    public int bet3 = 100;
+    public int bet1 = 0;
+    public int bet2 = 0;
+    public int bet3 = 0;
 
     // 現在ショップを開いているプレイヤー
     public int currentShopPlayer = 1;
@@ -326,5 +326,16 @@ public class MoneyManager : MonoBehaviour
         Debug.Log("P" + player + " 掛け金UP！");
 
         UpdateUI();
+    }
+
+    public void ResetBet()
+    {
+        bet1 = 0;
+        bet2 = 0;
+        bet3 = 0;
+
+        UpdateUI();
+
+        Debug.Log("全プレイヤーのBETをリセットしました");
     }
 }
