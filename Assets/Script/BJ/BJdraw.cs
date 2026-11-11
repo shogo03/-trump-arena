@@ -1,8 +1,8 @@
-
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 
 public class BJdraw : MonoBehaviour
@@ -635,10 +635,10 @@ public class BJdraw : MonoBehaviour
     {
         if (currentRound >= maxRound)
         {
-            
-
             Debug.Log("全10ラウンド終了！");
-            ShowFinalResult();
+
+            // リザルトSceneへ移動
+            SceneManager.LoadScene("Result");
 
             return;
         }
