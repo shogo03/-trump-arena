@@ -743,41 +743,49 @@ public class BJdraw : MonoBehaviour
         }
     }
 
+
     void ShowFinalResult()
     {
         int p1 = moneyManager.money1;
         int p2 = moneyManager.money2;
         int p3 = moneyManager.money3;
 
+        // 最高所持金を調べる
+        int maxMoney = p1;
+
+        if (GameSettings.IsActive[1] && p2 > maxMoney)
+            maxMoney = p2;
+
+        if (GameSettings.IsActive[2] && p3 > maxMoney)
+            maxMoney = p3;
+
         string result = "最終結果\n";
 
-        if (p1 == p2 && p2 == p3)
-        {
-            result += "全員同率1位！";
-        }
-        else
-        {
-            int maxMoney = Mathf.Max(p1, p2, p3);
+        // 1位のプレイヤーを表示
+        if (p1 == maxMoney)
+            result += "P1 1位！\n";
 
-            if (p1 == maxMoney)
-                result += "P1 1位！\n";
+        if (GameSettings.IsActive[1] && p2 == maxMoney)
+            result += "P2 1位！\n";
 
-            if (p2 == maxMoney)
-                result += "P2 1位！\n";
+        if (GameSettings.IsActive[2] && p3 == maxMoney)
+            result += "P3 1位！\n";
 
-            if (p3 == maxMoney)
-                result += "P3 1位！\n";
-        }
-
+        // 参加しているプレイヤーだけ所持金を表示
         result += "\nP1：" + p1 + " チップ";
-        result += "\nP2：" + p2 + " チップ";
-        result += "\nP3：" + p3 + " チップ";
+
+        if (GameSettings.IsActive[1])
+            result += "\nP2：" + p2 + " チップ";
+
+        if (GameSettings.IsActive[2])
+            result += "\nP3：" + p3 + " チップ";
 
         if (gameEndText != null)
             gameEndText.text = result;
 
         Debug.Log(result);
     }
+
 
     public int GetCurrentTurn()
     {
