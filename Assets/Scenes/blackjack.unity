@@ -430,6 +430,7 @@ RectTransform:
   - {fileID: 286600939}
   - {fileID: 266507110}
   - {fileID: 1167564950}
+  - {fileID: 1522199847}
   m_Father: {fileID: 1991516802}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -833,7 +834,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2136599520}
+  m_Father: {fileID: 412959911}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1981,6 +1982,7 @@ RectTransform:
   - {fileID: 113327426}
   - {fileID: 688238128}
   - {fileID: 782830447}
+  - {fileID: 119637325}
   m_Father: {fileID: 1991516802}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -5049,6 +5051,7 @@ RectTransform:
   - {fileID: 2085135573}
   - {fileID: 1658999748}
   - {fileID: 829404207}
+  - {fileID: 1426561889}
   m_Father: {fileID: 1991516802}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -5953,12 +5956,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1426561888}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2136599520}
+  m_Father: {fileID: 1154354581}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -6174,7 +6177,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2136599520}
+  m_Father: {fileID: 83771518}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -7905,6 +7908,8 @@ MonoBehaviour:
   cardSize: {x: 160, y: 180}
   roundText: {fileID: 1983398139}
   gameEndText: {fileID: 0}
+  player2UI: {fileID: 1154354580}
+  player3UI: {fileID: 412959910}
 --- !u!4 &2031883186
 Transform:
   m_ObjectHideFlags: 0
@@ -8503,10 +8508,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1522199847}
-  - {fileID: 1426561889}
-  - {fileID: 119637325}
+  m_Children: []
   m_Father: {fileID: 93316396}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
