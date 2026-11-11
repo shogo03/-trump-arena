@@ -17,6 +17,8 @@ public class MemoryBurstTurnManager : MonoBehaviour
     [Header("プレイヤーごとの文字色")]
     [SerializeField] private Color[] playerColors = new Color[4];
 
+  
+
     private int currentPlayer = 1;
     private float remainingTurnTime;
     private bool isGameOver;
@@ -170,5 +172,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
             timerText.text =
                 $"残り時間：{Mathf.CeilToInt(remainingTurnTime)}秒";
         }
+
+       
     }
 }
