@@ -522,17 +522,25 @@ public class BJdraw : MonoBehaviour
         betConfirmed2 = false;
         betConfirmed3 = false;
 
-        // P1に2枚
+
+
+        // P1に2枚（常に参加）
         DrawCard();
         DrawCard();
 
-        // P2に2枚
-        DrawCard2();
-        DrawCard2();
+        // P2が参加している場合
+        if (GameSettings.IsActive[1])
+        {
+            DrawCard2();
+            DrawCard2();
+        }
 
-        // P3に2枚
-        DrawCard3();
-        DrawCard3();
+        // P3が参加している場合
+        if (GameSettings.IsActive[2])
+        {
+            DrawCard3();
+            DrawCard3();
+        }
 
         // ディーラーに2枚
         bjDealer.DrawDealerCard();
@@ -562,6 +570,7 @@ public class BJdraw : MonoBehaviour
         }
     }
 
+
     void DealerTurn()
     {
         if (bjDealer == null || bjResult == null)
@@ -570,41 +579,67 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        // ディーラーのターンを実行
+        // ディーラーのターン
         int dealerTotal = bjDealer.DealerTurn();
 
-        // 3人それぞれの勝敗を判定
-        bjResult.CheckWinner(hand, resultText, "P1",
-            dealerTotal, isBust, moneyManager);
+        // P1の勝敗判定（常に参加）
+        bjResult.CheckWinner(
+            hand, resultText, "P1",
+            dealerTotal, isBust, moneyManager
+        );
 
-        bjResult.CheckWinner(hand2, resultText2, "P2",
-            dealerTotal, isBust2, moneyManager);
+        // P2が参加している場合
+        if (GameSettings.IsActive[1])
+        {
+            bjResult.CheckWinner(
+                hand2, resultText2, "P2",
+                dealerTotal, isBust2, moneyManager
+            );
+        }
 
-        bjResult.CheckWinner(hand3, resultText3, "P3",
-            dealerTotal, isBust3, moneyManager);
+        // P3が参加している場合
+        if (GameSettings.IsActive[2])
+        {
+            bjResult.CheckWinner(
+                hand3, resultText3, "P3",
+                dealerTotal, isBust3, moneyManager
+            );
+        }
 
         StartCoroutine(WaitNextRound());
     }
+
+
 
     void NextTurn()
     {
         currentTurn++;
 
-        // 終了しているプレイヤーは飛ばす
+        // 終了しているプレイヤーや参加していないプレイヤーを飛ばす
         while (currentTurn <= 3)
         {
+            // 参加していないプレイヤーは飛ばす
+            if (!GameSettings.IsActive[currentTurn - 1])
+            {
+                currentTurn++;
+                continue;
+            }
+
+            // P1
             if (currentTurn == 1 && !isStand && !isBust)
             {
                 Debug.Log("P1のターン！");
                 return;
             }
 
+            // P2
             if (currentTurn == 2 && !isStand2 && !isBust2)
             {
                 Debug.Log("P2のターン！");
                 return;
             }
 
+            // P3
             if (currentTurn == 3 && !isStand3 && !isBust3)
             {
                 Debug.Log("P3のターン！");
@@ -618,6 +653,7 @@ public class BJdraw : MonoBehaviour
         Debug.Log("全員終了！ディーラーのターン！");
         DealerTurn();
     }
+
 
     void UpdateRoundText()
     {
@@ -751,10 +787,10 @@ public class BJdraw : MonoBehaviour
     void UpdatePlayerUI()
     {
         if (player2UI != null)
-            player2UI.SetActive(GameSettings.IsActive[2]);
+            player2UI.SetActive(GameSettings.IsActive[1]);
 
         if (player3UI != null)
-            player3UI.SetActive(GameSettings.IsActive[3]);
+            player3UI.SetActive(GameSettings.IsActive[2]);
     }
 }
 //ここから下 変更用
