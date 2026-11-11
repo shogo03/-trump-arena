@@ -59,6 +59,10 @@ public class BJdraw : MonoBehaviour
     private bool doubleDown2 = false;
     private bool doubleDown3 = false;
 
+    [Header("プレイヤーUI")]
+    public GameObject player2UI;
+    public GameObject player3UI;
+
     public void DrawCard()
     {
         if (!isInitialDeal && currentTurn != 1)
@@ -546,9 +550,9 @@ public class BJdraw : MonoBehaviour
 
     void Start()
     {
+        UpdatePlayerUI();
         StartGame();
     }
-
 
     void CheckAllStand()
     {
@@ -742,6 +746,15 @@ public class BJdraw : MonoBehaviour
     public int GetCurrentTurn()
     {
         return currentTurn;
+    }
+
+    void UpdatePlayerUI()
+    {
+        if (player2UI != null)
+            player2UI.SetActive(GameSettings.IsActive[2]);
+
+        if (player3UI != null)
+            player3UI.SetActive(GameSettings.IsActive[3]);
     }
 }
 //ここから下 変更用
