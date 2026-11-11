@@ -61,12 +61,24 @@ public class CursorManager : MonoBehaviour
 
         cursors.Clear();
 
-        int count = Mathf.Min(Gamepad.all.Count, cursorPrefabs.Length);
+        int gamepadIndex = 0;
 
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < 4; i++)
         {
+            // 1Pは必ず表示
+            if (i != 0 && !GameSettings.IsActive[i])
+                continue;
+
+            // CPUは表示しない
+            if (GameSettings.IsCPU[i])
+                continue;
+
             if (cursorPrefabs[i] == null)
                 continue;
+
+            // 1P以外はゲームパッドが必要
+            if (i != 0 && gamepadIndex >= Gamepad.all.Count)
+                break;
 
             GameObject cursor = Instantiate(
                 cursorPrefabs[i],
@@ -80,7 +92,7 @@ public class CursorManager : MonoBehaviour
             if (rect != null)
             {
                 rect.anchoredPosition = new Vector2(
-                    startPosition.x + i * 60f,
+                    startPosition.x + gamepadIndex * 60f,
                     startPosition.y
                 );
 
@@ -98,11 +110,21 @@ public class CursorManager : MonoBehaviour
                 cursor.GetComponent<CursorController>();
 
             if (controller != null)
-                controller.SetGamepadIndex(i);
+            {
+                controller.SetGamepadIndex(
+                    gamepadIndex < Gamepad.all.Count
+                        ? gamepadIndex
+                        : -1
+                );
+            }
 
             cursors.Add(cursor);
+
+            // ゲームパッドを割り当てた場合のみ番号を進める
+            if (gamepadIndex < Gamepad.all.Count)
+                gamepadIndex++;
         }
 
-        Debug.Log($"接続コントローラー数：{count}");
+        Debug.Log($"生成したカーソル数：{cursors.Count}");
     }
 }
