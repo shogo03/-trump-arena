@@ -7,19 +7,19 @@ public class GameSelectManager : MonoBehaviour
     public void SelectMemoryBurst()
     {
         Debug.Log("MemoryBurstを選択しました");
-        SceneManager.LoadScene("MemoryBurst");
+        SceneManager.LoadScene("PlayerSelect");
     }
 
     // ブラックジャック
     public void SelectBlackjack()
     {
         Debug.Log("Blackjackを選択しました");
-        SceneManager.LoadScene("blackjack");
+        SceneManager.LoadScene("BJPlayerSelect");
     }
 
     // 人数選択に戻る
     public void BackToPlayerSelect()
     {
-        SceneManager.LoadScene("PlayerSelect");
+        SceneManager.LoadScene("GameSelect");
     }
 }
