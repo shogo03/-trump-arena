@@ -3,6 +3,8 @@ using TMPro;
 
 public class MoneyManager : MonoBehaviour
 {
+    private static MoneyManager instance;
+
     // 所持金
 
     public int money1 = 1000;
@@ -33,6 +35,20 @@ public class MoneyManager : MonoBehaviour
     public int betUpStage1 = 0;
     public int betUpStage2 = 0;
     public int betUpStage3 = 0;
+
+
+    void Awake()
+    {
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
 
     void Start()
     {
