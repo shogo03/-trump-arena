@@ -638,7 +638,7 @@ public class BJdraw : MonoBehaviour
             Debug.Log("全10ラウンド終了！");
 
             // リザルトSceneへ移動
-            SceneManager.LoadScene("Result");
+            SceneManager.LoadScene("BJResult");
 
             return;
         }
@@ -753,3 +753,4 @@ public class BJdraw : MonoBehaviour
 //ka
 //ki
 //ku
+//
