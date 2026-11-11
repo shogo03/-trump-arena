@@ -8276,6 +8276,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2113451012}
   - component: {fileID: 2113451011}
+  - component: {fileID: 2113451013}
   m_Layer: 0
   m_Name: CursorManager
   m_TagString: Untagged
@@ -8290,7 +8291,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2113451010}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9e1bdffa883b61d4683de14cd330f6de, type: 3}
   m_Name: 
@@ -8317,6 +8318,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2113451013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2113451010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f81274f7ffabfd745b398743c433843e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BJCursorManager
+  cursorPrefabs:
+  - {fileID: 8293090615958869861, guid: 2182f46083783934dbf34c1b898ab25a, type: 3}
+  - {fileID: 316089494423373690, guid: afaf79f3cb92b4247a1d9fbe21f4f461, type: 3}
+  - {fileID: 6557215072619988933, guid: b30bcdc02e2be814cba1dd303a4e9f8d, type: 3}
+  startPosition: {x: 0, y: 0}
+  cursorCanvas: {fileID: 538690537}
 --- !u!1 &2123915474
 GameObject:
   m_ObjectHideFlags: 0
