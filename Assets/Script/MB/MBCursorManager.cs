@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class CursorManager : MonoBehaviour
+public class MBCursorManager : MonoBehaviour
 {
-    [Header("プレイヤーごとのカーソルPrefab")]
+    [Header("プレイヤーごとのカーソルPrefab（最大4人）")]
     [SerializeField] private GameObject[] cursorPrefabs = new GameObject[4];
 
     [Header("カーソルの開始位置")]
@@ -53,6 +53,7 @@ public class CursorManager : MonoBehaviour
             return;
         }
 
+        // 既存カーソルを削除
         foreach (GameObject cursor in cursors)
         {
             if (cursor != null)
@@ -63,8 +64,25 @@ public class CursorManager : MonoBehaviour
 
         int gamepadIndex = 0;
 
+        // 最大4人
         for (int i = 0; i < 4; i++)
         {
+            // 配列の範囲を確認
+            if (GameSettings.IsActive == null ||
+                i >= GameSettings.IsActive.Length)
+                continue;
+
+            if (GameSettings.IsCPU == null ||
+                i >= GameSettings.IsCPU.Length)
+                continue;
+
+            if (cursorPrefabs == null ||
+                i >= cursorPrefabs.Length)
+            {
+                Debug.LogWarning($"P{i + 1}のカーソルPrefabがありません。");
+                continue;
+            }
+
             // 1Pは必ず表示
             if (i != 0 && !GameSettings.IsActive[i])
                 continue;
@@ -120,7 +138,6 @@ public class CursorManager : MonoBehaviour
 
             cursors.Add(cursor);
 
-            // ゲームパッドを割り当てた場合のみ番号を進める
             if (gamepadIndex < Gamepad.all.Count)
                 gamepadIndex++;
         }
