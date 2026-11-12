@@ -117,20 +117,45 @@ public class MemoryBurstManager : MonoBehaviour
     }
 
     // 現在のプレイヤーがコントローラーを操作できるか
+    // 現在のプレイヤーがコントローラーを操作できるか
     public bool CanControl(int gamepadIndex)
     {
         if (cardManager.IsChecking || isGameOver || turnFailed)
             return false;
 
-        // 人間プレイヤーの人数を超えていたらCPUのターン
-        if (turnManager.CurrentPlayer > GameSettings.HumanPlayerCount)
-            return false;
-
+        // コントローラーの存在確認
         if (gamepadIndex < 0 ||
             gamepadIndex >= Gamepad.all.Count)
             return false;
 
-        return gamepadIndex == turnManager.CurrentPlayer - 1;
+        // 現在のプレイヤー番号（1P～4P）を配列番号に変換
+        int playerIndex = turnManager.CurrentPlayer - 1;
+
+        if (playerIndex < 0 || playerIndex >= 4)
+            return false;
+
+        // 参加していないプレイヤーは操作できない
+        if (!GameSettings.IsActive[playerIndex])
+            return false;
+
+        // CPUはコントローラーで操作しない
+        if (GameSettings.IsCPU[playerIndex])
+            return false;
+
+        // 現在の人間プレイヤーが何番目の人間か調べる
+        int humanIndex = 0;
+
+        for (int i = 0; i < playerIndex; i++)
+        {
+            if (GameSettings.IsActive[i] &&
+                !GameSettings.IsCPU[i])
+            {
+                humanIndex++;
+            }
+        }
+
+        // 人間プレイヤーの順番とコントローラーを対応させる
+        return gamepadIndex == humanIndex;
     }
 
     private void OnDestroy()

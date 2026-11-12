@@ -94,10 +94,19 @@ public class BJDealer : MonoBehaviour
     }
 
     // 点数表示を更新する
+    // 点数表示を更新する
     void UpdateDealerPoint()
     {
         if (dealerPointText != null)
         {
+            // 最初のカードが裏向きの間は点数を隠す
+            if (dealerHand.Count > 0 && dealerCardImages.Count > 0
+                && dealerCardImages[0].sprite == deck.cardBackImage)
+            {
+                dealerPointText.text = "";
+                return;
+            }
+
             dealerPointText.text = "合計：" + GetDealerTotal();
         }
     }
@@ -127,5 +136,26 @@ public class BJDealer : MonoBehaviour
         Debug.Log("ディーラーの最終点数：" + GetDealerTotal());
 
         return GetDealerTotal();
+    }
+
+    // 次のラウンドに向けてディーラーをリセット
+    // 次のラウンドに向けてディーラーをリセット
+    public void ResetDealer()
+    {
+        dealerHand.Clear();
+        dealerCardImages.Clear();
+
+        if (dealerHandArea != null)
+        {
+            foreach (Transform child in dealerHandArea)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        if (dealerPointText != null)
+        {
+            dealerPointText.text = "合計：0";
+        }
     }
 }
