@@ -79,6 +79,9 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     // ランダム公開が予約されているプレイヤー
     private int pendingRandomPlayer = 0;
 
+
+    private int activePlayerCount = 1;
+
     private bool isGameOver = false;
 
     // =================================
@@ -97,6 +100,7 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         skipUsed = new bool[4];
         randomUseCount = new int[4];
         abilityUsedThisTurn = new bool[4];
+        activePlayerCount = Mathf.Clamp(playerCount, 1, 4);
 
         turnManager = turn;
         cardManager = card;
@@ -501,25 +505,32 @@ public class MemoryBurstAbilityManager : MonoBehaviour
 
     private void UpdatePlayerUI(int playerCount)
     {
-        SetPlayerUI(player1UI, 1 <= playerCount,
-            shuffleButton, skipButton, randomButton);
+        SetPlayerUI(player1UI, playerCount >= 1,
+            shuffleButton, skipButton, randomButton,
+            shuffleCountText, skipCountText, randomCountText);
 
-        SetPlayerUI(player2UI, 2 <= playerCount,
-            shuffleButton2, skipButton2, randomButton2);
+        SetPlayerUI(player2UI, playerCount >= 2,
+            shuffleButton2, skipButton2, randomButton2,
+            shuffleCountText2, skipCountText2, randomCountText2);
 
-        SetPlayerUI(player3UI, 3 <= playerCount,
-            shuffleButton3, skipButton3, randomButton3);
+        SetPlayerUI(player3UI, playerCount >= 3,
+            shuffleButton3, skipButton3, randomButton3,
+            shuffleCountText3, skipCountText3, randomCountText3);
 
-        SetPlayerUI(player4UI, 4 <= playerCount,
-            shuffleButton4, skipButton4, randomButton4);
+        SetPlayerUI(player4UI, playerCount >= 4,
+            shuffleButton4, skipButton4, randomButton4,
+            shuffleCountText4, skipCountText4, randomCountText4);
     }
 
     private void SetPlayerUI(
-        GameObject playerUI,
-        bool visible,
-        Button shuffle,
-        Button skip,
-        Button random)
+     GameObject playerUI,
+     bool visible,
+     Button shuffle,
+     Button skip,
+     Button random,
+     TMP_Text shuffleText,
+     TMP_Text skipText,
+     TMP_Text randomText)
     {
         if (playerUI != null)
             playerUI.SetActive(visible);
@@ -532,6 +543,16 @@ public class MemoryBurstAbilityManager : MonoBehaviour
 
         if (random != null)
             random.gameObject.SetActive(visible);
+
+        // 能力回数表示も人数に合わせて切り替え
+        if (shuffleText != null)
+            shuffleText.gameObject.SetActive(visible);
+
+        if (skipText != null)
+            skipText.gameObject.SetActive(visible);
+
+        if (randomText != null)
+            randomText.gameObject.SetActive(visible);
     }
 
     // =================================
