@@ -515,6 +515,7 @@ GameObject:
   - component: {fileID: 695937493}
   - component: {fileID: 695937492}
   - component: {fileID: 695937495}
+  - component: {fileID: 695937496}
   m_Layer: 5
   m_Name: BJ
   m_TagString: Untagged
@@ -562,7 +563,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 3
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -652,6 +653,24 @@ MonoBehaviour:
   m_EffectColor: {r: 0.84705883, g: 0.7137255, b: 0.41960785, a: 1}
   m_EffectDistance: {x: 3, y: 3}
   m_UseGraphicAlpha: 1
+--- !u!114 &695937496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 695937490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39f9bc1f362878d4cbd15ed14a6323a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameButtonEffect
+  buttonImage: {fileID: 122426987}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedColor: {r: 1, g: 0.82, b: 0.42, a: 1}
+  glowColor: {r: 1, g: 0.72, b: 0.2, a: 1}
+  hoverScale: 1.04
+  selectedScale: 1.05
 --- !u!1 &990828279
 GameObject:
   m_ObjectHideFlags: 0
@@ -767,6 +786,7 @@ GameObject:
   - component: {fileID: 1106530772}
   - component: {fileID: 1106530771}
   - component: {fileID: 1106530770}
+  - component: {fileID: 1106530774}
   m_Layer: 5
   m_Name: HL
   m_TagString: Untagged
@@ -829,7 +849,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 3
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -904,6 +924,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1106530768}
   m_CullTransparentMesh: 1
+--- !u!114 &1106530774
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1106530768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39f9bc1f362878d4cbd15ed14a6323a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameButtonEffect
+  buttonImage: {fileID: 2120683182}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedColor: {r: 1, g: 0.82, b: 0.42, a: 1}
+  glowColor: {r: 1, g: 0.72, b: 0.2, a: 1}
+  hoverScale: 1.04
+  selectedScale: 1.05
 --- !u!1 &1118913401
 GameObject:
   m_ObjectHideFlags: 0
@@ -1834,6 +1872,7 @@ GameObject:
   - component: {fileID: 2093143953}
   - component: {fileID: 2093143952}
   - component: {fileID: 2093143955}
+  - component: {fileID: 2093143956}
   m_Layer: 5
   m_Name: MB
   m_TagString: Untagged
@@ -1881,7 +1920,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 3
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -1971,6 +2010,24 @@ MonoBehaviour:
   m_EffectColor: {r: 0.84705883, g: 0.7137255, b: 0.41960785, a: 1}
   m_EffectDistance: {x: 3, y: 3}
   m_UseGraphicAlpha: 1
+--- !u!114 &2093143956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2093143950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39f9bc1f362878d4cbd15ed14a6323a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameButtonEffect
+  buttonImage: {fileID: 1308774811}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedColor: {r: 1, g: 0.82, b: 0.42, a: 1}
+  glowColor: {r: 1, g: 0.72, b: 0.2, a: 1}
+  hoverScale: 1.04
+  selectedScale: 1.05
 --- !u!1 &2120683180
 GameObject:
   m_ObjectHideFlags: 0
