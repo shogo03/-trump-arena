@@ -1901,6 +1901,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 300155836}
   m_CullTransparentMesh: 1
+--- !u!1 &385741837
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 385741839}
+  - component: {fileID: 385741838}
+  m_Layer: 0
+  m_Name: BJCardManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &385741838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 385741837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdd50122559600747ad5c90a359eab70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BJCardManager
+--- !u!4 &385741839
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 385741837}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1327.5, y: 307.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &391183720
 GameObject:
   m_ObjectHideFlags: 0
@@ -7908,6 +7952,7 @@ MonoBehaviour:
   cardSize: {x: 160, y: 180}
   roundText: {fileID: 1983398139}
   gameEndText: {fileID: 0}
+  cardManager: {fileID: 385741838}
   player2UI: {fileID: 1154354580}
   player3UI: {fileID: 412959910}
 --- !u!4 &2031883186
@@ -8655,3 +8700,4 @@ SceneRoots:
   - {fileID: 1769354768}
   - {fileID: 1892295527}
   - {fileID: 391183722}
+  - {fileID: 385741839}
