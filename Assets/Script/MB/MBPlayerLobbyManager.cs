@@ -161,12 +161,13 @@ public class MBPlayerLobbyManager : MonoBehaviour
             if (i > 0)
             {
                 // プレイヤー状態の表示
-                slotTexts[i - 1].text =
-                    !isSelected[i]
-                    ? $"{i + 1}P：未選択"
-                    : isCPU[i]
-                        ? $"{i + 1}P：CPU"
-                        : $"{i + 1}P：プレイヤー";
+                // 未選択のときだけSlot Textを表示
+                if (slotTexts[i - 1] != null)
+                {
+                    slotTexts[i - 1].gameObject.SetActive(!isSelected[i]);
+
+                    slotTexts[i - 1].text = $"{i + 1}P：未選択";
+                }
 
                 // CPUを選択した枠だけ難易度を表示
                 if (cpuLevelDropdowns[i - 1] != null)

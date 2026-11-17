@@ -872,6 +872,7 @@ GameObject:
   - component: {fileID: 144845535}
   - component: {fileID: 144845534}
   - component: {fileID: 144845533}
+  - component: {fileID: 144845536}
   m_Layer: 5
   m_Name: P3UI
   m_TagString: Untagged
@@ -969,6 +970,18 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!225 &144845536
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 144845531}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &246292256
 GameObject:
   m_ObjectHideFlags: 0
@@ -1442,6 +1455,7 @@ GameObject:
   - component: {fileID: 426111861}
   - component: {fileID: 426111860}
   - component: {fileID: 426111859}
+  - component: {fileID: 426111862}
   m_Layer: 5
   m_Name: P2UI
   m_TagString: Untagged
@@ -1539,6 +1553,18 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!225 &426111862
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426111857}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &426833123
 GameObject:
   m_ObjectHideFlags: 0
@@ -3157,6 +3183,7 @@ GameObject:
   - component: {fileID: 1473510137}
   - component: {fileID: 1473510136}
   - component: {fileID: 1473510135}
+  - component: {fileID: 1473510138}
   m_Layer: 5
   m_Name: P1UI
   m_TagString: Untagged
@@ -3254,6 +3281,18 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!225 &1473510138
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1473510133}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1513981009
 GameObject:
   m_ObjectHideFlags: 0
@@ -3403,6 +3442,7 @@ GameObject:
   - component: {fileID: 1560397112}
   - component: {fileID: 1560397111}
   - component: {fileID: 1560397110}
+  - component: {fileID: 1560397113}
   m_Layer: 5
   m_Name: P4UI
   m_TagString: Untagged
@@ -3500,6 +3540,18 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!225 &1560397113
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1560397108}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1580837926
 GameObject:
   m_ObjectHideFlags: 0
@@ -4231,10 +4283,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ecdf27758392574dbfdb91b10ade29e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MemoryBurstAbilityManager
-  player1UI: {fileID: 736203731}
-  player2UI: {fileID: 1900532007}
-  player3UI: {fileID: 1453377918}
-  player4UI: {fileID: 89299106}
+  player1UI: {fileID: 1473510133}
+  player2UI: {fileID: 426111857}
+  player3UI: {fileID: 144845531}
+  player4UI: {fileID: 1560397108}
   shuffleButton: {fileID: 369834734}
   skipButton: {fileID: 2073086359}
   randomButton: {fileID: 496783258}
