@@ -17,7 +17,8 @@ public class MemoryBurstTurnManager : MonoBehaviour
     [Header("プレイヤーごとの文字色")]
     [SerializeField] private Color[] playerColors = new Color[4];
 
-  
+    [Header("カーソル管理")]
+    [SerializeField] private MBCursorManager cursorManager;
 
     private int currentPlayer = 1;
     private float remainingTurnTime;
@@ -36,12 +37,18 @@ public class MemoryBurstTurnManager : MonoBehaviour
 
             return index >= 0 &&
                    index < 4 &&
+                   GameSettings.IsCPU != null &&
+                   index < GameSettings.IsCPU.Length &&
                    GameSettings.IsCPU[index];
         }
     }
 
     public event Action<int> OnTurnChanged;
     public event Action OnTurnTimeout;
+
+    // =================================
+    // 初期化
+    // =================================
 
     public void Initialize(int count)
     {
@@ -52,9 +59,19 @@ public class MemoryBurstTurnManager : MonoBehaviour
 
         UpdateUI();
 
+        // 最初のターンのカーソルを表示
+        if (cursorManager != null)
+        {
+            cursorManager.SetCurrentTurn(currentPlayer);
+        }
+
         Debug.Log($"参加人数：{count}");
         Debug.Log($"最初のターン：プレイヤー{currentPlayer}");
     }
+
+    // =================================
+    // タイマー更新
+    // =================================
 
     public void Tick(bool paused)
     {
@@ -67,6 +84,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
         {
             remainingTurnTime = 0f;
             UpdateUI();
+
             OnTurnTimeout?.Invoke();
             return;
         }
@@ -74,7 +92,10 @@ public class MemoryBurstTurnManager : MonoBehaviour
         UpdateUI();
     }
 
-    // タイマーをリセット
+    // =================================
+    // タイマーリセット
+    // =================================
+
     public void ResetTimer()
     {
         if (isGameOver)
@@ -86,7 +107,10 @@ public class MemoryBurstTurnManager : MonoBehaviour
         Debug.Log($"プレイヤー{currentPlayer}のタイマーをリセット！");
     }
 
-    // 次の参加プレイヤーへ交代
+    // =================================
+    // 次のターンへ
+    // =================================
+
     public void NextTurn()
     {
         if (isGameOver)
@@ -102,6 +126,11 @@ public class MemoryBurstTurnManager : MonoBehaviour
 
             int index = currentPlayer - 1;
 
+            // 配列の範囲確認
+            if (GameSettings.IsActive == null ||
+                index >= GameSettings.IsActive.Length)
+                continue;
+
             // 参加していないプレイヤーは飛ばす
             if (!GameSettings.IsActive[index])
                 continue;
@@ -114,12 +143,22 @@ public class MemoryBurstTurnManager : MonoBehaviour
                 continue;
             }
 
+            // タイマーリセット
             remainingTurnTime = turnTimeLimit;
 
             UpdateUI();
+
+            // カーソルを現在のプレイヤーに切り替える
+            if (cursorManager != null)
+            {
+                cursorManager.SetCurrentTurn(currentPlayer);
+            }
+
+            // ターン変更イベント
             OnTurnChanged?.Invoke(currentPlayer);
 
             Debug.Log($"次のプレイヤー：P{currentPlayer}");
+
             return;
         }
 
@@ -129,7 +168,10 @@ public class MemoryBurstTurnManager : MonoBehaviour
         Debug.LogError("次の参加プレイヤーが見つかりません！");
     }
 
-    // 次のプレイヤーのターンをスキップ予約
+    // =================================
+    // スキップ予約
+    // =================================
+
     public void RequestSkipNextTurn()
     {
         if (isGameOver)
@@ -140,11 +182,19 @@ public class MemoryBurstTurnManager : MonoBehaviour
         Debug.Log("次のプレイヤーのスキップを予約しました");
     }
 
+    // =================================
+    // ゲーム終了
+    // =================================
+
     public void SetGameOver()
     {
         isGameOver = true;
         UpdateUI();
     }
+
+    // =================================
+    // UI更新
+    // =================================
 
     private void UpdateUI()
     {
@@ -153,26 +203,26 @@ public class MemoryBurstTurnManager : MonoBehaviour
             turnText.gameObject.SetActive(true);
             turnText.text = $"P{currentPlayer}のターン";
             turnText.color = Color.white;
-        }
 
-        int index = currentPlayer - 1;
-        if (index >= 0 && index < playerColors.Length)
-        {
-            Color color = playerColors[index];
+            int index = currentPlayer - 1;
 
-            // 透明度を必ず100%にする
-            color.a = 1f;
+            if (index >= 0 && index < playerColors.Length)
+            {
+                Color color = playerColors[index];
 
-            turnText.color = color;
+                // 透明度を必ず100%にする
+                color.a = 1f;
+
+                turnText.color = color;
+            }
         }
 
         if (timerText != null)
         {
             timerText.gameObject.SetActive(true);
+
             timerText.text =
                 $"残り時間：{Mathf.CeilToInt(remainingTurnTime)}秒";
         }
-
-       
     }
 }
