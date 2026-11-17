@@ -14,7 +14,11 @@ public class MBCursorManager : MonoBehaviour
     [Header("カーソル用Canvas")]
     [SerializeField] private Canvas cursorCanvas;
 
-    private readonly List<GameObject> cursors = new();
+    private readonly List<GameObject> cursors = new List<GameObject>();
+
+    private GameObject[] playerCursors = new GameObject[4];
+
+    private int currentTurn = 1;
 
     private void OnEnable()
     {
@@ -31,9 +35,7 @@ public class MBCursorManager : MonoBehaviour
         UpdateCursors();
     }
 
-    private void OnDeviceChange(
-        InputDevice device,
-        InputDeviceChange change)
+    private void OnDeviceChange(InputDevice device, InputDeviceChange change)
     {
         if (device is Gamepad &&
             (change == InputDeviceChange.Added ||
@@ -53,7 +55,6 @@ public class MBCursorManager : MonoBehaviour
             return;
         }
 
-        // 既存カーソルを削除
         foreach (GameObject cursor in cursors)
         {
             if (cursor != null)
@@ -61,13 +62,12 @@ public class MBCursorManager : MonoBehaviour
         }
 
         cursors.Clear();
+        playerCursors = new GameObject[4];
 
         int gamepadIndex = 0;
 
-        // 最大4人
         for (int i = 0; i < 4; i++)
         {
-            // 配列の範囲を確認
             if (GameSettings.IsActive == null ||
                 i >= GameSettings.IsActive.Length)
                 continue;
@@ -78,23 +78,17 @@ public class MBCursorManager : MonoBehaviour
 
             if (cursorPrefabs == null ||
                 i >= cursorPrefabs.Length)
-            {
-                Debug.LogWarning($"P{i + 1}のカーソルPrefabがありません。");
                 continue;
-            }
 
-            // 1Pは必ず表示
             if (i != 0 && !GameSettings.IsActive[i])
                 continue;
 
-            // CPUは表示しない
             if (GameSettings.IsCPU[i])
                 continue;
 
             if (cursorPrefabs[i] == null)
                 continue;
 
-            // 1P以外はゲームパッドが必要
             if (i != 0 && gamepadIndex >= Gamepad.all.Count)
                 break;
 
@@ -137,11 +131,39 @@ public class MBCursorManager : MonoBehaviour
             }
 
             cursors.Add(cursor);
+            playerCursors[i] = cursor;
 
             if (gamepadIndex < Gamepad.all.Count)
                 gamepadIndex++;
         }
 
+        ApplyTurnVisibility();
+
         Debug.Log($"生成したカーソル数：{cursors.Count}");
+    }
+
+    // ターン変更時に呼び出す
+    public void SetCurrentTurn(int playerNumber)
+    {
+        if (playerNumber < 1 || playerNumber > 4)
+            return;
+
+        currentTurn = playerNumber;
+
+        ApplyTurnVisibility();
+
+        Debug.Log($"現在のターン：{currentTurn}P");
+    }
+
+    // 自分のターンのカーソルだけ表示
+    private void ApplyTurnVisibility()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            if (playerCursors[i] != null)
+            {
+                playerCursors[i].SetActive(i + 1 == currentTurn);
+            }
+        }
     }
 }

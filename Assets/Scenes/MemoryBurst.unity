@@ -1188,6 +1188,7 @@ MonoBehaviour:
   - {r: 0.9547169, g: 0.012609419, b: 0.012609419, a: 0}
   - {r: 0.035037242, g: 0.14988717, b: 0.97735846, a: 0}
   - {r: 1, g: 0.9296725, b: 0, a: 0}
+  cursorManager: {fileID: 1604315287}
 --- !u!4 &294210558
 Transform:
   m_ObjectHideFlags: 0
