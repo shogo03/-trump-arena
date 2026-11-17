@@ -1,28 +1,28 @@
+
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class ResultManager : MonoBehaviour
 {
     public TMP_Text p1Text;
     public TMP_Text p2Text;
     public TMP_Text p3Text;
-    //public TMP_Text winnerText;
+
+    [Header("シーン名")]
+    [SerializeField] private string gameSceneName = "blackjack";
+    [SerializeField] private string titleSceneName = "title";
 
     void Start()
     {
         ShowResult();
     }
 
-
     void ShowResult()
     {
         MoneyManager money = FindAnyObjectByType<MoneyManager>();
-
-        //Debug.Log("P1：" + GameSettings.IsActive[0]);
-        //Debug.Log("P2：" + GameSettings.IsActive[1]);
-        //Debug.Log("P3：" + GameSettings.IsActive[2]);
 
         if (money == null)
         {
@@ -30,7 +30,6 @@ public class ResultManager : MonoBehaviour
             return;
         }
 
-        // 参加しているプレイヤーだけ追加
         List<PlayerData> players = new List<PlayerData>();
 
         players.Add(new PlayerData("P1", money.money1));
@@ -64,12 +63,19 @@ public class ResultManager : MonoBehaviour
             else if (i == 2)
                 p3Text.text = text;
         }
-
-        // 優勝者
-        //winnerText.text = "優勝：" + players[0].name;
     }
 
+    // リトライ
+    public void RetryGame()
+    {
+        SceneManager.LoadScene(gameSceneName);
+    }
 
+    // タイトルに戻る
+    public void ReturnToTitle()
+    {
+        SceneManager.LoadScene(titleSceneName);
+    }
 
     // プレイヤーデータ
     class PlayerData

@@ -25,6 +25,9 @@ public class MBPlayerLobbyManager : MonoBehaviour
     [Header("開始ボタン")]
     [SerializeField] private Button startButton;
 
+    [Header("戻るボタン")]
+    [SerializeField] private Button backButton;
+
     private bool[] isSelected = new bool[4];
     private bool[] isCPU = new bool[4];
 
@@ -73,6 +76,12 @@ public class MBPlayerLobbyManager : MonoBehaviour
         if (startButton != null)
         {
             startButton.onClick.AddListener(StartGame);
+        }
+
+        // 戻るボタンの登録
+        if (backButton != null)
+        {
+            backButton.onClick.AddListener(BackToTitle);
         }
 
         UpdateUI();
@@ -195,5 +204,11 @@ public class MBPlayerLobbyManager : MonoBehaviour
         }
 
         SceneManager.LoadScene("MemoryBurst");
+    }
+
+    // タイトル画面に戻る
+    public void BackToTitle()
+    {
+        SceneManager.LoadScene("GameSelect");
     }
 }

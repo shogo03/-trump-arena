@@ -22,9 +22,6 @@ public class BJdraw : MonoBehaviour
 
     public MoneyManager moneyManager;
 
-    private List<Card> hand = new List<Card>();
-    private List<Card> hand2 = new List<Card>();
-    private List<Card> hand3 = new List<Card>();
 
     public BJDealer bjDealer;
     public BJResult bjResult;
@@ -59,9 +56,14 @@ public class BJdraw : MonoBehaviour
     private bool doubleDown2 = false;
     private bool doubleDown3 = false;
 
+    public BJCardManager cardManager;
+
     [Header("プレイヤーUI")]
     public GameObject player2UI;
     public GameObject player3UI;
+
+    
+
 
     public void DrawCard()
     {
@@ -109,41 +111,39 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        Card card = deck.DrawCard();
-
-        GameObject obj = Instantiate(cardPrefab, handArea);
-
-        Image image = obj.GetComponent<Image>();
-
-        if (image == null)
+        if (cardManager == null)
         {
-            Debug.LogError("Card PrefabにImageがない！");
+            Debug.LogError("BJCardManagerが設定されていません！");
             return;
         }
 
+        Card card = deck.DrawCard();
+
+
+
+        cardManager.hand.Add(card);
+
         // 初期配布中は裏向き、それ以外は表向き
+        Sprite displayImage;
+
         if (isInitialDeal)
         {
-            image.sprite = deck.cardBackImage;
+            displayImage = deck.cardBackImage;
         }
         else
         {
-            image.sprite = card.image;
+            displayImage = card.image;
         }
-        image.enabled = true;
 
-        hand.Add(card);
-
-        RectTransform rect = obj.GetComponent<RectTransform>();
-
-        // カードを小さくする
-        rect.sizeDelta = cardSize;
-
-        // カードを横に並べる
-        rect.anchoredPosition = new Vector2(
-            (hand.Count - 1) * 35,
-            0
+        cardManager.CreateCard(
+            card,
+            handArea,
+            cardPrefab,
+            cardSize,
+            cardManager.hand.Count,
+            displayImage
         );
+
         UpdatePoint();
     }
 
@@ -173,7 +173,13 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        DrawForPlayer(hand2, handArea2);
+        if (cardManager == null)
+        {
+            Debug.LogError("BJCardManagerが設定されていません！");
+            return;
+        }
+
+        DrawForPlayer(cardManager.hand2, handArea2);
         UpdatePoint2();
     }
 
@@ -203,7 +209,13 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        DrawForPlayer(hand3, handArea3);
+        if (cardManager == null)
+        {
+            Debug.LogError("BJCardManagerが設定されていません！");
+            return;
+        }
+
+        DrawForPlayer(cardManager.hand3, handArea3);
         UpdatePoint3();
     }
 
@@ -215,51 +227,36 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        Card card = deck.DrawCard();
-
-        GameObject obj = Instantiate(cardPrefab, area);
-
-        Image image = obj.GetComponent<Image>();
-
-        if (image == null)
+        if (cardManager == null)
         {
-            Debug.LogError("Card PrefabにImageがない！");
-            Destroy(obj);
+            Debug.LogError("BJCardManagerが設定されていません！");
             return;
         }
 
-        // 初期配布中は裏向き、それ以外は表向き
-        if (isInitialDeal)
-        {
-            image.sprite = deck.cardBackImage;
-        }
-        else
-        {
-            image.sprite = card.image;
-        }
-
-        image.enabled = true;
-        image.enabled = true;
+        Card card = deck.DrawCard();
 
         playerHand.Add(card);
 
-        RectTransform rect = obj.GetComponent<RectTransform>();
-        rect.sizeDelta = cardSize;
-        rect.anchoredPosition = new Vector2((playerHand.Count - 1) * 35, 0);
-    }
+        // 初期配布中は裏向き、それ以外は表向き
+        Sprite displayImage;
 
-    // プレイヤーの手札を表向きにする
-    void RevealPlayerCards(List<Card> playerHand, Transform area)
-    {
-        for (int i = 0; i < playerHand.Count; i++)
+        if (isInitialDeal)
         {
-            Image image = area.GetChild(i).GetComponent<Image>();
-
-            if (image != null)
-            {
-                image.sprite = playerHand[i].image;
-            }
+            displayImage = deck.cardBackImage;
         }
+        else
+        {
+            displayImage = card.image;
+        }
+
+        cardManager.CreateCard(
+            card,
+            area,
+            cardPrefab,
+            cardSize,
+            playerHand.Count,
+            displayImage
+        );
     }
 
     public void ConfirmBet1()
@@ -270,7 +267,7 @@ public class BJdraw : MonoBehaviour
         moneyManager.PlaceBet(1);
         betConfirmed1 = true;
 
-        RevealPlayerCards(hand, handArea);
+        cardManager.RevealCards(cardManager.hand, handArea);
         UpdatePoint();
         Debug.Log("プレイヤー1のBET確定！");
     }
@@ -283,7 +280,7 @@ public class BJdraw : MonoBehaviour
         moneyManager.PlaceBet(2);
         betConfirmed2 = true;
 
-        RevealPlayerCards(hand2, handArea2);
+        cardManager.RevealCards(cardManager.hand2, handArea2);
         UpdatePoint2();
         Debug.Log("プレイヤー2のBET確定！");
     }
@@ -296,7 +293,7 @@ public class BJdraw : MonoBehaviour
         moneyManager.PlaceBet(3);
         betConfirmed3 = true;
 
-        RevealPlayerCards(hand3, handArea3);
+        cardManager.RevealCards(cardManager.hand3, handArea3);
         UpdatePoint3();
         Debug.Log("プレイヤー3のBET確定！");
     }
@@ -306,7 +303,7 @@ public class BJdraw : MonoBehaviour
         if (currentTurn != 1 || !betConfirmed1 || doubleDown1)
             return;
 
-        if (hand.Count != 2)
+        if (cardManager.hand.Count != 2)
             return;
 
         moneyManager.DoubleDown(1);
@@ -328,7 +325,7 @@ public class BJdraw : MonoBehaviour
             return;
 
         // 最初の2枚だけで使用可能
-        if (hand2.Count != 2)
+        if (cardManager.hand2.Count != 2)
             return;
 
         moneyManager.DoubleDown(2);
@@ -353,7 +350,7 @@ public class BJdraw : MonoBehaviour
             return;
 
         // 最初の2枚だけで使用可能
-        if (hand3.Count != 2)
+        if (cardManager.hand3.Count != 2)
             return;
 
         moneyManager.DoubleDown(3);
@@ -374,48 +371,24 @@ public class BJdraw : MonoBehaviour
 
     void UpdatePoint()
     {
-        CalculatePoint(hand, pointText);
+        CalculatePoint(cardManager.hand, pointText);
     }
 
     void UpdatePoint2()
     {
-        CalculatePoint(hand2, pointText2);
+        CalculatePoint(cardManager.hand2, pointText2);
     }
 
     void UpdatePoint3()
     {
-        CalculatePoint(hand3, pointText3);
+        CalculatePoint(cardManager.hand3, pointText3);
     }
 
     void CalculatePoint(List<Card> playerHand, Text targetText)
     {
         if (targetText == null) return;
 
-        int total = 0;
-        int aceCount = 0;
-
-        foreach (Card card in playerHand)
-        {
-            if (card.number == 1)
-            {
-                total += 11;
-                aceCount++;
-            }
-            else if (card.number >= 11)
-            {
-                total += 10;
-            }
-            else
-            {
-                total += card.number;
-            }
-        }
-
-        while (total > 21 && aceCount > 0)
-        {
-            total -= 10;
-            aceCount--;
-        }
+        int total = cardManager.CalculatePoint(playerHand);
 
         // 初期配布中は合計点数を隠す
         if (isInitialDeal)
@@ -428,19 +401,19 @@ public class BJdraw : MonoBehaviour
         {
             targetText.text = "バースト！ 合計：" + total;
 
-            if (playerHand == hand)
+            if (playerHand == cardManager.hand)
             {
                 isBust = true;
                 isStand = true;
                 Debug.Log("P1はバースト！強制STAND！");
             }
-            else if (playerHand == hand2)
+            else if (playerHand == cardManager.hand2)
             {
                 isBust2 = true;
                 isStand2 = true;
                 Debug.Log("P2はバースト！強制STAND！");
             }
-            else if (playerHand == hand3)
+            else if (playerHand == cardManager.hand3)
             {
                 isBust3 = true;
                 isStand3 = true;
@@ -584,7 +557,7 @@ public class BJdraw : MonoBehaviour
 
         // P1の勝敗判定（常に参加）
         bjResult.CheckWinner(
-            hand, resultText, "P1",
+            cardManager.hand, resultText, "P1",
             dealerTotal, isBust, moneyManager
         );
 
@@ -592,7 +565,7 @@ public class BJdraw : MonoBehaviour
         if (GameSettings.IsActive[1])
         {
             bjResult.CheckWinner(
-                hand2, resultText2, "P2",
+                cardManager.hand2, resultText2, "P2",
                 dealerTotal, isBust2, moneyManager
             );
         }
@@ -601,7 +574,7 @@ public class BJdraw : MonoBehaviour
         if (GameSettings.IsActive[2])
         {
             bjResult.CheckWinner(
-                hand3, resultText3, "P3",
+                cardManager.hand3, resultText3, "P3",
                 dealerTotal, isBust3, moneyManager
             );
         }
@@ -695,14 +668,14 @@ public class BJdraw : MonoBehaviour
         moneyManager.ResetBet();
 
         // 手札をリセット
-        hand.Clear();
-        hand2.Clear();
-        hand3.Clear();
+        cardManager.hand.Clear();
+        cardManager.hand2.Clear();
+        cardManager.hand3.Clear();
 
         // 画面上のカードを削除
-        ClearHandArea(handArea);
-        ClearHandArea(handArea2);
-        ClearHandArea(handArea3);
+        cardManager.ClearCards(handArea);
+        cardManager.ClearCards(handArea2);
+        cardManager.ClearCards(handArea3);
 
         // ディーラーの手札をリセット
         bjDealer.ResetDealer();
@@ -732,17 +705,6 @@ public class BJdraw : MonoBehaviour
         // 次のラウンド開始
         StartGame();
     }
-
-    void ClearHandArea(Transform area)
-    {
-        if (area == null) return;
-
-        foreach (Transform child in area)
-        {
-            Destroy(child.gameObject);
-        }
-    }
-
 
     void ShowFinalResult()
     {
