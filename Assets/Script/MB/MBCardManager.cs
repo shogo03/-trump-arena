@@ -141,6 +141,8 @@ public class MemoryBurstCardManager : MonoBehaviour
             {
                 isChecking = false;
                 OnAllCardsMatched?.Invoke();
+                
+
                 yield break;
             }
         }
