@@ -48,6 +48,15 @@ public class BJdraw : MonoBehaviour
     private bool doubleDown2 = false;
     private bool doubleDown3 = false;
 
+    private bool isStand = false;
+    private bool isStand2 = false;
+    private bool isStand3 = false;
+
+    // バースト無効で返金されたか
+    private bool bustGuardUsed1 = false;
+    private bool bustGuardUsed2 = false;
+    private bool bustGuardUsed3 = false;
+
     public BJCardManager cardManager;
     public BJTurnManager turnManager;
     public BJRoundManager roundManager;
@@ -325,6 +334,8 @@ public class BJdraw : MonoBehaviour
 
     void CheckBust(List<Card> playerHand, Text targetText)
     {
+
+        Debug.Log("CheckBustが呼ばれた！");
         int total = cardManager.CalculatePoint(playerHand);
 
         if (isInitialDeal || total <= 21)
@@ -332,37 +343,74 @@ public class BJdraw : MonoBehaviour
 
         targetText.text = "バースト！ 合計：" + total;
 
+        // P1
         if (playerHand == cardManager.hand)
         {
             if (isBust) return;
 
+            Debug.Log("P1のバースト無効所持数：" + abilityManager.bustGuardCount[0]);
+
+            // バースト無効を持っている場合
+            if (abilityManager != null && abilityManager.UseBustGuard(0))
+            {
+                bustGuardUsed1 = true;
+                moneyManager.RefundBet(1);
+                isStand = true;
+
+                targetText.text = "バースト無効！掛け金返却！";
+                Debug.Log("P1返金処理を実行！ BET額：" + moneyManager.bet1);
+                NextTurn();
+                return;
+            }
+
             isBust = true;
             isStand = true;
-            Debug.Log("P1はバースト！強制STAND！");
         }
+        // P2
         else if (playerHand == cardManager.hand2)
         {
             if (isBust2) return;
 
+            if (abilityManager != null && abilityManager.UseBustGuard(1))
+            {
+                bustGuardUsed2 = true;
+                moneyManager.RefundBet(2);
+                isStand2 = true;
+
+                targetText.text = "バースト無効！掛け金返却！";
+                Debug.Log("P2返金処理を実行！ BET額：" + moneyManager.bet2);
+                NextTurn();
+                return;
+            }
+
             isBust2 = true;
             isStand2 = true;
-            Debug.Log("P2はバースト！強制STAND！");
         }
+        // P3
         else if (playerHand == cardManager.hand3)
         {
             if (isBust3) return;
 
+            if (abilityManager != null && abilityManager.UseBustGuard(2))
+            {
+                bustGuardUsed3 = true;
+                moneyManager.RefundBet(3);
+                isStand3 = true;
+
+                targetText.text = "バースト無効！掛け金返却！";
+                Debug.Log("P3返金処理を実行！ BET額：" + moneyManager.bet3);
+                NextTurn();
+                return;
+            }
+
             isBust3 = true;
             isStand3 = true;
-            Debug.Log("P3はバースト！強制STAND！");
         }
 
         NextTurn();
     }
 
-    private bool isStand = false;
-    private bool isStand2 = false;
-    private bool isStand3 = false;
+
 
     public void Stand()
     {
@@ -485,18 +533,45 @@ public class BJdraw : MonoBehaviour
         int dealerTotal = bjDealer.DealerTurn();
 
         // P1の勝敗判定（常に参加）
-        bjResult.CheckWinner(
-            cardManager.hand, resultText, "P1",
-            dealerTotal, isBust, moneyManager
-        );
+        if (bustGuardUsed1)
+        {
+            resultText.text = "バースト無効！掛け金返却！";
+        }
+        else
+        {
+            bjResult.CheckWinner(
+                cardManager.hand, resultText, "P1",
+                dealerTotal, isBust, moneyManager
+            );
+        }
 
         // P2が参加している場合
         if (GameSettings.IsActive[1])
         {
-            bjResult.CheckWinner(
-                cardManager.hand2, resultText2, "P2",
-                dealerTotal, isBust2, moneyManager
-            );
+            if (GameSettings.IsActive[1])
+            {
+                if (bustGuardUsed2)
+                {
+                    resultText2.text = "バースト無効！掛け金返却！";
+                }
+                else
+                {
+                    if (GameSettings.IsActive[2])
+                    {
+                        if (bustGuardUsed3)
+                        {
+                            resultText3.text = "バースト無効！掛け金返却！";
+                        }
+                        else
+                        {
+                            bjResult.CheckWinner(
+                                cardManager.hand3, resultText3, "P3",
+                                dealerTotal, isBust3, moneyManager
+                            );
+                        }
+                    }
+                }
+            }
         }
 
         // P3が参加している場合
@@ -611,6 +686,10 @@ public class BJdraw : MonoBehaviour
         isStand = false;
         isStand2 = false;
         isStand3 = false;
+
+        bustGuardUsed1 = false;
+        bustGuardUsed2 = false;
+        bustGuardUsed3 = false;
 
         turnManager.ResetTurn();
 

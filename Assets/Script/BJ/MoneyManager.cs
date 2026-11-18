@@ -4,7 +4,7 @@ using TMPro;
 public class MoneyManager : MonoBehaviour
 {
     private static MoneyManager instance;
-
+    public BJAbilityManager abilityManager;
     // 所持金
 
     public int money1 = 1000;
@@ -146,6 +146,28 @@ public class MoneyManager : MonoBehaviour
         // 負けた場合は何もしない
 
         Debug.Log("P" + player + " 負け！");
+
+        UpdateUI();
+    }
+
+    // バースト無効による掛け金返却
+    public void RefundBet(int player)
+    {
+        if (player == 1)
+        {
+            money1 += bet1;
+        }
+        else if (player == 2)
+        {
+            money2 += bet2;
+        }
+        else if (player == 3)
+        {
+            money3 += bet3;
+        }
+
+        Debug.Log("P" + player + " バースト無効！掛け金返却：" +
+            (player == 1 ? bet1 : player == 2 ? bet2 : bet3));
 
         UpdateUI();
     }
@@ -340,7 +362,39 @@ public class MoneyManager : MonoBehaviour
         }
 
         Debug.Log("P" + player + " 掛け金UP！");
+        abilityManager?.SyncMoneyAbilities(this);
+        UpdateUI();
+    }
 
+    // バースト無効を購入
+    public void BuyBustGuard()
+    {
+        int price = 250;
+        int player = currentShopPlayer;
+
+        if (player == 1)
+        {
+            if (money1 < price) return;
+            money1 -= price;
+        }
+        else if (player == 2)
+        {
+            if (money2 < price) return;
+            money2 -= price;
+        }
+        else if (player == 3)
+        {
+            if (money3 < price) return;
+            money3 -= price;
+        }
+        else
+        {
+            return;
+        }
+
+        abilityManager.AddBustGuard(player - 1);
+
+        Debug.Log("P" + player + " バースト無効を購入！");
         UpdateUI();
     }
 
