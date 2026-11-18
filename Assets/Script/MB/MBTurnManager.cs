@@ -233,7 +233,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
             timerText.gameObject.SetActive(true);
 
             timerText.text =
-                $"残り時間：{Mathf.CeilToInt(remainingTurnTime)}秒";
+                $"残り：{Mathf.CeilToInt(remainingTurnTime)}秒";
         }
     }
 }
