@@ -12,135 +12,277 @@ public class Pointer : MonoBehaviour
 
     private readonly List<RaycastResult> results = new();
 
+    private GraphicRaycaster[] raycasters;
+    private PointerEventData pointerData;
+
+    private GameObject currentHovered;
+
+    [Header("カーソル当たり判定")]
+    [SerializeField] private float hitRadius = 20f;
+
+    [Header("指先の判定位置")]
+    [SerializeField] private Transform tipPoint;
+
+    private readonly Vector2[] directions =
+    {
+        Vector2.zero,
+        new Vector2(0, 1),
+        new Vector2(0, -1),
+        new Vector2(1, 0),
+        new Vector2(-1, 0),
+        new Vector2(1, 1).normalized,
+        new Vector2(-1, 1).normalized,
+        new Vector2(1, -1).normalized,
+        new Vector2(-1, -1).normalized
+    };
+
     private void Awake()
     {
         controller = GetComponentInParent<CursorController>();
         manager = FindAnyObjectByType<MemoryBurstManager>();
+
+        Image image = GetComponent<Image>();
+
+        if (image != null)
+            image.raycastTarget = false;
+    }
+
+    private void OnEnable()
+    {
+        currentHovered = null;
+
+        RefreshRaycasters();
+
+        if (EventSystem.current != null)
+        {
+            pointerData = new PointerEventData(EventSystem.current);
+        }
+    }
+
+    private void OnDisable()
+    {
+        ClearHover();
+    }
+
+    private void RefreshRaycasters()
+    {
+        raycasters = FindObjectsByType<GraphicRaycaster>();
+    }
+
+    private void ClearHover()
+    {
+        if (currentHovered != null && pointerData != null)
+        {
+            ExecuteEvents.Execute(
+                currentHovered,
+                pointerData,
+                ExecuteEvents.pointerExitHandler
+            );
+        }
+
+        currentHovered = null;
     }
 
     private void Update()
     {
-        if (controller == null)
+        if (controller == null || pointerData == null)
             return;
 
         int index = controller.GamepadIndex;
 
-        // 接続中のコントローラーか確認
         if (index < 0 || index >= Gamepad.all.Count)
             return;
 
-        // Aボタンが押されたときだけ処理
-        if (!Gamepad.all[index].buttonSouth.wasPressedThisFrame)
-            return;
-
-        if (EventSystem.current == null)
-        {
-            Debug.LogError("EventSystem がありません");
-            return;
-        }
-
-        // カーソル位置をスクリーン座標に変換
         Canvas canvas = GetComponentInParent<Canvas>();
+
+        if (canvas == null)
+            return;
 
         Camera eventCamera = null;
 
-        if (canvas != null &&
-            canvas.renderMode != RenderMode.ScreenSpaceOverlay)
-        {
+        if (canvas.renderMode != RenderMode.ScreenSpaceOverlay)
             eventCamera = canvas.worldCamera;
-        }
+
+        // TipPointが設定されていれば、その位置を判定位置にする
+        // 未設定の場合はカーソル本体の位置を使う
+        Vector3 targetPosition = tipPoint != null
+            ? tipPoint.position
+            : transform.position;
 
         Vector2 screenPosition =
             RectTransformUtility.WorldToScreenPoint(
                 eventCamera,
-                transform.position
+                targetPosition
             );
-
-        PointerEventData pointerData =
-            new PointerEventData(EventSystem.current);
 
         pointerData.position = screenPosition;
 
-        // UI の GraphicRaycaster を検索
-        GraphicRaycaster[] raycasters =
-            FindObjectsByType<GraphicRaycaster>();
+        UpdateHover(screenPosition);
 
-        foreach (GraphicRaycaster raycaster in raycasters)
+        if (Gamepad.all[index].buttonSouth.wasPressedThisFrame)
         {
-            if (raycaster == null || !raycaster.isActiveAndEnabled)
-                continue;
+            ClickUI(index, screenPosition);
+        }
+    }
 
-            // カーソル位置にあるUIを取得
-            results.Clear();
-            raycaster.Raycast(pointerData, results);
 
-            foreach (RaycastResult result in results)
+    private GameObject FindHitObject(Vector2 centerPosition)
+    {
+        foreach (Vector2 direction in directions)
+        {
+            Vector2 samplePosition =
+                centerPosition + direction * hitRadius;
+
+            pointerData.position = samplePosition;
+
+            foreach (GraphicRaycaster raycaster in raycasters)
             {
-                GameObject hitObject = result.gameObject;
+                if (raycaster == null ||
+                    !raycaster.isActiveAndEnabled)
+                    continue;
 
-                // Buttonを検索
-                Button button =
-                    hitObject.GetComponentInParent<Button>();
+                results.Clear();
+                raycaster.Raycast(pointerData, results);
 
-                if (button != null)
+                foreach (RaycastResult result in results)
                 {
-                    if (!button.interactable ||
-                        !button.gameObject.activeInHierarchy)
-                    {
+                    GameObject hitObject = result.gameObject;
+
+                    if (hitObject.transform.IsChildOf(transform))
                         continue;
-                    }
 
-                    // カード内のButtonはターン制限を適用
-                    MemoryBurstCardView card =
-                        button.GetComponentInParent<MemoryBurstCardView>();
+                    // PointerEnterを受け取れるUIを探す
+                    GameObject target =
+                        ExecuteEvents.GetEventHandler<IPointerEnterHandler>(
+                            hitObject
+                        );
 
-                    if (card != null)
-                    {
-                        if (manager == null ||
-                            !manager.CanControl(index))
-                        {
-                            return;
-                        }
-                    }
-
-                    // 通常のUIボタンはターンに関係なく押せる
-                    button.onClick.Invoke();
-                    return;
+                    if (target != null)
+                        return hitObject;
                 }
+            }
+        }
 
-                // Button以外のクリック可能なUIを検索
-                Transform current = hitObject.transform;
+        return null;
+    }
 
-                while (current != null)
+
+    private void UpdateHover(Vector2 screenPosition)
+    {
+        GameObject newHovered = null;
+
+        GameObject hitObject = FindHitObject(screenPosition);
+
+        if (hitObject != null)
+        {
+            newHovered =
+                ExecuteEvents.GetEventHandler<IPointerEnterHandler>(
+                    hitObject
+                );
+        }
+
+        if (currentHovered != newHovered)
+        {
+            ClearHover();
+
+            if (newHovered != null)
+            {
+                pointerData.position = screenPosition;
+
+                ExecuteEvents.Execute(
+                    newHovered,
+                    pointerData,
+                    ExecuteEvents.pointerEnterHandler
+                );
+
+                currentHovered = newHovered;
+            }
+        }
+
+        pointerData.position = screenPosition;
+    }
+
+    private void ClickUI(int index, Vector2 screenPosition)
+    {
+        foreach (Vector2 direction in directions)
+        {
+            Vector2 samplePosition =
+                screenPosition + direction * hitRadius;
+
+            pointerData.position = samplePosition;
+
+            foreach (GraphicRaycaster raycaster in raycasters)
+            {
+                if (raycaster == null ||
+                    !raycaster.isActiveAndEnabled)
+                    continue;
+
+                results.Clear();
+                raycaster.Raycast(pointerData, results);
+
+                foreach (RaycastResult result in results)
                 {
-                    IPointerClickHandler clickHandler =
-                        current.GetComponent<IPointerClickHandler>();
+                    GameObject hitObject = result.gameObject;
 
-                    if (clickHandler != null)
+                    if (hitObject.transform.IsChildOf(transform))
+                        continue;
+
+                    Button button =
+                        hitObject.GetComponentInParent<Button>();
+
+                    if (button != null)
                     {
-                        // カードなら自分のターンだけ操作可能
+                        if (!button.interactable ||
+                            !button.gameObject.activeInHierarchy)
+                            continue;
+
                         MemoryBurstCardView card =
-                            current.GetComponentInParent<MemoryBurstCardView>();
+                            button.GetComponentInParent<MemoryBurstCardView>();
 
                         if (card != null &&
                             (manager == null ||
                              !manager.CanControl(index)))
-                        {
                             return;
-                        }
 
-                        ExecuteEvents.Execute(
-                            current.gameObject,
-                            pointerData,
-                            ExecuteEvents.pointerClickHandler
-                        );
+                        button.onClick.Invoke();
 
+                        pointerData.position = screenPosition;
                         return;
                     }
 
-                    current = current.parent;
+                    Transform current = hitObject.transform;
+
+                    while (current != null)
+                    {
+                        IPointerClickHandler clickHandler =
+                            current.GetComponent<IPointerClickHandler>();
+
+                        if (clickHandler != null)
+                        {
+                            MemoryBurstCardView card =
+                                current.GetComponentInParent<MemoryBurstCardView>();
+
+                            if (card != null &&
+                                (manager == null ||
+                                 !manager.CanControl(index)))
+                                return;
+
+                            ExecuteEvents.Execute(
+                                current.gameObject,
+                                pointerData,
+                                ExecuteEvents.pointerClickHandler
+                            );
+
+                            pointerData.position = screenPosition;
+                            return;
+                        }
+
+                        current = current.parent;
+                    }
                 }
             }
         }
+
+        pointerData.position = screenPosition;
     }
 }

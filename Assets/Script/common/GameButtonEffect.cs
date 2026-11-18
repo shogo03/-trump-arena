@@ -9,30 +9,24 @@ public class GameButtonEffect :
     IPointerExitHandler,
     IPointerClickHandler
 {
-    private static GameButtonEffect selectedButton;
-
     [Header("Settings")]
     [SerializeField] private Image buttonImage;
-    [SerializeField]
-    private Color normalColor =
-        Color.white;
 
     [SerializeField]
-    private Color selectedColor =
-        new Color(1f, 0.82f, 0.42f);
+    private Color normalColor = Color.white;
 
     [SerializeField]
-    private Color glowColor =
-        new Color(1f, 0.72f, 0.2f);
+    private Color hoverColor = new Color(1f, 0.82f, 0.42f);
+
+    [SerializeField]
+    private Color glowColor = new Color(1f, 0.72f, 0.2f);
 
     [SerializeField] private float hoverScale = 1.04f;
-    [SerializeField] private float selectedScale = 1.05f;
 
     private RectTransform rectTransform;
     private Outline outline;
 
     private bool isHovered;
-    private bool isSelected;
 
     private void Awake()
     {
@@ -48,18 +42,30 @@ public class GameButtonEffect :
 
         outline.effectColor = glowColor;
         outline.effectDistance = new Vector2(3, 3);
-        outline.enabled = false;
 
-        if (buttonImage != null)
-            buttonImage.color = normalColor;
+        ResetEffect();
     }
 
+    // オブジェクトが有効になったとき
+    private void OnEnable()
+    {
+        ResetEffect();
+    }
+
+    // オブジェクトが無効になるとき
+    private void OnDisable()
+    {
+        ResetEffect();
+    }
+
+    // カーソルがボタンに乗ったとき
     public void OnPointerEnter(PointerEventData eventData)
     {
         isHovered = true;
         UpdateEffect();
     }
 
+    // カーソルがボタンから離れたとき
     public void OnPointerExit(PointerEventData eventData)
     {
         isHovered = false;
@@ -68,50 +74,39 @@ public class GameButtonEffect :
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // 前に選択されていたボタンを解除
-        if (selectedButton != null)
-        {
-            selectedButton.isSelected = false;
-            selectedButton.UpdateEffect();
-        }
-
-        // 今のボタンを選択
-        selectedButton = this;
-        isSelected = true;
-
-        UpdateEffect();
     }
 
+    // 初期状態に戻す
+    private void ResetEffect()
+    {
+        isHovered = false;
+
+        if (rectTransform != null)
+            rectTransform.localScale = Vector3.one;
+
+        if (buttonImage != null)
+            buttonImage.color = normalColor;
+
+        if (outline != null)
+            outline.enabled = false;
+    }
+
+    // エフェクト更新
     private void UpdateEffect()
     {
-        if (isSelected)
-        {
-            rectTransform.localScale =
-                Vector3.one * selectedScale;
-
-            if (buttonImage != null)
-                buttonImage.color = selectedColor;
-
-            outline.enabled = true;
-        }
-        else if (isHovered)
+        if (isHovered)
         {
             rectTransform.localScale =
                 Vector3.one * hoverScale;
 
             if (buttonImage != null)
-                buttonImage.color = normalColor;
+                buttonImage.color = hoverColor;
 
             outline.enabled = true;
         }
         else
         {
-            rectTransform.localScale = Vector3.one;
-
-            if (buttonImage != null)
-                buttonImage.color = normalColor;
-
-            outline.enabled = false;
+            ResetEffect();
         }
     }
 }
