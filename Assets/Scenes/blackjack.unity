@@ -755,8 +755,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 93316395}
-        m_TargetAssemblyTypeName: MoneyManager, Assembly-CSharp
+      - m_Target: {fileID: 2031883185}
+        m_TargetAssemblyTypeName: BJdraw, Assembly-CSharp
         m_MethodName: DecreaseBet3
         m_Mode: 1
         m_Arguments:
@@ -1753,8 +1753,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 93316395}
-        m_TargetAssemblyTypeName: MoneyManager, Assembly-CSharp
+      - m_Target: {fileID: 2031883185}
+        m_TargetAssemblyTypeName: BJdraw, Assembly-CSharp
         m_MethodName: IncreaseBet2
         m_Mode: 1
         m_Arguments:
@@ -1886,8 +1886,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 93316395}
-        m_TargetAssemblyTypeName: MoneyManager, Assembly-CSharp
+      - m_Target: {fileID: 2031883185}
+        m_TargetAssemblyTypeName: BJdraw, Assembly-CSharp
         m_MethodName: DecreaseBet1
         m_Mode: 1
         m_Arguments:
@@ -4910,8 +4910,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 93316395}
-        m_TargetAssemblyTypeName: MoneyManager, Assembly-CSharp
+      - m_Target: {fileID: 2031883185}
+        m_TargetAssemblyTypeName: BJdraw, Assembly-CSharp
         m_MethodName: IncreaseBet1
         m_Mode: 1
         m_Arguments:
@@ -5258,12 +5258,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 279045689}
   - {fileID: 1987883954}
   - {fileID: 871963891}
   - {fileID: 2064993590}
   - {fileID: 829658462}
   - {fileID: 783629019}
+  - {fileID: 279045689}
   - {fileID: 2085135573}
   - {fileID: 1658999748}
   - {fileID: 829404207}
@@ -7337,6 +7337,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BJTurnManager
   currentTurn: 1
+  player1Buttons:
+  - {fileID: 1668351968}
+  - {fileID: 227190036}
+  - {fileID: 1167564951}
+  - {fileID: 1008372042}
+  - {fileID: 286600940}
+  - {fileID: 266507111}
+  - {fileID: 668462279}
+  - {fileID: 2107023274}
+  player2Buttons:
+  - {fileID: 1987883955}
+  - {fileID: 871963892}
+  - {fileID: 829404208}
+  - {fileID: 279045690}
+  - {fileID: 2085135574}
+  - {fileID: 1658999749}
+  - {fileID: 668462279}
+  - {fileID: 2107023274}
+  player3Buttons:
+  - {fileID: 789680438}
+  - {fileID: 1098520215}
+  - {fileID: 782830448}
+  - {fileID: 1908171127}
+  - {fileID: 113327427}
+  - {fileID: 688238129}
+  - {fileID: 668462279}
+  - {fileID: 2107023274}
 --- !u!4 &1839510072
 Transform:
   m_ObjectHideFlags: 0
@@ -7484,8 +7511,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 93316395}
-        m_TargetAssemblyTypeName: MoneyManager, Assembly-CSharp
+      - m_Target: {fileID: 2031883185}
+        m_TargetAssemblyTypeName: BJdraw, Assembly-CSharp
         m_MethodName: IncreaseBet3
         m_Mode: 1
         m_Arguments:
@@ -8549,8 +8576,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 93316395}
-        m_TargetAssemblyTypeName: MoneyManager, Assembly-CSharp
+      - m_Target: {fileID: 2031883185}
+        m_TargetAssemblyTypeName: BJdraw, Assembly-CSharp
         m_MethodName: DecreaseBet2
         m_Mode: 1
         m_Arguments:

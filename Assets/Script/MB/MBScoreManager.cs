@@ -65,7 +65,7 @@ public class MemoryBurstScoreManager : MonoBehaviour
                 playerScoreTexts[i].gameObject.SetActive(true);
 
                 playerScoreTexts[i].text =
-                    $"P{i + 1}：{scores[i]}点";
+                    $"：{scores[i]}点";
             }
             else
             {
