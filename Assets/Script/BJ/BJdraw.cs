@@ -676,6 +676,60 @@ public class BJdraw : MonoBehaviour
         if (player3UI != null)
             player3UI.SetActive(GameSettings.IsActive[2]);
     }
+
+ 
+ // BET•ÏX
+
+public void IncreaseBet1()
+    {
+        if (turnManager.GetCurrentTurn() != 1)
+            return;
+
+        moneyManager.IncreaseBet1();
+    }
+
+    public void DecreaseBet1()
+    {
+        if (turnManager.GetCurrentTurn() != 1)
+            return;
+
+        moneyManager.DecreaseBet1();
+    }
+
+
+    public void IncreaseBet2()
+    {
+        if (turnManager.GetCurrentTurn() != 2)
+            return;
+
+        moneyManager.IncreaseBet2();
+    }
+
+    public void DecreaseBet2()
+    {
+        if (turnManager.GetCurrentTurn() != 2)
+            return;
+
+        moneyManager.DecreaseBet2();
+    }
+
+
+    public void IncreaseBet3()
+    {
+        if (turnManager.GetCurrentTurn() != 3)
+            return;
+
+        moneyManager.IncreaseBet3();
+    }
+
+    public void DecreaseBet3()
+    {
+        if (turnManager.GetCurrentTurn() != 3)
+            return;
+
+        moneyManager.DecreaseBet3();
+    }
+
 }
 //‚±‚±‚©‚ç‰º •ÏX—p
 //a
