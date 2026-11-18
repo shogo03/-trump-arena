@@ -31,9 +31,7 @@ public class MBCursorManager : MonoBehaviour
         UpdateCursors();
     }
 
-    private void OnDeviceChange(
-        InputDevice device,
-        InputDeviceChange change)
+    private void OnDeviceChange(InputDevice device, InputDeviceChange change)
     {
         if (device is Gamepad &&
             (change == InputDeviceChange.Added ||

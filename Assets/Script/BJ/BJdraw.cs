@@ -29,14 +29,6 @@ public class BJdraw : MonoBehaviour
    
     public Vector2 cardSize = new Vector2(60, 80);
 
-    // 現在のターン（1=P1、2=P2、3=P3）
-    private int currentTurn = 1;
-
-    // ラウンド管理
-    private int currentRound = 1;
-    private int maxRound = 10;
-    
-
     public Text roundText;
     public Text gameEndText;
 
@@ -57,6 +49,9 @@ public class BJdraw : MonoBehaviour
     private bool doubleDown3 = false;
 
     public BJCardManager cardManager;
+    public BJTurnManager turnManager;
+    public BJRoundManager roundManager;
+    public BJAbilityManager abilityManager;
 
     [Header("プレイヤーUI")]
     public GameObject player2UI;
@@ -67,7 +62,7 @@ public class BJdraw : MonoBehaviour
 
     public void DrawCard()
     {
-        if (!isInitialDeal && currentTurn != 1)
+        if (!isInitialDeal && turnManager.GetCurrentTurn() != 1)
         {
             Debug.Log("現在はP1のターンではありません");
             return;
@@ -117,39 +112,14 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        Card card = deck.DrawCard();
-
-
-
-        cardManager.hand.Add(card);
-
-        // 初期配布中は裏向き、それ以外は表向き
-        Sprite displayImage;
-
-        if (isInitialDeal)
-        {
-            displayImage = deck.cardBackImage;
-        }
-        else
-        {
-            displayImage = card.image;
-        }
-
-        cardManager.CreateCard(
-            card,
-            handArea,
-            cardPrefab,
-            cardSize,
-            cardManager.hand.Count,
-            displayImage
-        );
+        cardManager.DrawAndDisplayCard(deck, cardManager.hand, handArea, cardPrefab, cardSize, isInitialDeal);
 
         UpdatePoint();
     }
 
     public void DrawCard2()
     {
-        if (!isInitialDeal && currentTurn != 2)
+        if (!isInitialDeal && turnManager.GetCurrentTurn() != 2)
         {
             Debug.Log("現在はP2のターンではありません");
             return;
@@ -179,13 +149,13 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        DrawForPlayer(cardManager.hand2, handArea2);
+        cardManager.DrawAndDisplayCard(deck, cardManager.hand2, handArea2, cardPrefab, cardSize, isInitialDeal);
         UpdatePoint2();
     }
 
     public void DrawCard3()
     {
-        if (!isInitialDeal && currentTurn != 3)
+        if (!isInitialDeal && turnManager.GetCurrentTurn() != 3)
         {
             Debug.Log("現在はP3のターンではありません");
             return;
@@ -215,53 +185,13 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        DrawForPlayer(cardManager.hand3, handArea3);
+        cardManager.DrawAndDisplayCard(deck, cardManager.hand3, handArea3, cardPrefab, cardSize, isInitialDeal);
         UpdatePoint3();
-    }
-
-    void DrawForPlayer(List<Card> playerHand, Transform area)
-    {
-        if (deck == null || cardPrefab == null || area == null)
-        {
-            Debug.LogError("Deck、Card Prefab、Hand Areaの設定を確認してね！");
-            return;
-        }
-
-        if (cardManager == null)
-        {
-            Debug.LogError("BJCardManagerが設定されていません！");
-            return;
-        }
-
-        Card card = deck.DrawCard();
-
-        playerHand.Add(card);
-
-        // 初期配布中は裏向き、それ以外は表向き
-        Sprite displayImage;
-
-        if (isInitialDeal)
-        {
-            displayImage = deck.cardBackImage;
-        }
-        else
-        {
-            displayImage = card.image;
-        }
-
-        cardManager.CreateCard(
-            card,
-            area,
-            cardPrefab,
-            cardSize,
-            playerHand.Count,
-            displayImage
-        );
     }
 
     public void ConfirmBet1()
     {
-        if (currentTurn != 1 || betConfirmed1)
+        if (turnManager.GetCurrentTurn() != 1 || betConfirmed1)
             return;
 
         moneyManager.PlaceBet(1);
@@ -274,7 +204,7 @@ public class BJdraw : MonoBehaviour
 
     public void ConfirmBet2()
     {
-        if (currentTurn != 2 || betConfirmed2)
+        if (turnManager.GetCurrentTurn() != 2 || betConfirmed2)
             return;
 
         moneyManager.PlaceBet(2);
@@ -287,7 +217,7 @@ public class BJdraw : MonoBehaviour
 
     public void ConfirmBet3()
     {
-        if (currentTurn != 3 || betConfirmed3)
+        if (turnManager.GetCurrentTurn() != 3 || betConfirmed3)
             return;
 
         moneyManager.PlaceBet(3);
@@ -300,7 +230,7 @@ public class BJdraw : MonoBehaviour
 
     public void DoubleDown1()
     {
-        if (currentTurn != 1 || !betConfirmed1 || doubleDown1)
+        if (turnManager.GetCurrentTurn() != 1 || !betConfirmed1 || doubleDown1)
             return;
 
         if (cardManager.hand.Count != 2)
@@ -321,7 +251,7 @@ public class BJdraw : MonoBehaviour
 
     public void DoubleDown2()
     {
-        if (currentTurn != 2 || !betConfirmed2 || doubleDown2)
+        if (turnManager.GetCurrentTurn() != 2 || !betConfirmed2 || doubleDown2)
             return;
 
         // 最初の2枚だけで使用可能
@@ -346,7 +276,7 @@ public class BJdraw : MonoBehaviour
 
     public void DoubleDown3()
     {
-        if (currentTurn != 3 || !betConfirmed3 || doubleDown3)
+        if (turnManager.GetCurrentTurn() != 3 || !betConfirmed3 || doubleDown3)
             return;
 
         // 最初の2枚だけで使用可能
@@ -371,64 +301,63 @@ public class BJdraw : MonoBehaviour
 
     void UpdatePoint()
     {
-        CalculatePoint(cardManager.hand, pointText);
+        if (isInitialDeal) return;
+
+        cardManager.UpdatePointText(cardManager.hand, pointText);
+        CheckBust(cardManager.hand, pointText);
     }
 
     void UpdatePoint2()
     {
-        CalculatePoint(cardManager.hand2, pointText2);
+        if (isInitialDeal) return;
+
+        cardManager.UpdatePointText(cardManager.hand2, pointText2);
+        CheckBust(cardManager.hand2, pointText2);
     }
 
     void UpdatePoint3()
     {
-        CalculatePoint(cardManager.hand3, pointText3);
+        if (isInitialDeal) return;
+
+        cardManager.UpdatePointText(cardManager.hand3, pointText3);
+        CheckBust(cardManager.hand3, pointText3);
     }
 
-    void CalculatePoint(List<Card> playerHand, Text targetText)
+    void CheckBust(List<Card> playerHand, Text targetText)
     {
-        if (targetText == null) return;
-
         int total = cardManager.CalculatePoint(playerHand);
 
-        // 初期配布中は合計点数を隠す
-        if (isInitialDeal)
-        {
-            targetText.text = "";
+        if (isInitialDeal || total <= 21)
             return;
-        }
 
-        if (total > 21)
+        targetText.text = "バースト！ 合計：" + total;
+
+        if (playerHand == cardManager.hand)
         {
-            targetText.text = "バースト！ 合計：" + total;
+            if (isBust) return;
 
-            if (playerHand == cardManager.hand)
-            {
-                isBust = true;
-                isStand = true;
-                Debug.Log("P1はバースト！強制STAND！");
-            }
-            else if (playerHand == cardManager.hand2)
-            {
-                isBust2 = true;
-                isStand2 = true;
-                Debug.Log("P2はバースト！強制STAND！");
-            }
-            else if (playerHand == cardManager.hand3)
-            {
-                isBust3 = true;
-                isStand3 = true;
-                Debug.Log("P3はバースト！強制STAND！");
-            }
-
-            if (!isInitialDeal)
-            {
-                NextTurn();
-            }
+            isBust = true;
+            isStand = true;
+            Debug.Log("P1はバースト！強制STAND！");
         }
-        else
+        else if (playerHand == cardManager.hand2)
         {
-            targetText.text = "合計：" + total;
+            if (isBust2) return;
+
+            isBust2 = true;
+            isStand2 = true;
+            Debug.Log("P2はバースト！強制STAND！");
         }
+        else if (playerHand == cardManager.hand3)
+        {
+            if (isBust3) return;
+
+            isBust3 = true;
+            isStand3 = true;
+            Debug.Log("P3はバースト！強制STAND！");
+        }
+
+        NextTurn();
     }
 
     private bool isStand = false;
@@ -443,7 +372,7 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        if (currentTurn != 1) return;
+        if (turnManager.GetCurrentTurn() != 1) return;
         if (isStand || isBust) return;
 
         isStand = true;
@@ -460,7 +389,7 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        if (currentTurn != 2) return;
+        if (turnManager.GetCurrentTurn() != 2) return;
         if (isStand2 || isBust2) return;
 
         isStand2 = true;
@@ -477,7 +406,7 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        if (currentTurn != 3) return;
+        if (turnManager.GetCurrentTurn() != 3) return;
         if (isStand3 || isBust3) return;
 
         isStand3 = true;
@@ -582,49 +511,32 @@ public class BJdraw : MonoBehaviour
         StartCoroutine(WaitNextRound());
     }
 
-
-
     void NextTurn()
     {
-        currentTurn++;
-
-        // 終了しているプレイヤーや参加していないプレイヤーを飛ばす
-        while (currentTurn <= 3)
+        bool[] activePlayers =
         {
-            // 参加していないプレイヤーは飛ばす
-            if (!GameSettings.IsActive[currentTurn - 1])
-            {
-                currentTurn++;
-                continue;
-            }
+        GameSettings.IsActive[0],
+        GameSettings.IsActive[1],
+        GameSettings.IsActive[2]
+        };
 
-            // P1
-            if (currentTurn == 1 && !isStand && !isBust)
-            {
-                Debug.Log("P1のターン！");
-                return;
-            }
+        bool[] finishedPlayers =
+        {
+        isStand || isBust,
+        isStand2 || isBust2,
+        isStand3 || isBust3
+        };
 
-            // P2
-            if (currentTurn == 2 && !isStand2 && !isBust2)
-            {
-                Debug.Log("P2のターン！");
-                return;
-            }
+        int nextTurn = turnManager.NextTurn(activePlayers, finishedPlayers);
 
-            // P3
-            if (currentTurn == 3 && !isStand3 && !isBust3)
-            {
-                Debug.Log("P3のターン！");
-                return;
-            }
-
-            currentTurn++;
+        if (nextTurn == 4)
+        {
+            Debug.Log("全員終了！ディーラーのターン！");
+            DealerTurn();
+            return;
         }
 
-        // 全員終了
-        Debug.Log("全員終了！ディーラーのターン！");
-        DealerTurn();
+        Debug.Log("プレイヤー" + nextTurn + "のターン！");
     }
 
 
@@ -632,7 +544,7 @@ public class BJdraw : MonoBehaviour
     {
         if (roundText != null)
         {
-            roundText.text = "ROUND " + currentRound + " / " + maxRound;
+            roundText.text = roundManager.GetRoundText();
         }
     }
 
@@ -646,7 +558,7 @@ public class BJdraw : MonoBehaviour
 
     void NextRound()
     {
-        if (currentRound >= maxRound)
+        if (roundManager.IsLastRound())
         {
             Debug.Log("全10ラウンド終了！");
 
@@ -656,13 +568,15 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        currentRound++;
+        // 次のラウンドへ
+        roundManager.NextRound();
+
         StartNextRound();
     }
 
     void StartNextRound()
     {
-        Debug.Log(currentRound + "ラウンド目開始！");
+        Debug.Log(roundManager.currentRound + "ラウンド目開始！");
 
         // 全プレイヤーのBETを0にする
         moneyManager.ResetBet();
@@ -698,7 +612,7 @@ public class BJdraw : MonoBehaviour
         isStand2 = false;
         isStand3 = false;
 
-        currentTurn = 1;
+        turnManager.ResetTurn();
 
         UpdateRoundText();
 
@@ -751,7 +665,7 @@ public class BJdraw : MonoBehaviour
 
     public int GetCurrentTurn()
     {
-        return currentTurn;
+        return turnManager.GetCurrentTurn();
     }
 
     void UpdatePlayerUI()
