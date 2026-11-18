@@ -21,6 +21,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
     [SerializeField] private MBCursorManager cursorManager;
 
     private int currentPlayer = 1;
+    public bool IsGameOver => isGameOver;
     private float remainingTurnTime;
     private bool isGameOver;
     private bool skipNextTurn;
@@ -192,6 +193,16 @@ public class MemoryBurstTurnManager : MonoBehaviour
         UpdateUI();
     }
 
+
+    public void EndTurn()
+    {
+        if (isGameOver)
+            return;
+
+        NextTurn();
+    }
+
+
     // =================================
     // UI更新
     // =================================
@@ -222,7 +233,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
             timerText.gameObject.SetActive(true);
 
             timerText.text =
-                $"残り時間：{Mathf.CeilToInt(remainingTurnTime)}秒";
+                $"残り：{Mathf.CeilToInt(remainingTurnTime)}秒";
         }
     }
 }
