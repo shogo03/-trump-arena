@@ -8250,6 +8250,7 @@ MonoBehaviour:
   resultText2: {fileID: 783629021}
   resultText3: {fileID: 1931044977}
   moneyManager: {fileID: 93316395}
+  cursorManager: {fileID: 2113451013}
   bjDealer: {fileID: 1892295526}
   bjResult: {fileID: 391183721}
   cardSize: {x: 160, y: 180}

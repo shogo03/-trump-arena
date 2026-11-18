@@ -1,4 +1,3 @@
-
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -16,6 +15,10 @@ public class BJCursorManager : MonoBehaviour
 
     private readonly List<GameObject> cursors = new();
 
+    // P1～P3それぞれのカーソルを保存
+    private GameObject[] playerCursors = new GameObject[3];
+
+
     private void OnEnable()
     {
         InputSystem.onDeviceChange += OnDeviceChange;
@@ -31,6 +34,7 @@ public class BJCursorManager : MonoBehaviour
         UpdateCursors();
     }
 
+
     private void OnDeviceChange(
         InputDevice device,
         InputDeviceChange change)
@@ -44,6 +48,7 @@ public class BJCursorManager : MonoBehaviour
             UpdateCursors();
         }
     }
+
 
     private void UpdateCursors()
     {
@@ -61,12 +66,18 @@ public class BJCursorManager : MonoBehaviour
 
         cursors.Clear();
 
+        // 一度全部消す
+        for (int i = 0; i < playerCursors.Length; i++)
+        {
+            playerCursors[i] = null;
+        }
+
         int gamepadIndex = 0;
 
         // 最大3人
         for (int i = 0; i < 3; i++)
         {
-            // 1Pは必ず表示
+            // 1P以外で参加していない
             if (i != 0 && !GameSettings.IsActive[i])
                 continue;
 
@@ -119,6 +130,9 @@ public class BJCursorManager : MonoBehaviour
                 );
             }
 
+            // P1/P2/P3のカーソルとして保存
+            playerCursors[i] = cursor;
+
             cursors.Add(cursor);
 
             if (gamepadIndex < Gamepad.all.Count)
@@ -126,5 +140,27 @@ public class BJCursorManager : MonoBehaviour
         }
 
         Debug.Log($"生成したカーソル数：{cursors.Count}");
+
+        // 最初はP1だけ表示
+        SetTurnCursor(1);
+    }
+
+
+    // 現在のターンのカーソルだけ表示
+
+    public void SetTurnCursor(int turn)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (playerCursors[i] == null)
+                continue;
+
+            // turnは1=P1、2=P2、3=P3
+            bool show = (i + 1 == turn);
+
+            playerCursors[i].SetActive(show);
+        }
+
+        Debug.Log("表示カーソル：P" + turn);
     }
 }
