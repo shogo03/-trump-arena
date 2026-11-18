@@ -131,4 +131,15 @@ public class BJCardManager : MonoBehaviour
             displayImage
         );
     }
+
+    // 点数を画面に表示する
+    // 点数を画面に表示する
+    public void UpdatePointText(List<Card> playerHand, Text targetText)
+    {
+        if (targetText == null) return;
+
+        int total = CalculatePoint(playerHand);
+
+        targetText.text = "合計：" + total;
+    }
 }
