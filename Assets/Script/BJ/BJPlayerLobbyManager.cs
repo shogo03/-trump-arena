@@ -19,6 +19,15 @@ public class BJPlayerLobbyManager : MonoBehaviour
     [Header("人数表示")]
     [SerializeField] private TextMeshProUGUI playerCountText;
 
+    [Header("プレイヤーキャラクター画像")]
+    [SerializeField] private Image[] characterImages;
+
+    [Header("人間プレイヤー画像")]
+    [SerializeField] private Sprite[] characterSprites;
+
+    [Header("CPUロボット画像")]
+    [SerializeField] private Sprite[] cpuSprites;
+
     [Header("2P～3Pの解除ボタン")]
     [SerializeField] private Button[] deselectButtons;
 
@@ -124,6 +133,7 @@ public class BJPlayerLobbyManager : MonoBehaviour
     }
 
     // 表示更新
+    // 表示更新
     private void UpdateUI()
     {
         int humanCount = 0;
@@ -141,20 +151,62 @@ public class BJPlayerLobbyManager : MonoBehaviour
 
             if (i > 0)
             {
-                slotTexts[i - 1].text =
-                    !isSelected[i]
-                    ? $"{i + 1}P：未選択"
-                    : isCPU[i]
-                        ? $"{i + 1}P：CPU"
-                        : $"{i + 1}P：プレイヤー";
+                int index = i - 1;
 
-                // CPUを選択した枠だけ難易度を表示
-                if (cpuLevelDropdowns[i - 1] != null)
+                // Slot Text
+                if (slotTexts[index] != null)
                 {
-                    cpuLevelDropdowns[i - 1]
-                        .gameObject.SetActive(
-                            isSelected[i] && isCPU[i]
-                        );
+                    slotTexts[index].gameObject.SetActive(!isSelected[i]);
+                    slotTexts[index].text = $"{i + 1}P：未選択";
+                }
+
+                // 人間・CPU選択ボタン
+                if (playerButtons[index] != null)
+                    playerButtons[index].gameObject.SetActive(!isSelected[i]);
+
+                if (cpuButtons[index] != null)
+                    cpuButtons[index].gameObject.SetActive(!isSelected[i]);
+
+                // 解除ボタン
+                if (deselectButtons[index] != null)
+                    deselectButtons[index].gameObject.SetActive(isSelected[i]);
+
+                // キャラクター画像
+                if (characterImages != null &&
+                    index < characterImages.Length &&
+                    characterImages[index] != null)
+                {
+                    Image image = characterImages[index];
+
+                    image.gameObject.SetActive(isSelected[i]);
+
+                    if (isSelected[i])
+                    {
+                        if (isCPU[i])
+                        {
+                            if (cpuSprites != null &&
+                                i < cpuSprites.Length)
+                            {
+                                image.sprite = cpuSprites[i];
+                            }
+                        }
+                        else
+                        {
+                            if (characterSprites != null &&
+                                i < characterSprites.Length)
+                            {
+                                image.sprite = characterSprites[i];
+                            }
+                        }
+                    }
+                }
+
+                // CPU難易度
+                if (cpuLevelDropdowns[index] != null)
+                {
+                    cpuLevelDropdowns[index].gameObject.SetActive(
+                        isSelected[i] && isCPU[i]
+                    );
                 }
             }
         }
