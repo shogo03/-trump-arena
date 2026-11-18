@@ -51,38 +51,48 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     [SerializeField] private TMP_Text skipCountText4;
     [SerializeField] private TMP_Text randomCountText4;
 
-    // 各能力の最大使用回数
-    private const int MAX_SHUFFLE_USES = 1;
-    private const int MAX_SKIP_USES = 1;
-
     [Header("ターン外の透明度")]
     [SerializeField, Range(0f, 1f)]
     private float inactiveAlpha = 0.35f;
 
-    // 既存のPlayerUIに付いているCanvasGroup
-    private CanvasGroup[] playerGroups = new CanvasGroup[4];
+    // =================================
+    // 能力使用回数
+    // =================================
 
-    // 能力の使用状況
+    private const int MAX_SHUFFLE_USES = 1;
+    private const int MAX_SKIP_USES = 1;
+    private const int MAX_RANDOM_USES = 2;
+
     private bool[] shuffleUsed = new bool[4];
     private bool[] skipUsed = new bool[4];
 
-    // ランダム公開は各プレイヤー2回まで
     private int[] randomUseCount = new int[4];
-    private const int MAX_RANDOM_USES = 2;
 
     // そのターンに能力を使用したか
     private bool[] abilityUsedThisTurn = new bool[4];
 
+    // =================================
+    // シャッフル・ランダム予約
+    // =================================
+
+    // 次のターン開始時にシャッフルする
+    private bool shufflePending;
+
+    // 次のターン開始時にランダム公開する
+    private bool randomPending;
+
+    // =================================
+    // その他
+    // =================================
+
+    private CanvasGroup[] playerGroups = new CanvasGroup[4];
+
     private MemoryBurstTurnManager turnManager;
     private MemoryBurstCardManager cardManager;
 
-    // ランダム公開が予約されているプレイヤー
-    private int pendingRandomPlayer = 0;
-
-
     private int activePlayerCount = 1;
 
-    private bool isGameOver = false;
+    private bool isGameOver;
 
     // =================================
     // 初期化
@@ -93,13 +103,16 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         MemoryBurstTurnManager turn,
         MemoryBurstCardManager card)
     {
-        pendingRandomPlayer = 0;
         isGameOver = false;
+
+        shufflePending = false;
+        randomPending = false;
 
         shuffleUsed = new bool[4];
         skipUsed = new bool[4];
         randomUseCount = new int[4];
         abilityUsedThisTurn = new bool[4];
+
         activePlayerCount = Mathf.Clamp(playerCount, 1, 4);
 
         turnManager = turn;
@@ -111,7 +124,7 @@ public class MemoryBurstAbilityManager : MonoBehaviour
             return;
         }
 
-        // 既存のPlayerUIからCanvasGroupを取得
+        // PlayerUIのCanvasGroup取得
         playerGroups[0] = GetPlayerCanvasGroup(player1UI);
         playerGroups[1] = GetPlayerCanvasGroup(player2UI);
         playerGroups[2] = GetPlayerCanvasGroup(player3UI);
@@ -155,94 +168,22 @@ public class MemoryBurstAbilityManager : MonoBehaviour
             randomButton4.onClick.AddListener(RandomPlayer4);
 
         // ターン変更イベント登録
+        turnManager.OnTurnChanged -= OnTurnChanged;
         turnManager.OnTurnChanged += OnTurnChanged;
 
-        // プレイヤー人数に応じたUI表示
+        // UI更新
         UpdatePlayerUI(playerCount);
-
-        // 能力使用回数の初期表示
         UpdateAbilityCountText();
 
-        // 初期ターンのUI表示
         UpdatePlayerAlpha(turnManager.CurrentPlayer);
-
         UpdateButtons();
 
         Debug.Log("AbilityManager：初期化完了！");
     }
 
     // =================================
-    // PlayerUIのCanvasGroup取得
+    // CanvasGroup取得
     // =================================
-
-
-    private void UpdateAbilityCountText()
-    {
-        UpdateCountText(
-            shuffleCountText, shuffleUsed[0], MAX_SHUFFLE_USES);
-
-        UpdateCountText(
-            skipCountText, skipUsed[0], MAX_SKIP_USES);
-
-        UpdateCountText(
-            randomCountText, randomUseCount[0], MAX_RANDOM_USES);
-
-
-        UpdateCountText(
-            shuffleCountText2, shuffleUsed[1], MAX_SHUFFLE_USES);
-
-        UpdateCountText(
-            skipCountText2, skipUsed[1], MAX_SKIP_USES);
-
-        UpdateCountText(
-            randomCountText2, randomUseCount[1], MAX_RANDOM_USES);
-
-
-        UpdateCountText(
-            shuffleCountText3, shuffleUsed[2], MAX_SHUFFLE_USES);
-
-        UpdateCountText(
-            skipCountText3, skipUsed[2], MAX_SKIP_USES);
-
-        UpdateCountText(
-            randomCountText3, randomUseCount[2], MAX_RANDOM_USES);
-
-
-        UpdateCountText(
-            shuffleCountText4, shuffleUsed[3], MAX_SHUFFLE_USES);
-
-        UpdateCountText(
-            skipCountText4, skipUsed[3], MAX_SKIP_USES);
-
-        UpdateCountText(
-            randomCountText4, randomUseCount[3], MAX_RANDOM_USES);
-    }
-    // =================================
-    // 回数表示の更新
-    // =================================
-    private void UpdateCountText(
-        TMP_Text text,
-        bool used,
-        int maxUses)
-    {
-        if (text == null) return;
-
-        int remaining = maxUses - (used ? 1 : 0);
-
-        text.text = " ×" + remaining;
-    }
-
-    private void UpdateCountText(
-        TMP_Text text,
-        int usedCount,
-        int maxUses)
-    {
-        if (text == null) return;
-
-        int remaining = maxUses - usedCount;
-
-        text.text = " ×" + remaining;
-    }
 
     private CanvasGroup GetPlayerCanvasGroup(GameObject playerUI)
     {
@@ -265,6 +206,55 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     }
 
     // =================================
+    // 能力回数表示
+    // =================================
+
+    private void UpdateAbilityCountText()
+    {
+        UpdateCountText(shuffleCountText, shuffleUsed[0], MAX_SHUFFLE_USES);
+        UpdateCountText(skipCountText, skipUsed[0], MAX_SKIP_USES);
+        UpdateCountText(randomCountText, randomUseCount[0], MAX_RANDOM_USES);
+
+        UpdateCountText(shuffleCountText2, shuffleUsed[1], MAX_SHUFFLE_USES);
+        UpdateCountText(skipCountText2, skipUsed[1], MAX_SKIP_USES);
+        UpdateCountText(randomCountText2, randomUseCount[1], MAX_RANDOM_USES);
+
+        UpdateCountText(shuffleCountText3, shuffleUsed[2], MAX_SHUFFLE_USES);
+        UpdateCountText(skipCountText3, skipUsed[2], MAX_SKIP_USES);
+        UpdateCountText(randomCountText3, randomUseCount[2], MAX_RANDOM_USES);
+
+        UpdateCountText(shuffleCountText4, shuffleUsed[3], MAX_SHUFFLE_USES);
+        UpdateCountText(skipCountText4, skipUsed[3], MAX_SKIP_USES);
+        UpdateCountText(randomCountText4, randomUseCount[3], MAX_RANDOM_USES);
+    }
+
+    private void UpdateCountText(
+        TMP_Text text,
+        bool used,
+        int maxUses)
+    {
+        if (text == null)
+            return;
+
+        int remaining = maxUses - (used ? 1 : 0);
+
+        text.text = " ×" + remaining;
+    }
+
+    private void UpdateCountText(
+        TMP_Text text,
+        int usedCount,
+        int maxUses)
+    {
+        if (text == null)
+            return;
+
+        int remaining = maxUses - usedCount;
+
+        text.text = " ×" + remaining;
+    }
+
+    // =================================
     // ターン変更
     // =================================
 
@@ -279,10 +269,33 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         // 新しいターンなので能力使用状態をリセット
         abilityUsedThisTurn[player - 1] = false;
 
-        // ランダム公開の発動
-        if (pendingRandomPlayer == player)
+        // =================================
+        // シャッフル能力の発動
+        // =================================
+
+        if (shufflePending)
         {
-            pendingRandomPlayer = 0;
+            shufflePending = false;
+
+            Debug.Log(
+                $"プレイヤー{player}のターン開始！シャッフル発動！"
+            );
+
+            if (!cardManager.ShuffleUnmatchedCards())
+            {
+                Debug.LogWarning(
+                    "シャッフルできるカードがありませんでした。"
+                );
+            }
+        }
+
+        // =================================
+        // ランダム公開の発動
+        // =================================
+
+        if (randomPending)
+        {
+            randomPending = false;
 
             Debug.Log(
                 $"プレイヤー{player}のターン開始！ランダム公開を発動！"
@@ -290,7 +303,9 @@ public class MemoryBurstAbilityManager : MonoBehaviour
 
             if (!cardManager.ForceRandomReveal())
             {
-                Debug.LogWarning("ランダム公開できるカードがありませんでした。");
+                Debug.LogWarning(
+                    "ランダム公開できるカードがありませんでした。"
+                );
             }
         }
 
@@ -299,7 +314,7 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     }
 
     // =================================
-    // プレイヤーUIの透明度更新
+    // プレイヤーUI透明度
     // =================================
 
     private void UpdatePlayerAlpha(int currentPlayer)
@@ -315,7 +330,7 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     }
 
     // =================================
-    // ボタン状態の更新
+    // ボタン状態更新
     // =================================
 
     public void UpdateButtons()
@@ -349,19 +364,23 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         bool canUse = CanUseAbility(player);
 
         if (shuffle != null)
+        {
             shuffle.interactable =
                 canUse && !shuffleUsed[player - 1];
+        }
 
         if (skip != null)
+        {
             skip.interactable =
                 canUse && !skipUsed[player - 1];
+        }
 
         if (random != null)
         {
             random.interactable =
                 canUse &&
                 randomUseCount[player - 1] < MAX_RANDOM_USES &&
-                pendingRandomPlayer == 0;
+                !randomPending;
         }
     }
 
@@ -383,6 +402,16 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         // 自分のターン以外は使用不可
         if (turnManager.CurrentPlayer != player)
             return false;
+
+        // 参加していないプレイヤーは不可
+        if (GameSettings.IsActive != null)
+        {
+            int index = player - 1;
+
+            if (index >= GameSettings.IsActive.Length ||
+                !GameSettings.IsActive[index])
+                return false;
+        }
 
         // カード判定中・ゲーム終了時は使用不可
         if (cardManager.IsChecking || cardManager.AllCardsMatched)
@@ -412,20 +441,23 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         if (shuffleUsed[player - 1])
             return;
 
-        if (!cardManager.ShuffleUnmatchedCards())
-            return;
+        // シャッフルを予約
+        shufflePending = true;
 
-      
+        // 使用済みにする
         shuffleUsed[player - 1] = true;
         abilityUsedThisTurn[player - 1] = true;
 
-        
+        Debug.Log(
+            $"プレイヤー{player}がシャッフル能力を使用！"
+        );
 
-        Debug.Log($"プレイヤー{player}がシャッフル能力を使用！");
-       
+        Debug.Log("次のプレイヤーのターン開始時にシャッフルします！");
+
         UpdateAbilityCountText();
-
         UpdateButtons();
+
+       
     }
 
     // =================================
@@ -451,12 +483,20 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         // 次のプレイヤーのターンをスキップ予約
         turnManager.RequestSkipNextTurn();
 
-        Debug.Log($"プレイヤー{player}がスキップ能力を使用！");
+        Debug.Log(
+            $"プレイヤー{player}がスキップ能力を使用！"
+        );
 
         UpdateAbilityCountText();
-
-
         UpdateButtons();
+
+       
+    }
+
+    // 現在のプレイヤーがスキップ能力を使用
+    public void UseSkipForCurrentPlayer()
+    {
+        UseSkip(turnManager.CurrentPlayer);
     }
 
     // =================================
@@ -474,29 +514,29 @@ public class MemoryBurstAbilityManager : MonoBehaviour
             return;
 
         // すでに予約中なら使用できない
-        if (pendingRandomPlayer != 0)
+        if (randomPending)
             return;
 
         // 使用回数の確認
         if (randomUseCount[player - 1] >= MAX_RANDOM_USES)
             return;
 
-        // 相手のターンに発動するよう予約
-        int opponent = player == 1 ? 2 : 1;
-        pendingRandomPlayer = opponent;
+        // 次のターン開始時にランダム公開する
+        randomPending = true;
 
         randomUseCount[player - 1]++;
         abilityUsedThisTurn[player - 1] = true;
 
         Debug.Log(
             $"プレイヤー{player}がランダム公開を予約！" +
-            $"プレイヤー{opponent}のターン開始時に発動！" +
+            $"次のプレイヤーのターン開始時に発動！" +
             $"残り回数：{MAX_RANDOM_USES - randomUseCount[player - 1]}回"
         );
 
         UpdateAbilityCountText();
-
         UpdateButtons();
+
+       
     }
 
     // =================================
@@ -505,32 +545,40 @@ public class MemoryBurstAbilityManager : MonoBehaviour
 
     private void UpdatePlayerUI(int playerCount)
     {
-        SetPlayerUI(player1UI, playerCount >= 1,
+        SetPlayerUI(
+            player1UI, playerCount >= 1,
             shuffleButton, skipButton, randomButton,
-            shuffleCountText, skipCountText, randomCountText);
+            shuffleCountText, skipCountText, randomCountText
+        );
 
-        SetPlayerUI(player2UI, playerCount >= 2,
+        SetPlayerUI(
+            player2UI, playerCount >= 2,
             shuffleButton2, skipButton2, randomButton2,
-            shuffleCountText2, skipCountText2, randomCountText2);
+            shuffleCountText2, skipCountText2, randomCountText2
+        );
 
-        SetPlayerUI(player3UI, playerCount >= 3,
+        SetPlayerUI(
+            player3UI, playerCount >= 3,
             shuffleButton3, skipButton3, randomButton3,
-            shuffleCountText3, skipCountText3, randomCountText3);
+            shuffleCountText3, skipCountText3, randomCountText3
+        );
 
-        SetPlayerUI(player4UI, playerCount >= 4,
+        SetPlayerUI(
+            player4UI, playerCount >= 4,
             shuffleButton4, skipButton4, randomButton4,
-            shuffleCountText4, skipCountText4, randomCountText4);
+            shuffleCountText4, skipCountText4, randomCountText4
+        );
     }
 
     private void SetPlayerUI(
-     GameObject playerUI,
-     bool visible,
-     Button shuffle,
-     Button skip,
-     Button random,
-     TMP_Text shuffleText,
-     TMP_Text skipText,
-     TMP_Text randomText)
+        GameObject playerUI,
+        bool visible,
+        Button shuffle,
+        Button skip,
+        Button random,
+        TMP_Text shuffleText,
+        TMP_Text skipText,
+        TMP_Text randomText)
     {
         if (playerUI != null)
             playerUI.SetActive(visible);
@@ -544,7 +592,6 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         if (random != null)
             random.gameObject.SetActive(visible);
 
-        // 能力回数表示も人数に合わせて切り替え
         if (shuffleText != null)
             shuffleText.gameObject.SetActive(visible);
 
@@ -562,11 +609,15 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     public void SetGameOver()
     {
         isGameOver = true;
-        pendingRandomPlayer = 0;
+
+        shufflePending = false;
+        randomPending = false;
 
         SetAllButtonsInteractable(false);
 
-        Debug.Log("AbilityManager：ゲーム終了。能力を無効化しました。");
+        Debug.Log(
+            "AbilityManager：ゲーム終了。能力を無効化しました。"
+        );
     }
 
     private void SetAllButtonsInteractable(bool value)
