@@ -4350,8 +4350,9 @@ MonoBehaviour:
   - {fileID: -3256003480736652767, guid: d6d641a405e2e1248ad51c9aa0a3583a, type: 3}
   - {fileID: 7672885101811217934, guid: 54e695e423c4b0a4a93a4f359178f9c6, type: 3}
   cpuSprites:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 712884470510461899, guid: 15779dcfbe43fa34f92bdb55ec6a54ae, type: 3}
+  - {fileID: 5095350293615905860, guid: bb4792e3eeaf49b44bef0fe91a94c8cc, type: 3}
+  - {fileID: 712884470510461899, guid: 15779dcfbe43fa34f92bdb55ec6a54ae, type: 3}
   deselectButtons:
   - {fileID: 694516596}
   - {fileID: 1638708512}
