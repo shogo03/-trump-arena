@@ -8231,7 +8231,7 @@ MonoBehaviour:
   cardManager: {fileID: 385741838}
   turnManager: {fileID: 1839510071}
   roundManager: {fileID: 170544959}
-  abilityManager: {fileID: 0}
+  abilityManager: {fileID: 142375925}
   player2UI: {fileID: 1154354580}
   player3UI: {fileID: 412959910}
 --- !u!4 &2031883186
