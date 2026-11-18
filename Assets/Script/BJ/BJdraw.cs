@@ -686,4 +686,4 @@ public class BJdraw : MonoBehaviour
 //ka
 //ki
 //ku
-//
+//ki
