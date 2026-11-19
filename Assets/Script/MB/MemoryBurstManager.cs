@@ -12,6 +12,9 @@ public class MemoryBurstManager : MonoBehaviour
     [SerializeField] private MemoryBurstScoreManager scoreManager;
     [SerializeField] private MemoryBurstAbilityManager abilityManager;
 
+    [Header("CPU管理")]
+    [SerializeField] private MemoryBurstCPU cpu;
+
     [Header("TURN SKIPボタン")]
     [SerializeField] private Button turnSkipButton;
 
@@ -54,6 +57,14 @@ public class MemoryBurstManager : MonoBehaviour
         // ターンマネージャーのイベント登録
         turnManager.OnTurnTimeout += OnTurnTimeout;
         turnManager.OnTurnChanged += OnTurnChanged;
+
+        cpu.Initialize(cardManager, turnManager);
+
+        // 最初のプレイヤーがCPUだった場合にも対応
+        if (turnManager.IsCurrentPlayerCPU)
+        {
+            cpu.StartTurn(turnManager.CurrentPlayer);
+        }
     }
 
     private void Update()
@@ -87,9 +98,14 @@ public class MemoryBurstManager : MonoBehaviour
     {
         turnFailed = true;
 
-        // TURN SKIPボタンを表示
-        ShowTurnSkipButton();
+        if (turnManager.IsCurrentPlayerCPU)
+        {
+            HideTurnSkipButton();
+            Debug.Log("CPUのペア不成立！自動でターンを終了します。");
+            return;
+        }
 
+        ShowTurnSkipButton();
         Debug.Log("ペア不成立！TURN SKIPボタンを表示します。");
     }
 
@@ -157,6 +173,8 @@ public class MemoryBurstManager : MonoBehaviour
 
     private void OnTurnTimeout()
     {
+        cpu.StopTurn();
+
         if (isGameOver)
             return;
 
@@ -177,10 +195,16 @@ public class MemoryBurstManager : MonoBehaviour
     private void OnTurnChanged(int player)
     {
         turnFailed = false;
-
         HideTurnSkipButton();
 
+        cpu.StopTurn();
+
         Debug.Log($"プレイヤー{player}のターンです。");
+
+        if (turnManager.IsCurrentPlayerCPU)
+        {
+            cpu.StartTurn(player);
+        }
     }
 
     // =================================
@@ -189,6 +213,8 @@ public class MemoryBurstManager : MonoBehaviour
 
     private void FinishGame()
     {
+        cpu.StopTurn();
+
         if (isGameOver)
             return;
 
@@ -266,6 +292,11 @@ public class MemoryBurstManager : MonoBehaviour
         {
             turnManager.OnTurnTimeout -= OnTurnTimeout;
             turnManager.OnTurnChanged -= OnTurnChanged;
+        }
+
+        if (cpu != null)
+        {
+            cpu.Shutdown();
         }
     }
 }
