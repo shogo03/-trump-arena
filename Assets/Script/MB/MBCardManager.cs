@@ -36,6 +36,12 @@ public class MemoryBurstCardManager : MonoBehaviour
     public event Action OnPairFailed;
     public event Action OnAllCardsMatched;
 
+    public IReadOnlyList<MemoryBurstCardView> Cards => cards;
+
+    public event Action OnCardsShuffled;
+
+
+
     // =================================
     // 初期化
     // =================================
@@ -291,8 +297,25 @@ public class MemoryBurstCardManager : MonoBehaviour
             currentOrder[i].SetSiblingIndex(i);
         }
 
+        OnCardsShuffled?.Invoke();
+
         Debug.Log($"未成立カード{shuffleCards.Count}枚をシャッフルしました！");
 
+        return true;
+    }
+
+    public bool TrySelectCard(MemoryBurstCardView card)
+    {
+        if (isChecking || card == null)
+            return false;
+
+        if (firstCard == card || secondCard == card)
+            return false;
+
+        if (card.IsRevealed || card.IsMatched)
+            return false;
+
+        OnCardClicked(card);
         return true;
     }
 
