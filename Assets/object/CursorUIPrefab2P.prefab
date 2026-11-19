@@ -89,7 +89,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 248a514c52e69fe46b4523d7b3f03144, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CursorController
-  moveSpeed: 600
+  gamepadIndex: 0
+  moveSpeed: 800
 --- !u!1 &803106237276634310
 GameObject:
   m_ObjectHideFlags: 0
@@ -117,7 +118,7 @@ Transform:
   m_GameObject: {fileID: 803106237276634310}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -38, y: 37.17, z: 0}
+  m_LocalPosition: {x: -40.2, y: 38.5, z: 0}
   m_LocalScale: {x: 30, y: 0.35, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -171,3 +172,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ffdd65d78925b14f99beaf3b01f12cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CursorTip
+  hitRadius: 20
+  tipPoint: {fileID: 0}

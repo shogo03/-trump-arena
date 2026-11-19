@@ -1,3 +1,4 @@
+
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -10,8 +11,8 @@ public class PlayerSelectManager : MonoBehaviour
     [SerializeField] private TMP_Dropdown humanDropdown;
     [SerializeField] private TMP_Dropdown cpuDropdown;
 
-    [Header("CPU難易度")]
-    [SerializeField] private TMP_Dropdown levelDropdown;
+    [Header("CPUごとの難易度")]
+    [SerializeField] private TMP_Dropdown[] levelDropdowns;
 
     [Header("表示")]
     [SerializeField] private TextMeshProUGUI totalText;
@@ -36,25 +37,35 @@ public class PlayerSelectManager : MonoBehaviour
             new List<string> { "0人", "1人", "2人", "3人" }
         );
 
-        // CPU難易度
-        levelDropdown.ClearOptions();
-        levelDropdown.AddOptions(
-            new List<string>
-            {
-                "かんたん",
-                "ふつう",
-                "むずかしい"
-            }
-        );
+        // CPUごとの難易度
+        foreach (TMP_Dropdown dropdown in levelDropdowns)
+        {
+            if (dropdown == null) continue;
+
+            dropdown.ClearOptions();
+            dropdown.AddOptions(
+                new List<string>
+                {
+                    "かんたん",
+                    "ふつう",
+                    "むずかしい"
+                }
+            );
+
+            dropdown.value = 1;
+        }
 
         humanDropdown.value = 0;
         cpuDropdown.value = 0;
-        levelDropdown.value = 0;
 
-        // 選択変更時の処理
         humanDropdown.onValueChanged.AddListener(OnSettingChanged);
         cpuDropdown.onValueChanged.AddListener(OnSettingChanged);
-        levelDropdown.onValueChanged.AddListener(OnSettingChanged);
+
+        foreach (TMP_Dropdown dropdown in levelDropdowns)
+        {
+            if (dropdown != null)
+                dropdown.onValueChanged.AddListener(OnSettingChanged);
+        }
 
         UpdateSettings();
     }
@@ -68,8 +79,9 @@ public class PlayerSelectManager : MonoBehaviour
     {
         int humanCount = humanDropdown.value + 1;
 
-        // 最大4人になるようCPU人数を制限
         int maxCPU = 4 - humanCount;
+
+        int previousCPU = cpuDropdown.value;
 
         cpuDropdown.ClearOptions();
 
@@ -82,26 +94,60 @@ public class PlayerSelectManager : MonoBehaviour
 
         cpuDropdown.AddOptions(cpuOptions);
 
-        // CPU人数が上限を超えないようにする
         cpuDropdown.value = Mathf.Clamp(
-            cpuDropdown.value,
+            previousCPU,
             0,
             maxCPU
         );
 
         int cpuCount = cpuDropdown.value;
 
-        // 設定を保存
         GameSettings.HumanPlayerCount = humanCount;
         GameSettings.CPUCount = cpuCount;
-        GameSettings.CPULevel = levelDropdown.value + 1;
+
+        // プレイヤー構成を初期化
+        for (int i = 0; i < 4; i++)
+        {
+            GameSettings.IsActive[i] = false;
+            GameSettings.IsCPU[i] = false;
+        }
+
+        // 人間プレイヤーを先に配置
+        for (int i = 0; i < humanCount; i++)
+        {
+            GameSettings.IsActive[i] = true;
+        }
+
+        // CPUを人間の後ろに配置
+        for (int i = 0; i < cpuCount; i++)
+        {
+            int index = humanCount + i;
+
+            GameSettings.IsActive[index] = true;
+            GameSettings.IsCPU[index] = true;
+
+            if (i < levelDropdowns.Length &&
+                levelDropdowns[i] != null)
+            {
+                GameSettings.CPULevels[index] =
+                    levelDropdowns[i].value + 1;
+            }
+        }
+
+        // CPU難易度Dropdownの表示切り替え
+        for (int i = 0; i < levelDropdowns.Length; i++)
+        {
+            if (levelDropdowns[i] != null)
+            {
+                levelDropdowns[i].gameObject.SetActive(i < cpuCount);
+            }
+        }
 
         int total = humanCount + cpuCount;
 
         if (totalText != null)
         {
-            totalText.text =
-                $"合計人数：{total} / 4人";
+            totalText.text = $"合計人数：{total} / 4人";
         }
 
         if (startButton != null)
@@ -113,7 +159,6 @@ public class PlayerSelectManager : MonoBehaviour
     public void StartGame()
     {
         UpdateSettings();
-
         SceneManager.LoadScene(gameSceneName);
     }
 
@@ -124,8 +169,16 @@ public class PlayerSelectManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        humanDropdown.onValueChanged.RemoveListener(OnSettingChanged);
-        cpuDropdown.onValueChanged.RemoveListener(OnSettingChanged);
-        levelDropdown.onValueChanged.RemoveListener(OnSettingChanged);
+        if (humanDropdown != null)
+            humanDropdown.onValueChanged.RemoveListener(OnSettingChanged);
+
+        if (cpuDropdown != null)
+            cpuDropdown.onValueChanged.RemoveListener(OnSettingChanged);
+
+        foreach (TMP_Dropdown dropdown in levelDropdowns)
+        {
+            if (dropdown != null)
+                dropdown.onValueChanged.RemoveListener(OnSettingChanged);
+        }
     }
 }
