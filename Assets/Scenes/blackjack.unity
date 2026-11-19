@@ -5490,7 +5490,7 @@ MonoBehaviour:
   - {fileID: 8106983338303789419, guid: 58e92ab7bc7765748979006c2cb24e9a, type: 3}
   - {fileID: 2821917336188288749, guid: 96df38059bb6d7c488d34c461223ee04, type: 3}
   - {fileID: -4604392324990250200, guid: a4fa3910c7420de448c10618c6b91082, type: 3}
-  cardBackImage: {fileID: 7880817723055296925, guid: 7322349cbf914fb4fab6ed09fbacd4c6, type: 3}
+  cardBackImage: {fileID: 6785808537490883368, guid: e1f3e3c372788cb499b4dc9bc126a335, type: 3}
 --- !u!4 &1195274877
 Transform:
   m_ObjectHideFlags: 0

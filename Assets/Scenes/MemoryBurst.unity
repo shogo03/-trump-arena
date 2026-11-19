@@ -1675,7 +1675,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MemoryBurstCardManager
   deck: {fileID: 9093634218768387832, guid: 38dbb80b5cd33cc47a691e217dfd0410, type: 3}
   cardPrefab: {fileID: 8356994227912987825, guid: adf4c390e25c46248a2692b5b92b8433, type: 3}
-  backImage: {fileID: 7880817723055296925, guid: 7322349cbf914fb4fab6ed09fbacd4c6, type: 3}
+  backImage: {fileID: 6785808537490883368, guid: e1f3e3c372788cb499b4dc9bc126a335, type: 3}
   cardArea: {fileID: 78408869}
   cardCount: 24
   flipBackDelay: 1
