@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
@@ -11,6 +10,7 @@ public class MemoryBurstManager : MonoBehaviour
     [SerializeField] private MemoryBurstTurnManager turnManager;
     [SerializeField] private MemoryBurstScoreManager scoreManager;
     [SerializeField] private MemoryBurstAbilityManager abilityManager;
+    [SerializeField] private MemoryBurstUIManager uiManager;
 
     [Header("CPU管理")]
     [SerializeField] private MemoryBurstCPU cpu;
@@ -24,6 +24,10 @@ public class MemoryBurstManager : MonoBehaviour
     private int playerCount;
     private bool turnFailed;
     private bool isGameOver;
+
+    // =================================
+    // 初期化
+    // =================================
 
     private void Start()
     {
@@ -43,6 +47,7 @@ public class MemoryBurstManager : MonoBehaviour
         scoreManager.Initialize(playerCount);
         cardManager.Initialize();
 
+        // AbilityManager初期化
         abilityManager.Initialize(
             playerCount,
             turnManager,
@@ -58,14 +63,55 @@ public class MemoryBurstManager : MonoBehaviour
         turnManager.OnTurnTimeout += OnTurnTimeout;
         turnManager.OnTurnChanged += OnTurnChanged;
 
+        // CPU初期化
         cpu.Initialize(cardManager, turnManager);
 
-        // 最初のプレイヤーがCPUだった場合にも対応
+        // =================================
+        // CPU設定を取得
+        // =================================
+
+        bool[] cpuPlayers = new bool[4];
+
+        for (int i = 0; i < 4; i++)
+        {
+            cpuPlayers[i] =
+                GameSettings.IsActive[i] &&
+                GameSettings.IsCPU[i];
+        }
+
+        // =================================
+        // UIManager初期化
+        // =================================
+
+        if (uiManager != null)
+        {
+            uiManager.Initialize(
+                playerCount,
+                abilityManager,
+                turnManager,
+                cpuPlayers
+            );
+
+            Debug.Log("UIManager初期化完了");
+        }
+        else
+        {
+            Debug.LogError("MemoryBurstUIManagerがInspectorに設定されていません！");
+        }
+
+        // =================================
+        // 最初のプレイヤーがCPUだった場合
+        // =================================
+
         if (turnManager.IsCurrentPlayerCPU)
         {
             cpu.StartTurn(turnManager.CurrentPlayer);
         }
     }
+
+    // =================================
+    // Update
+    // =================================
 
     private void Update()
     {
@@ -75,7 +121,11 @@ public class MemoryBurstManager : MonoBehaviour
         // カード判定中はタイマーを止める
         turnManager.Tick(cardManager.IsChecking);
 
-        abilityManager.UpdateButtons();
+        // UI更新
+        if (uiManager != null)
+        {
+            uiManager.RefreshUI();
+        }
     }
 
     // =================================
@@ -88,6 +138,11 @@ public class MemoryBurstManager : MonoBehaviour
 
         // ペア成立後は同じプレイヤーのターンを継続
         turnManager.ResetTimer();
+
+        if (uiManager != null)
+        {
+            uiManager.RefreshUI();
+        }
     }
 
     // =================================
@@ -98,14 +153,17 @@ public class MemoryBurstManager : MonoBehaviour
     {
         turnFailed = true;
 
+        // CPUの場合は自動でターン終了
         if (turnManager.IsCurrentPlayerCPU)
         {
             HideTurnSkipButton();
+
             Debug.Log("CPUのペア不成立！自動でターンを終了します。");
             return;
         }
 
         ShowTurnSkipButton();
+
         Debug.Log("ペア不成立！TURN SKIPボタンを表示します。");
     }
 
@@ -154,7 +212,6 @@ public class MemoryBurstManager : MonoBehaviour
         turnFailed = false;
 
         // 次のプレイヤーへ交代
-        // 能力の使用回数は消費しない
         turnManager.EndTurn();
     }
 
@@ -182,9 +239,12 @@ public class MemoryBurstManager : MonoBehaviour
 
         HideTurnSkipButton();
 
+        // 表向きカードを隠す
         cardManager.HidePendingCards();
 
         turnFailed = false;
+
+        // 次のプレイヤーへ
         turnManager.NextTurn();
     }
 
@@ -195,15 +255,22 @@ public class MemoryBurstManager : MonoBehaviour
     private void OnTurnChanged(int player)
     {
         turnFailed = false;
+
         HideTurnSkipButton();
 
         cpu.StopTurn();
 
         Debug.Log($"プレイヤー{player}のターンです。");
 
+        // CPUのターンならCPUを開始
         if (turnManager.IsCurrentPlayerCPU)
         {
             cpu.StartTurn(player);
+        }
+
+        if (uiManager != null)
+        {
+            uiManager.RefreshUI();
         }
     }
 
@@ -222,9 +289,16 @@ public class MemoryBurstManager : MonoBehaviour
 
         HideTurnSkipButton();
 
+        // 各マネージャーのゲーム終了処理
         turnManager.SetGameOver();
         abilityManager.SetGameOver();
 
+        if (uiManager != null)
+        {
+            uiManager.SetGameOver();
+        }
+
+        // リザルト保存
         scoreManager.SaveResult();
 
         Debug.Log("ゲーム終了！リザルトシーンへ移動します。");
@@ -253,11 +327,13 @@ public class MemoryBurstManager : MonoBehaviour
         if (!GameSettings.IsActive[playerIndex])
             return false;
 
+        // CPUはコントローラー操作不可
         if (GameSettings.IsCPU[playerIndex])
             return false;
 
         int humanIndex = 0;
 
+        // 現在のプレイヤーより前にいる人間プレイヤーの数を調べる
         for (int i = 0; i < playerIndex; i++)
         {
             if (GameSettings.IsActive[i] &&
@@ -276,11 +352,13 @@ public class MemoryBurstManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        // TURN SKIPボタン
         if (turnSkipButton != null)
         {
             turnSkipButton.onClick.RemoveListener(OnTurnSkipButtonClicked);
         }
 
+        // カードイベント解除
         if (cardManager != null)
         {
             cardManager.OnPairMatched -= OnPairMatched;
@@ -288,12 +366,14 @@ public class MemoryBurstManager : MonoBehaviour
             cardManager.OnAllCardsMatched -= OnAllCardsMatched;
         }
 
+        // ターンイベント解除
         if (turnManager != null)
         {
             turnManager.OnTurnTimeout -= OnTurnTimeout;
             turnManager.OnTurnChanged -= OnTurnChanged;
         }
 
+        // CPU終了
         if (cpu != null)
         {
             cpu.Shutdown();
