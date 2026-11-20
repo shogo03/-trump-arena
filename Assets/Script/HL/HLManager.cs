@@ -10,17 +10,46 @@ public class HighLowManager : MonoBehaviour
     [SerializeField] private GameObject cardPrefab;
     [SerializeField] private Transform cardArea;
 
+    [Header("HIGH・LOWボタン")]
+    [SerializeField] private Button highButton;
+    [SerializeField] private Button lowButton;
+
+    public enum Prediction
+    {
+        None,
+        High,
+        Low
+    }
+
+    private Prediction currentPrediction = Prediction.None;
+
+    public Prediction CurrentPrediction => currentPrediction;
+
     private GameObject currentCardObject;
     private HighLowDeck.CardData currentCard;
 
     private void Start()
     {
+        highButton.onClick.AddListener(OnHighButtonClicked);
+        lowButton.onClick.AddListener(OnLowButtonClicked);
+
         StartGame();
+    }
+
+    private void OnDestroy()
+    {
+        if (highButton != null)
+            highButton.onClick.RemoveListener(OnHighButtonClicked);
+
+        if (lowButton != null)
+            lowButton.onClick.RemoveListener(OnLowButtonClicked);
     }
 
     public void StartGame()
     {
         deck.CreateDeck();
+
+        ResetSelection();
 
         ShowFirstCard();
     }
@@ -61,6 +90,7 @@ public class HighLowManager : MonoBehaviour
         currentCardObject = Instantiate(cardPrefab, cardArea);
 
         RectTransform rect = currentCardObject.GetComponent<RectTransform>();
+
         rect.anchorMin = new Vector2(0.5f, 0.5f);
         rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.pivot = new Vector2(0.5f, 0.5f);
@@ -84,6 +114,41 @@ public class HighLowManager : MonoBehaviour
         Debug.Log($"カード表示成功：{card.suit} {card.number}");
     }
 
+    // HIGHボタン
+    private void OnHighButtonClicked()
+    {
+        SelectPrediction(Prediction.High);
+    }
+
+    // LOWボタン
+    private void OnLowButtonClicked()
+    {
+        SelectPrediction(Prediction.Low);
+    }
+
+    // 選択処理
+    private void SelectPrediction(Prediction prediction)
+    {
+        if (currentPrediction != Prediction.None)
+            return;
+
+        currentPrediction = prediction;
+
+        highButton.interactable = false;
+        lowButton.interactable = false;
+
+        Debug.Log($"予想選択：{currentPrediction}");
+    }
+
+    // 選択リセット
+    private void ResetSelection()
+    {
+        currentPrediction = Prediction.None;
+
+        highButton.interactable = true;
+        lowButton.interactable = true;
+    }
+
     // 次のカードを引く
     public HighLowDeck.CardData DrawNextCard()
     {
@@ -101,5 +166,7 @@ public class HighLowManager : MonoBehaviour
     {
         currentCard = card;
         DisplayCard(card);
+
+        ResetSelection();
     }
 }

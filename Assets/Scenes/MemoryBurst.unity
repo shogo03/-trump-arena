@@ -1160,7 +1160,7 @@ GameObject:
   - component: {fileID: 252949338}
   - component: {fileID: 252949337}
   m_Layer: 0
-  m_Name: CardBurstManager
+  m_Name: MemoryBurstManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
