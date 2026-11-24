@@ -1,4 +1,5 @@
 
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -23,6 +24,8 @@ public class HLManager : MonoBehaviour
 
     [Header("スキル管理")]
     [SerializeField] private HighLowAbilityManager abilityManager;
+
+    [SerializeField] private HighLowTimerManager timerManager;
 
     public enum Prediction
     {
@@ -63,6 +66,9 @@ public class HLManager : MonoBehaviour
 
         turnManager.Initialize();
         scoreManager.Initialize();
+
+        timerManager.Initialize();
+        timerManager.StartTimer();
 
         ResetSelection();
 
