@@ -21,15 +21,16 @@ public class MemoryBurstTurnManager : MonoBehaviour
     [SerializeField] private MBCursorManager cursorManager;
 
     private int currentPlayer = 1;
-    public bool IsGameOver => isGameOver;
+
     private float remainingTurnTime;
     private bool isGameOver;
     private bool skipNextTurn;
 
+    public bool IsGameOver => isGameOver;
+
     public int CurrentPlayer => currentPlayer;
     public float RemainingTurnTime => remainingTurnTime;
 
-    // 現在のプレイヤーがCPUかどうか
     public bool IsCurrentPlayerCPU
     {
         get
@@ -47,6 +48,9 @@ public class MemoryBurstTurnManager : MonoBehaviour
     public event Action<int> OnTurnChanged;
     public event Action OnTurnTimeout;
 
+    // スキップされたプレイヤーを通知
+    public event Action<int> OnPlayerSkipped;
+
     // =================================
     // 初期化
     // =================================
@@ -60,7 +64,6 @@ public class MemoryBurstTurnManager : MonoBehaviour
 
         UpdateUI();
 
-        // 最初のターンのカーソルを表示
         if (cursorManager != null)
         {
             cursorManager.SetCurrentTurn(currentPlayer);
@@ -71,7 +74,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
     }
 
     // =================================
-    // タイマー更新
+    // タイマー
     // =================================
 
     public void Tick(bool paused)
@@ -93,10 +96,6 @@ public class MemoryBurstTurnManager : MonoBehaviour
         UpdateUI();
     }
 
-    // =================================
-    // タイマーリセット
-    // =================================
-
     public void ResetTimer()
     {
         if (isGameOver)
@@ -109,7 +108,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
     }
 
     // =================================
-    // 次のターンへ
+    // 次のターン
     // =================================
 
     public void NextTurn()
@@ -117,7 +116,7 @@ public class MemoryBurstTurnManager : MonoBehaviour
         if (isGameOver)
             return;
 
-        // 次の参加プレイヤーを探す
+        // 現在のプレイヤーを含めず、次の参加者を探す
         for (int i = 0; i < 4; i++)
         {
             currentPlayer++;
@@ -127,46 +126,55 @@ public class MemoryBurstTurnManager : MonoBehaviour
 
             int index = currentPlayer - 1;
 
-            // 配列の範囲確認
             if (GameSettings.IsActive == null ||
-                index >= GameSettings.IsActive.Length)
+                index >= GameSettings.IsActive.Length ||
+                !GameSettings.IsActive[index])
+            {
                 continue;
-
-            // 参加していないプレイヤーは飛ばす
-            if (!GameSettings.IsActive[index])
-                continue;
+            }
 
             // スキップ予約があれば、このプレイヤーを飛ばす
             if (skipNextTurn)
             {
                 Debug.Log($"プレイヤー{currentPlayer}のターンをスキップ！");
+
                 skipNextTurn = false;
+
+                // UIManagerに対象プレイヤーを通知
+                OnPlayerSkipped?.Invoke(currentPlayer);
+
                 continue;
             }
 
-            // タイマーリセット
-            remainingTurnTime = turnTimeLimit;
-
-            UpdateUI();
-
-            // カーソルを現在のプレイヤーに切り替える
-            if (cursorManager != null)
-            {
-                cursorManager.SetCurrentTurn(currentPlayer);
-            }
-
-            // ターン変更イベント
-            OnTurnChanged?.Invoke(currentPlayer);
-
-            Debug.Log($"次のプレイヤー：P{currentPlayer}");
+            // 通常のターン開始
+            StartPlayerTurn();
 
             return;
         }
 
-        // 全員がスキップ対象になった場合
         skipNextTurn = false;
 
         Debug.LogError("次の参加プレイヤーが見つかりません！");
+    }
+
+    // =================================
+    // ターン開始
+    // =================================
+
+    private void StartPlayerTurn()
+    {
+        remainingTurnTime = turnTimeLimit;
+
+        UpdateUI();
+
+        if (cursorManager != null)
+        {
+            cursorManager.SetCurrentTurn(currentPlayer);
+        }
+
+        OnTurnChanged?.Invoke(currentPlayer);
+
+        Debug.Log($"次のプレイヤー：P{currentPlayer}");
     }
 
     // =================================
@@ -178,9 +186,36 @@ public class MemoryBurstTurnManager : MonoBehaviour
         if (isGameOver)
             return;
 
+        // 参加者が1人しかいない場合はスキップしない
+        if (GetActivePlayerCount() <= 1)
+        {
+            Debug.Log("参加プレイヤーが1人のため、スキップできません。");
+            return;
+        }
+
         skipNextTurn = true;
 
         Debug.Log("次のプレイヤーのスキップを予約しました");
+    }
+
+    // =================================
+    // 参加人数取得
+    // =================================
+
+    private int GetActivePlayerCount()
+    {
+        if (GameSettings.IsActive == null)
+            return 0;
+
+        int count = 0;
+
+        for (int i = 0; i < GameSettings.IsActive.Length && i < 4; i++)
+        {
+            if (GameSettings.IsActive[i])
+                count++;
+        }
+
+        return count;
     }
 
     // =================================
@@ -190,9 +225,10 @@ public class MemoryBurstTurnManager : MonoBehaviour
     public void SetGameOver()
     {
         isGameOver = true;
+        skipNextTurn = false;
+
         UpdateUI();
     }
-
 
     public void EndTurn()
     {
@@ -201,7 +237,6 @@ public class MemoryBurstTurnManager : MonoBehaviour
 
         NextTurn();
     }
-
 
     // =================================
     // UI更新
@@ -220,8 +255,6 @@ public class MemoryBurstTurnManager : MonoBehaviour
             if (index >= 0 && index < playerColors.Length)
             {
                 Color color = playerColors[index];
-
-                // 透明度を必ず100%にする
                 color.a = 1f;
 
                 turnText.color = color;
