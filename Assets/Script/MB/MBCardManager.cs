@@ -39,6 +39,7 @@ public class MemoryBurstCardManager : MonoBehaviour
     public IReadOnlyList<MemoryBurstCardView> Cards => cards;
 
     public event Action OnCardsShuffled;
+    public event Action<MemoryBurstCardView> OnCardRevealed;
 
 
 
@@ -108,6 +109,9 @@ public class MemoryBurstCardManager : MonoBehaviour
             return;
 
         card.Reveal();
+
+        // CPUにカードをめくったことを通知
+        OnCardRevealed?.Invoke(card);
 
         if (firstCard == null)
         {
