@@ -92,7 +92,7 @@ public class MemoryBurstResult : MonoBehaviour
             };
 
             sb.AppendLine(
-                $"{rankText}  {GetPlayerName(playerIndex + 1)}  {score} pt"
+                $"{rankText}  {GetPlayerName(playerIndex + 1)}      {score} pt"
             );
 
             if (GameSettings.IsCPU[playerIndex])
