@@ -1,12 +1,10 @@
+
+using System.Collections;
 using UnityEngine;
 
 public class MemoryBurstAbilityManager : MonoBehaviour
 {
-    // =================================
-    // 能力使用回数
-    // =================================
-
-    private const int MAX_SHUFFLE_USES = 2;
+    private const int MAX_SHUFFLE_USES = 1;
     private const int MAX_SKIP_USES = 1;
     private const int MAX_RANDOM_USES = 2;
 
@@ -14,19 +12,10 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     private bool[] skipUsed = new bool[4];
     private int[] randomUseCount = new int[4];
 
-    // そのターンに能力を使用したか
     private bool[] abilityUsedThisTurn = new bool[4];
-
-    // =================================
-    // 能力発動予約
-    // =================================
 
     private bool shufflePending;
     private bool randomPending;
-
-    // =================================
-    // Manager参照
-    // =================================
 
     private MemoryBurstTurnManager turnManager;
     private MemoryBurstCardManager cardManager;
@@ -60,13 +49,10 @@ public class MemoryBurstAbilityManager : MonoBehaviour
 
         if (turnManager == null || cardManager == null)
         {
-            Debug.LogError(
-                "AbilityManager：Managerが設定されていません！"
-            );
+            Debug.LogError("AbilityManager：Managerが設定されていません！");
             return;
         }
 
-        // ターン変更イベント登録
         turnManager.OnTurnChanged -= OnTurnChanged;
         turnManager.OnTurnChanged += OnTurnChanged;
 
@@ -85,52 +71,55 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         if (player < 1 || player > activePlayerCount)
             return;
 
-        // 新しいターンなので能力使用状態をリセット
         abilityUsedThisTurn[player - 1] = false;
 
-        // =================================
-        // シャッフル能力の発動
-        // =================================
-
-        if (shufflePending)
+        if (shufflePending || randomPending)
         {
-            shufflePending = false;
-
-            Debug.Log(
-                $"プレイヤー{player}のターン開始！シャッフル発動！"
-            );
-
-            if (!cardManager.ShuffleUnmatchedCards())
-            {
-                Debug.LogWarning(
-                    "シャッフルできるカードがありませんでした。"
-                );
-            }
-        }
-
-        // =================================
-        // ランダム公開能力の発動
-        // =================================
-
-        if (randomPending)
-        {
-            randomPending = false;
-
-            Debug.Log(
-                $"プレイヤー{player}のターン開始！ランダム公開発動！"
-            );
-
-            if (!cardManager.ForceRandomReveal())
-            {
-                Debug.LogWarning(
-                    "ランダム公開できるカードがありませんでした。"
-                );
-            }
+            StartCoroutine(ActivatePendingAbilities(player));
         }
     }
 
     // =================================
-    // 能力使用可能判定
+    // 予約能力の発動
+    // =================================
+
+    private IEnumerator ActivatePendingAbilities(int player)
+    {
+        // カード処理中なら終了を待つ
+        while (cardManager.IsChecking && !isGameOver)
+        {
+            yield return null;
+        }
+
+        // シャッフル
+        if (shufflePending && !isGameOver)
+        {
+            shufflePending = false;
+
+            Debug.Log($"プレイヤー{player}のターン開始！シャッフル発動！");
+
+            cardManager.ShuffleUnmatchedCards();
+
+            // シャッフル演出が終わるまで待つ
+            while (cardManager.IsChecking && !isGameOver)
+            {
+                yield return null;
+            }
+        }
+
+        // ランダム公開
+        if (randomPending && !isGameOver)
+        {
+            randomPending = false;
+
+            Debug.Log($"プレイヤー{player}のターン開始！ランダム公開発動！");
+
+            cardManager.ForceRandomReveal();
+        }
+    }
+
+    // =================================
+    // 使用可能判定
     // =================================
 
     public bool CanUseAbility(int player)
@@ -144,27 +133,21 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         if (player < 1 || player > activePlayerCount)
             return false;
 
-        // 自分のターン以外は使用不可
         if (turnManager.CurrentPlayer != player)
             return false;
 
-        // 参加していないプレイヤーは使用不可
         if (GameSettings.IsActive != null)
         {
             int index = player - 1;
 
             if (index >= GameSettings.IsActive.Length ||
                 !GameSettings.IsActive[index])
-            {
                 return false;
-            }
         }
 
-        // カード判定中・全カードペア完成時は使用不可
         if (cardManager.IsChecking || cardManager.AllCardsMatched)
             return false;
 
-        // このターンに能力を使用済みなら使用不可
         if (abilityUsedThisTurn[player - 1])
             return false;
 
@@ -172,7 +155,7 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     }
 
     // =================================
-    // シャッフル能力
+    // シャッフル
     // =================================
 
     public void UseShuffle(int player)
@@ -180,21 +163,15 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         if (!CanUseAbility(player))
             return;
 
-        // 使用回数確認
         if (shuffleUseCount[player - 1] >= MAX_SHUFFLE_USES)
             return;
 
-        // すでにシャッフル予約中なら使用不可
         if (shufflePending)
             return;
 
-        // シャッフル予約
         shufflePending = true;
 
-        // 使用回数加算
         shuffleUseCount[player - 1]++;
-
-        // このターンの能力使用済みにする
         abilityUsedThisTurn[player - 1] = true;
 
         Debug.Log(
@@ -206,7 +183,7 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     }
 
     // =================================
-    // スキップ能力
+    // スキップ
     // =================================
 
     public void UseSkip(int player)
@@ -214,24 +191,17 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         if (!CanUseAbility(player))
             return;
 
-        // 使用済み確認
         if (skipUsed[player - 1])
             return;
 
         skipUsed[player - 1] = true;
-
-        // このターンの能力使用済みにする
         abilityUsedThisTurn[player - 1] = true;
 
-        // 次のプレイヤーのターンをスキップ予約
         turnManager.RequestSkipNextTurn();
 
-        Debug.Log(
-            $"プレイヤー{player}がスキップ能力を使用！"
-    );
+        Debug.Log($"プレイヤー{player}がスキップ能力を使用！");
     }
 
-    // 現在のプレイヤーがスキップ能力を使用
     public void UseSkipForCurrentPlayer()
     {
         if (turnManager == null)
@@ -241,7 +211,7 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     }
 
     // =================================
-    // ランダム公開能力
+    // ランダム公開
     // =================================
 
     public void UseRandom(int player)
@@ -249,34 +219,27 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         if (!CanUseAbility(player))
             return;
 
-        // すでに予約中なら使用不可
         if (randomPending)
             return;
 
-        // 使用回数確認
         if (randomUseCount[player - 1] >= MAX_RANDOM_USES)
             return;
 
-        // ランダム公開を予約
         randomPending = true;
 
-        // 使用回数加算
         randomUseCount[player - 1]++;
-
-        // このターンの能力使用済みにする
         abilityUsedThisTurn[player - 1] = true;
 
         Debug.Log(
             $"プレイヤー{player}がランダム公開を予約！" +
             $"残り回数：{GetRandomRemaining(player)}回"
-    );
+        );
 
         Debug.Log("次のターン開始時にランダム公開します！");
     }
 
     // =================================
-    // 使用回数取得
-    // UIManagerから使用する
+    // 残り使用回数
     // =================================
 
     public int GetShuffleRemaining(int player)
@@ -304,7 +267,7 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     }
 
     // =================================
-    // 能力使用回数チェック
+    // 使用可能判定
     // =================================
 
     public bool CanUseShuffle(int player)
@@ -344,9 +307,9 @@ public class MemoryBurstAbilityManager : MonoBehaviour
         shufflePending = false;
         randomPending = false;
 
-        Debug.Log(
-            "AbilityManager：ゲーム終了。能力を無効化しました。"
-        );
+        StopAllCoroutines();
+
+        Debug.Log("AbilityManager：ゲーム終了。能力を無効化しました。");
     }
 
     // =================================

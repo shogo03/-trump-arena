@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
@@ -35,6 +36,12 @@ public class MemoryBurstManager : MonoBehaviour
 
         Debug.Log($"プレイヤー人数：{playerCount}");
 
+        if (playerCount <= 0)
+        {
+            Debug.LogError("参加プレイヤーがいません！");
+            return;
+        }
+
         // TURN SKIPボタンの初期設定
         if (turnSkipButton != null)
         {
@@ -42,29 +49,57 @@ public class MemoryBurstManager : MonoBehaviour
             turnSkipButton.onClick.AddListener(OnTurnSkipButtonClicked);
         }
 
+        // =================================
         // 各マネージャーの初期化
+        // =================================
+
         turnManager.Initialize(playerCount);
         scoreManager.Initialize(playerCount);
         cardManager.Initialize();
 
+        // =================================
         // AbilityManager初期化
+        // =================================
+
         abilityManager.Initialize(
             playerCount,
             turnManager,
             cardManager
         );
 
+        // =================================
         // カードマネージャーのイベント登録
+        // =================================
+
         cardManager.OnPairMatched += OnPairMatched;
         cardManager.OnPairFailed += OnPairFailed;
         cardManager.OnAllCardsMatched += OnAllCardsMatched;
 
+        // =================================
         // ターンマネージャーのイベント登録
+        // =================================
+
         turnManager.OnTurnTimeout += OnTurnTimeout;
         turnManager.OnTurnChanged += OnTurnChanged;
 
+        // =================================
         // CPU初期化
-        cpu.Initialize(cardManager, turnManager);
+        // =================================
+
+        if (cpu != null)
+        {
+            cpu.Initialize(cardManager, turnManager);
+
+            // CPUにAbilityManagerを接続
+            cpu.SetAbilityManager(abilityManager);
+
+            Debug.Log("CPUとAbilityManagerの接続完了！");
+        }
+        else
+        {
+            Debug.LogError(
+                "MemoryBurstCPUがInspectorに設定されていません！");
+        }
 
         // =================================
         // CPU設定を取得
@@ -96,14 +131,15 @@ public class MemoryBurstManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("MemoryBurstUIManagerがInspectorに設定されていません！");
+            Debug.LogError(
+                "MemoryBurstUIManagerがInspectorに設定されていません！");
         }
 
         // =================================
         // 最初のプレイヤーがCPUだった場合
         // =================================
 
-        if (turnManager.IsCurrentPlayerCPU)
+        if (turnManager.IsCurrentPlayerCPU && cpu != null)
         {
             cpu.StartTurn(turnManager.CurrentPlayer);
         }
@@ -158,13 +194,16 @@ public class MemoryBurstManager : MonoBehaviour
         {
             HideTurnSkipButton();
 
-            Debug.Log("CPUのペア不成立！自動でターンを終了します。");
+            Debug.Log(
+                "CPUのペア不成立！自動でターンを終了します。");
+
             return;
         }
 
         ShowTurnSkipButton();
 
-        Debug.Log("ペア不成立！TURN SKIPボタンを表示します。");
+        Debug.Log(
+            "ペア不成立！TURN SKIPボタンを表示します。");
     }
 
     // =================================
@@ -203,7 +242,8 @@ public class MemoryBurstManager : MonoBehaviour
         if (cardManager.IsChecking)
             return;
 
-        Debug.Log($"プレイヤー{turnManager.CurrentPlayer}がターンを終了しました。");
+        Debug.Log(
+            $"プレイヤー{turnManager.CurrentPlayer}がターンを終了しました。");
 
         // ボタンを非表示
         HideTurnSkipButton();
@@ -230,12 +270,16 @@ public class MemoryBurstManager : MonoBehaviour
 
     private void OnTurnTimeout()
     {
-        cpu.StopTurn();
+        if (cpu != null)
+        {
+            cpu.StopTurn();
+        }
 
         if (isGameOver)
             return;
 
-        Debug.Log($"プレイヤー{turnManager.CurrentPlayer}の時間切れ！");
+        Debug.Log(
+            $"プレイヤー{turnManager.CurrentPlayer}の時間切れ！");
 
         HideTurnSkipButton();
 
@@ -258,12 +302,15 @@ public class MemoryBurstManager : MonoBehaviour
 
         HideTurnSkipButton();
 
-        cpu.StopTurn();
+        if (cpu != null)
+        {
+            cpu.StopTurn();
+        }
 
         Debug.Log($"プレイヤー{player}のターンです。");
 
         // CPUのターンならCPUを開始
-        if (turnManager.IsCurrentPlayerCPU)
+        if (turnManager.IsCurrentPlayerCPU && cpu != null)
         {
             cpu.StartTurn(player);
         }
@@ -280,12 +327,15 @@ public class MemoryBurstManager : MonoBehaviour
 
     private void FinishGame()
     {
-        cpu.StopTurn();
-
         if (isGameOver)
             return;
 
         isGameOver = true;
+
+        if (cpu != null)
+        {
+            cpu.StopTurn();
+        }
 
         HideTurnSkipButton();
 
@@ -301,7 +351,8 @@ public class MemoryBurstManager : MonoBehaviour
         // リザルト保存
         scoreManager.SaveResult();
 
-        Debug.Log("ゲーム終了！リザルトシーンへ移動します。");
+        Debug.Log(
+            "ゲーム終了！リザルトシーンへ移動します。");
 
         SceneManager.LoadScene(resultSceneName);
     }
@@ -355,7 +406,8 @@ public class MemoryBurstManager : MonoBehaviour
         // TURN SKIPボタン
         if (turnSkipButton != null)
         {
-            turnSkipButton.onClick.RemoveListener(OnTurnSkipButtonClicked);
+            turnSkipButton.onClick.RemoveListener(
+                OnTurnSkipButtonClicked);
         }
 
         // カードイベント解除
