@@ -61,6 +61,7 @@ public class BJdraw : MonoBehaviour
     public BJTurnManager turnManager;
     public BJRoundManager roundManager;
     public BJAbilityManager abilityManager;
+    public BJCursorManager cursorManager;
 
     [Header("プレイヤーUI")]
     public GameObject player2UI;
@@ -463,7 +464,13 @@ public class BJdraw : MonoBehaviour
     }
     public void StartGame()
     {
+
         UpdateRoundText();
+
+        if (cursorManager != null)
+        {
+            cursorManager.SetTurnCursor(1);
+        }
 
         isInitialDeal = true;
 
@@ -593,22 +600,39 @@ public class BJdraw : MonoBehaviour
         GameSettings.IsActive[0],
         GameSettings.IsActive[1],
         GameSettings.IsActive[2]
-        };
+    };
 
         bool[] finishedPlayers =
         {
         isStand || isBust,
         isStand2 || isBust2,
         isStand3 || isBust3
-        };
+    };
 
-        int nextTurn = turnManager.NextTurn(activePlayers, finishedPlayers);
+        // 次のプレイヤーを取得
+        int nextTurn = turnManager.NextTurn(
+            activePlayers,
+            finishedPlayers
+        );
 
+        // 全員終了
         if (nextTurn == 4)
         {
+            // 全員のカーソルを非表示
+            if (cursorManager != null)
+            {
+                cursorManager.SetTurnCursor(0);
+            }
+
             Debug.Log("全員終了！ディーラーのターン！");
             DealerTurn();
             return;
+        }
+
+        // 次のプレイヤーのカーソルだけ表示
+        if (cursorManager != null)
+        {
+            cursorManager.SetTurnCursor(nextTurn);
         }
 
         Debug.Log("プレイヤー" + nextTurn + "のターン！");
@@ -694,6 +718,13 @@ public class BJdraw : MonoBehaviour
         turnManager.ResetTurn();
 
         UpdateRoundText();
+
+        // カーソルを再表示
+        if (cursorManager != null)
+        {
+            //cursorManager.UpdateCursors();
+            cursorManager.SetTurnCursor(1);
+        }
 
         // 次のラウンド開始
         StartGame();
@@ -819,4 +850,5 @@ public void IncreaseBet1()
 //ka
 //ki
 //ku
-//ki
+//ke
+//ko
