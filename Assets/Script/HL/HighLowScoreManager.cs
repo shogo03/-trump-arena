@@ -45,9 +45,9 @@ public class HighLowScoreManager : MonoBehaviour
     private void UpdateScoreUI()
     {
         if (player1ScoreText != null)
-            player1ScoreText.text = "P1 : " + player1Score;
+            player1ScoreText.text = "P1: " + player1Score + "pt";
 
         if (player2ScoreText != null)
-            player2ScoreText.text = "P2 : " + player2Score;
+            player2ScoreText.text = "P2: " + player2Score + "pt";
     }
 }
