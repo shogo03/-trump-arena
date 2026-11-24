@@ -10,6 +10,12 @@ public class MemoryBurstUIManager : MonoBehaviour
     [Header("プレイヤーUI")]
     [SerializeField] private GameObject[] playerUI = new GameObject[4];
 
+    [Header("スキップ演出")]
+    [SerializeField] private TMP_Text[] skipMarkTexts = new TMP_Text[4];
+    [SerializeField] private float skipMarkDuration = 1.5f;
+
+    private Coroutine[] skipMarkCoroutines = new Coroutine[4];
+
 
     [Header("能力ボタン")]
     [SerializeField] private Button[] shuffleButtons = new Button[4];
@@ -136,7 +142,6 @@ public class MemoryBurstUIManager : MonoBehaviour
                 }
             }
 
-          
 
             // 能力ボタン
             if (shuffleButtons[i] != null)
@@ -220,37 +225,6 @@ public class MemoryBurstUIManager : MonoBehaviour
         {
             int player = i + 1;
 
-            // HIGH（次のカードを引いてHIGH判定）
-            if (highButtons[i] != null)
-            {
-                if (highActions[i] != null)
-                {
-                    highButtons[i].onClick.RemoveListener(highActions[i]);
-                }
-
-                highActions[i] = () =>
-                {
-                    OnDrawNextCard(player, isHigh: true);
-                };
-
-                highButtons[i].onClick.AddListener(highActions[i]);
-            }
-
-            // LOW（次のカードを引いてLOW判定）
-            if (lowButtons[i] != null)
-            {
-                if (lowActions[i] != null)
-                {
-                    lowButtons[i].onClick.RemoveListener(lowActions[i]);
-                }
-
-                lowActions[i] = () =>
-                {
-                    OnDrawNextCard(player, isHigh: false);
-                };
-
-                lowButtons[i].onClick.AddListener(lowActions[i]);
-            }
 
             // Shuffle
             if (shuffleButtons[i] != null)
@@ -423,12 +397,6 @@ public class MemoryBurstUIManager : MonoBehaviour
                 player == currentPlayer &&
                 !isCPUPlayers[i];
 
-            // HIGH / LOW は自分のターン＆人間プレイヤーのみ押せるようにする
-            if (highButtons[i] != null)
-                highButtons[i].interactable = isMyTurn;
-
-            if (lowButtons[i] != null)
-                lowButtons[i].interactable = isMyTurn;
 
             if (shuffleButtons[i] != null)
             {
@@ -586,9 +554,7 @@ public class MemoryBurstUIManager : MonoBehaviour
 
         for (int i = 0; i < 4; i++)
         {
-           
-
-           if (shuffleButtons[i] != null)
+            if (shuffleButtons[i] != null)
                 shuffleButtons[i].interactable = false;
 
             if (skipButtons[i] != null)
@@ -625,8 +591,6 @@ public class MemoryBurstUIManager : MonoBehaviour
 
         for (int i = 0; i < 4; i++)
         {
-           
-
             if (shuffleButtons[i] != null && shuffleActions[i] != null)
                 shuffleButtons[i].onClick.RemoveListener(shuffleActions[i]);
 
