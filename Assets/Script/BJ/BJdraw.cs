@@ -850,4 +850,4 @@ public void IncreaseBet1()
 //ka
 //ki
 //ku
-//ki
+//ke

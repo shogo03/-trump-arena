@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -32,44 +33,118 @@ public class MemoryBurstResult : MonoBehaviour
             return;
         }
 
+        // 勝者表示
         if (playerCount == 1)
         {
-            winnerText.text = "ゲームクリア！";
+            winnerText.text = "GAME CLEAR!";
         }
-        else if (winners.Length >= 2)
+        else if (winners != null && winners.Length >= 2)
         {
-            winnerText.text = "引き分け！";
+            winnerText.text = "DRAW!";
         }
-        else if (winners.Length == 1)
+        else if (winners != null && winners.Length == 1)
         {
-            winnerText.text = $"プレイヤー{winners[0]}の勝利！";
+            winnerText.text = $"{GetPlayerName(winners[0])} WIN!";
         }
         else
         {
-            winnerText.text = "ゲーム終了";
+            winnerText.text = "GAME OVER";
         }
 
-        StringBuilder sb = new StringBuilder();
+        // ランキング作成
+        List<int> ranking = new List<int>();
 
         for (int i = 0; i < playerCount && i < scores.Length; i++)
         {
-            sb.AppendLine($"プレイヤー{i + 1}：{scores[i]}点");
+            ranking.Add(i);
+        }
+
+        ranking.Sort((a, b) =>
+            scores[b].CompareTo(scores[a]));
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.AppendLine("FINAL RANKING");
+        sb.AppendLine();
+
+        int previousScore = -1;
+        int rank = 0;
+
+        for (int i = 0; i < ranking.Count; i++)
+        {
+            int playerIndex = ranking[i];
+            int score = scores[playerIndex];
+
+            // 同点なら同じ順位
+            if (i == 0 || score != previousScore)
+            {
+                rank = i + 1;
+            }
+
+            previousScore = score;
+
+            string rankText = rank switch
+            {
+                1 => "1st",
+                2 => "2nd",
+                3 => "3rd",
+                _ => $"{rank}th"
+            };
+
+            sb.AppendLine(
+                $"{rankText}  {GetPlayerName(playerIndex + 1)}      {score} pt"
+            );
+
+            if (GameSettings.IsCPU[playerIndex])
+            {
+                sb.AppendLine(
+                    $"      {GetCPULevelName(playerIndex)}"
+                );
+            }
         }
 
         scoreText.text = sb.ToString();
     }
 
+    // プレイヤー名
+    private string GetPlayerName(int playerNumber)
+    {
+        int index = playerNumber - 1;
+
+        if (index >= 0 &&
+            index < GameSettings.IsCPU.Length &&
+            GameSettings.IsCPU[index])
+        {
+            return $"CPU {playerNumber}";
+        }
+
+        return $"PLAYER {playerNumber}";
+    }
+
+    // CPU難易度
+    private string GetCPULevelName(int index)
+    {
+        if (index < 0 || index >= GameSettings.CPULevels.Length)
+            return "";
+
+        return GameSettings.CPULevels[index] switch
+        {
+            1 => "EASY",
+            2 => "NORMAL",
+            3 => "HARD",
+            _ => "UNKNOWN"
+        };
+    }
+
     // リトライ
     public void RetryGame()
     {
-        Debug.Log("リトライボタンが押されました");
         SceneManager.LoadScene(gameSceneName);
     }
 
     // タイトルへ戻る
     public void ReturnToTitle()
     {
-        Debug.Log("タイトルボタンが押されました");
         SceneManager.LoadScene(titleSceneName);
     }
 }

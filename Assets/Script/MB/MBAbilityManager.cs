@@ -6,7 +6,7 @@ public class MemoryBurstAbilityManager : MonoBehaviour
     // 能力使用回数
     // =================================
 
-    private const int MAX_SHUFFLE_USES = 2;
+    private const int MAX_SHUFFLE_USES = 1;
     private const int MAX_SKIP_USES = 1;
     private const int MAX_RANDOM_USES = 2;
 

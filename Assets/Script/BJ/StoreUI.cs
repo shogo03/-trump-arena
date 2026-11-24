@@ -4,6 +4,10 @@ public class StoreUI : MonoBehaviour
 {
     public GameObject storePanel;
 
+    public BJAbilityManager abilityManager;
+    public MoneyManager moneyManager;
+    public BJTurnManager turnManager;
+
     // ストアを開いている間に無効にするゲームUI
     public GameObject gameUI;
 
