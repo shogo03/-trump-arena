@@ -398,6 +398,141 @@ public class MoneyManager : MonoBehaviour
         UpdateUI();
     }
 
+// 引き直しを購入
+
+public void BuyRedraw()
+    {
+        int price = 100;
+        int player = currentShopPlayer;
+
+        if (player == 1)
+        {
+            if (hasRedrawAlready(0) || money1 < price)
+                return;
+
+            money1 -= price;
+        }
+        else if (player == 2)
+        {
+            if (hasRedrawAlready(1) || money2 < price)
+                return;
+
+            money2 -= price;
+        }
+        else if (player == 3)
+        {
+            if (hasRedrawAlready(2) || money3 < price)
+                return;
+
+            money3 -= price;
+        }
+        else
+        {
+            return;
+        }
+
+        abilityManager.AddRedraw(player - 1);
+
+        Debug.Log("P" + player + " 引き直しを購入！");
+        UpdateUI();
+    }
+
+
+    // 強制1枚追加を購入
+
+    public void BuyForceRedraw()
+    {
+        int price = 700;
+        int player = currentShopPlayer;
+
+        if (player == 1)
+        {
+            if (hasForceRedrawAlready(0) || money1 < price)
+                return;
+
+            money1 -= price;
+        }
+        else if (player == 2)
+        {
+            if (hasForceRedrawAlready(1) || money2 < price)
+                return;
+
+            money2 -= price;
+        }
+        else if (player == 3)
+        {
+            if (hasForceRedrawAlready(2) || money3 < price)
+                return;
+
+            money3 -= price;
+        }
+        else
+        {
+            return;
+        }
+
+        abilityManager.AddForceRedraw(player - 1);
+
+        Debug.Log("P" + player + " 強制1枚追加を購入！");
+        UpdateUI();
+    }
+
+
+    // ディーラー情報を購入
+
+    public void BuyDealerInfo()
+    {
+        int price = 50;
+        int player = currentShopPlayer;
+
+        if (player == 1)
+        {
+            if (hasDealerInfoAlready(0) || money1 < price)
+                return;
+
+            money1 -= price;
+        }
+        else if (player == 2)
+        {
+            if (hasDealerInfoAlready(1) || money2 < price)
+                return;
+
+            money2 -= price;
+        }
+        else if (player == 3)
+        {
+            if (hasDealerInfoAlready(2) || money3 < price)
+                return;
+
+            money3 -= price;
+        }
+        else
+        {
+            return;
+        }
+
+        abilityManager.AddDealerInfo(player - 1);
+
+        Debug.Log("P" + player + " 17サーチを購入！");
+        UpdateUI();
+    }
+
+
+    private bool hasRedrawAlready(int playerIndex)
+    {
+        return abilityManager.hasRedraw[playerIndex];
+    }
+
+    private bool hasForceRedrawAlready(int playerIndex)
+    {
+        return abilityManager.hasForceRedraw[playerIndex];
+    }
+
+    private bool hasDealerInfoAlready(int playerIndex)
+    {
+        return abilityManager.hasDealerInfo[playerIndex];
+    }
+
     public void ResetBet()
     {
         bet1 = 0;
