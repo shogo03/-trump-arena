@@ -8,6 +8,10 @@ public class MemoryBurstUIManager : MonoBehaviour
     [Header("プレイヤーUI")]
     [SerializeField] private GameObject[] playerUI = new GameObject[4];
 
+    [Header("HIGH / LOW ボタン（次のカードを引く）")]
+    [SerializeField] private Button[] highButtons = new Button[4];
+    [SerializeField] private Button[] lowButtons = new Button[4];
+
     [Header("能力ボタン")]
     [SerializeField] private Button[] shuffleButtons = new Button[4];
     [SerializeField] private Button[] skipButtons = new Button[4];
@@ -44,6 +48,8 @@ public class MemoryBurstUIManager : MonoBehaviour
     private bool isGameOver;
 
     // ボタンイベントを保存して、自分が登録したイベントだけ解除する
+    private UnityAction[] highActions = new UnityAction[4];
+    private UnityAction[] lowActions = new UnityAction[4];
     private UnityAction[] shuffleActions = new UnityAction[4];
     private UnityAction[] skipActions = new UnityAction[4];
     private UnityAction[] randomActions = new UnityAction[4];
@@ -58,7 +64,6 @@ public class MemoryBurstUIManager : MonoBehaviour
         MemoryBurstTurnManager turn,
         bool[] cpuPlayers = null)
     {
-       
         isGameOver = false;
 
         activePlayerCount = Mathf.Clamp(playerCount, 1, 4);
@@ -125,6 +130,13 @@ public class MemoryBurstUIManager : MonoBehaviour
                 }
             }
 
+            // HIGH / LOW ボタン
+            if (highButtons[i] != null)
+                highButtons[i].gameObject.SetActive(active);
+
+            if (lowButtons[i] != null)
+                lowButtons[i].gameObject.SetActive(active);
+
             // 能力ボタン
             if (shuffleButtons[i] != null)
                 shuffleButtons[i].gameObject.SetActive(active);
@@ -163,7 +175,6 @@ public class MemoryBurstUIManager : MonoBehaviour
         {
             if (playerIconImages[i] == null)
             {
-               
                 continue;
             }
 
@@ -173,14 +184,10 @@ public class MemoryBurstUIManager : MonoBehaviour
 
             if (targetSprite == null)
             {
-               
                 continue;
             }
 
             playerIconImages[i].sprite = targetSprite;
-            
-
-          
         }
     }
 
@@ -198,7 +205,7 @@ public class MemoryBurstUIManager : MonoBehaviour
     }
 
     // ==================================================
-    // 能力ボタン登録
+    // ボタン登録（HIGH / LOW / 能力）
     // ==================================================
 
     private void RegisterButtonEvents()
@@ -206,6 +213,38 @@ public class MemoryBurstUIManager : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
             int player = i + 1;
+
+            // HIGH（次のカードを引いてHIGH判定）
+            if (highButtons[i] != null)
+            {
+                if (highActions[i] != null)
+                {
+                    highButtons[i].onClick.RemoveListener(highActions[i]);
+                }
+
+                highActions[i] = () =>
+                {
+                    OnDrawNextCard(player, isHigh: true);
+                };
+
+                highButtons[i].onClick.AddListener(highActions[i]);
+            }
+
+            // LOW（次のカードを引いてLOW判定）
+            if (lowButtons[i] != null)
+            {
+                if (lowActions[i] != null)
+                {
+                    lowButtons[i].onClick.RemoveListener(lowActions[i]);
+                }
+
+                lowActions[i] = () =>
+                {
+                    OnDrawNextCard(player, isHigh: false);
+                };
+
+                lowButtons[i].onClick.AddListener(lowActions[i]);
+            }
 
             // Shuffle
             if (shuffleButtons[i] != null)
@@ -258,6 +297,23 @@ public class MemoryBurstUIManager : MonoBehaviour
                 randomButtons[i].onClick.AddListener(randomActions[i]);
             }
         }
+    }
+
+    // 次のカードを引く処理
+    private void OnDrawNextCard(int player, bool isHigh)
+    {
+        if (isGameOver || turnManager == null)
+            return;
+
+        // 現在の手番プレイヤー以外からの入力をガード
+        if (turnManager.CurrentPlayer != player || isCPUPlayers[player - 1])
+            return;
+
+        // ★ここにカードを引く・判定する処理をつなぐ
+        // 例：turnManager.DrawAndJudgeNextCard(player, isHigh);
+        Debug.Log($"Player {player} が {(isHigh ? "HIGH" : "LOW")} を選択し、次のカードを引きます");
+
+        RefreshUI();
     }
 
     // ==================================================
@@ -327,7 +383,7 @@ public class MemoryBurstUIManager : MonoBehaviour
     }
 
     // ==================================================
-    // 能力ボタン使用可否更新
+    // ボタン使用可否更新
     // ==================================================
 
     private void UpdateButtons()
@@ -335,10 +391,20 @@ public class MemoryBurstUIManager : MonoBehaviour
         if (abilityManager == null)
             return;
 
+        int currentPlayer = turnManager != null ? turnManager.CurrentPlayer : 1;
+
         for (int i = 0; i < 4; i++)
         {
             int player = i + 1;
             bool active = i < activePlayerCount && !isGameOver;
+            bool isMyTurn = active && (player == currentPlayer) && !isCPUPlayers[i];
+
+            // HIGH / LOW は自分のターン＆人間プレイヤーのみ押せるようにする
+            if (highButtons[i] != null)
+                highButtons[i].interactable = isMyTurn;
+
+            if (lowButtons[i] != null)
+                lowButtons[i].interactable = isMyTurn;
 
             if (shuffleButtons[i] != null)
             {
@@ -389,6 +455,12 @@ public class MemoryBurstUIManager : MonoBehaviour
 
         for (int i = 0; i < 4; i++)
         {
+            if (highButtons[i] != null)
+                highButtons[i].interactable = false;
+
+            if (lowButtons[i] != null)
+                lowButtons[i].interactable = false;
+
             if (shuffleButtons[i] != null)
                 shuffleButtons[i].interactable = false;
 
@@ -413,6 +485,12 @@ public class MemoryBurstUIManager : MonoBehaviour
 
         for (int i = 0; i < 4; i++)
         {
+            if (highButtons[i] != null && highActions[i] != null)
+                highButtons[i].onClick.RemoveListener(highActions[i]);
+
+            if (lowButtons[i] != null && lowActions[i] != null)
+                lowButtons[i].onClick.RemoveListener(lowActions[i]);
+
             if (shuffleButtons[i] != null && shuffleActions[i] != null)
                 shuffleButtons[i].onClick.RemoveListener(shuffleActions[i]);
 

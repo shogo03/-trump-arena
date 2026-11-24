@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 3b2753259f68ad3438bf4f9c8e0a09a1
+guid: e2d503f3968313c4dbd1d57eb81d3746
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -952851908988488781
-    second: HLBackGround_0
+      213: -4995575001530410360
+    second: HLBackGround2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: HLBackGround_0
+      name: HLBackGround2_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1376
-        height: 768
+        width: 1672
+        height: 941
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3b33039bc3ac6c2f0800000000000000
-      internalID: -952851908988488781
+      spriteID: 88a55f8f0072caab0800000000000000
+      internalID: -4995575001530410360
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      HLBackGround_0: -952851908988488781
+      HLBackGround2_0: -4995575001530410360
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

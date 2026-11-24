@@ -20,7 +20,7 @@ public class GameSelectManager : MonoBehaviour
     public void HighAndLow()
     {
         Debug.Log("HighAndLowを選択しました");
-        SceneManager.LoadScene("BJPlayerSelect");
+        SceneManager.LoadScene("HLPlayerSelect");
     }
 
     // 人数選択に戻る
