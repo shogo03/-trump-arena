@@ -477,25 +477,30 @@ public class MoneyManager : MonoBehaviour
         int price = 50;
         int player = currentShopPlayer;
 
+        
+
+        // 誰かがすでに購入していたら購入できない
+        if (abilityManager.hasDealerInfo[0] ||
+            abilityManager.hasDealerInfo[1] ||
+            abilityManager.hasDealerInfo[2])
+        {
+            Debug.Log("今ラウンドの17サーチは購入済みです！");
+            return;
+        }
+
         if (player == 1)
         {
-            if (hasDealerInfoAlready(0) || money1 < price)
-                return;
-
+            if (money1 < price) return;
             money1 -= price;
         }
         else if (player == 2)
         {
-            if (hasDealerInfoAlready(1) || money2 < price)
-                return;
-
+            if (money2 < price) return;
             money2 -= price;
         }
         else if (player == 3)
         {
-            if (hasDealerInfoAlready(2) || money3 < price)
-                return;
-
+            if (money3 < price) return;
             money3 -= price;
         }
         else
@@ -509,10 +514,10 @@ public class MoneyManager : MonoBehaviour
 
         UpdateUI();
 
-        // P1が購入したらすぐ発動
-        if (player == 1 && bjDraw != null)
+        // 購入したプレイヤーのターンに応じて判定
+        if (bjDraw != null)
         {
-            bjDraw.CheckDealerInfo1();
+            bjDraw.CheckDealerInfoCurrentPlayer();
         }
     }
 
