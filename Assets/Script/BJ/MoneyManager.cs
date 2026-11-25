@@ -318,6 +318,9 @@ public class MoneyManager : MonoBehaviour
         Debug.Log("P" + player + " 勝ち金UP！現在の段階：" +
             (player == 1 ? winStage1 : player == 2 ? winStage2 : winStage3));
 
+        abilityManager?.SyncMoneyAbilities(this);
+
+
         UpdateUI();
     }
 

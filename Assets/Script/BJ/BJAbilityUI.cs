@@ -16,6 +16,7 @@ public class BJAbilityUI : MonoBehaviour
     public TMP_Text[] countTexts = new TMP_Text[6];
 
     [Header("発動ボタン")]
+    public Button bustGuardButton;
     public Button redrawButton;
     public Button forceRedrawButton;
 
@@ -78,12 +79,20 @@ public class BJAbilityUI : MonoBehaviour
 
         // abi3：バースト無効
 
-        if (abilityManager.bustGuardCount[index] > 0)
-        {
+        if(abilityManager.bustGuardCount[index] > 0)
+{
             ShowAbility(
                 2,
                 "×" + abilityManager.bustGuardCount[index]
             );
+
+            if (bustGuardButton != null)
+                bustGuardButton.gameObject.SetActive(true);
+        }
+else
+        {
+            if (bustGuardButton != null)
+                bustGuardButton.gameObject.SetActive(false);
         }
 
 

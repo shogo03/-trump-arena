@@ -15,6 +15,8 @@ public class HighLowTurnManager : MonoBehaviour
     [Header("表示設定")]
     [SerializeField] private float switchDelay = 0.3f;
 
+    [SerializeField] private HighLowCursorManager cursorManager;
+
     private int currentPlayer = 1;
     private Coroutine popupCoroutine;
 
@@ -33,6 +35,9 @@ public class HighLowTurnManager : MonoBehaviour
         player1Prediction = HLManager.Prediction.None;
         player2Prediction = HLManager.Prediction.None;
 
+        if (cursorManager != null)
+            cursorManager.SetCurrentTurn(1);
+
         UpdateTurnText();
         ShowTurnPopup();
     }
@@ -43,6 +48,9 @@ public class HighLowTurnManager : MonoBehaviour
         {
             player1Prediction = prediction;
             currentPlayer = 2;
+
+            if (cursorManager != null)
+                cursorManager.SetCurrentTurn(2);
 
             UpdateTurnText();
             ShowTurnPopup();
@@ -65,6 +73,9 @@ public class HighLowTurnManager : MonoBehaviour
 
         player1Prediction = HLManager.Prediction.None;
         player2Prediction = HLManager.Prediction.None;
+
+        if (cursorManager != null)
+            cursorManager.SetCurrentTurn(1);
 
         UpdateTurnText();
         ShowTurnPopup();
