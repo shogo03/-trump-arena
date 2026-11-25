@@ -24,9 +24,10 @@ public class HLManager : MonoBehaviour
     [Header("スコア管理")]
     [SerializeField] private HighLowScoreManager scoreManager;
 
-    [Header("スキル管理")]
+    [Header("能力管理")]
     [SerializeField] private HighLowAbilityManager abilityManager;
 
+    [Header("タイマー管理")]
     [SerializeField] private HighLowTimerManager timerManager;
 
     [Header("残り枚数表示")]
@@ -69,6 +70,9 @@ public class HLManager : MonoBehaviour
     {
         deck.CreateDeck();
 
+        if (abilityManager != null)
+            abilityManager.Initialize();
+
         turnManager.Initialize();
         scoreManager.Initialize();
 
@@ -82,12 +86,10 @@ public class HLManager : MonoBehaviour
         ShowFirstCard();
     }
 
-    // 最初のカード
     private void ShowFirstCard()
     {
         currentCard = deck.DrawCard();
 
-       
         UpdateRemainingCards();
 
         if (currentCard == null)
@@ -98,7 +100,6 @@ public class HLManager : MonoBehaviour
         Debug.Log($"最初のカード：{currentCard.suit} {currentCard.number}");
     }
 
-    // カード表示・めくるアニメーション
     private void DisplayCard(HighLowDeck.CardData card)
     {
         if (card == null || card.image == null)
@@ -128,7 +129,6 @@ public class HLManager : MonoBehaviour
         rect.sizeDelta = new Vector2(210f, 350f);
         rect.localScale = Vector3.one;
 
-        // アニメーション用スクリプトを取得
         HighLowCardView cardView =
             currentCardObject.GetComponent<HighLowCardView>();
 
@@ -138,10 +138,8 @@ public class HLManager : MonoBehaviour
             return;
         }
 
-        // 裏面を表示してからめくる
         cardView.Setup(card.image, backImage);
 
-        // アニメーション中はボタンを無効化
         SetButtonsInteractable(false);
 
         cardView.Flip();
@@ -149,7 +147,6 @@ public class HLManager : MonoBehaviour
         StartCoroutine(WaitForFlip(cardView));
     }
 
-    // アニメーション終了まで待つ
     private IEnumerator WaitForFlip(HighLowCardView cardView)
     {
         while (cardView != null && cardView.IsFlipping)
@@ -157,40 +154,62 @@ public class HLManager : MonoBehaviour
             yield return null;
         }
 
-        // 現在表示中のカードか確認
         if (currentCardObject != null &&
             currentCardObject.GetComponent<HighLowCardView>() == cardView)
         {
-            SetButtonsInteractable(true);
+            RefreshPredictionButtons();
         }
     }
 
-    // ボタンの有効・無効
-    private void SetButtonsInteractable(bool value)
+    // HIGH・LOWボタンの状態更新
+    public void RefreshPredictionButtons()
     {
-        if (highButton != null)
-            highButton.interactable = value;
+        HighLowCardView cardView =
+            currentCardObject != null
+            ? currentCardObject.GetComponent<HighLowCardView>()
+            : null;
 
-        if (lowButton != null)
-            lowButton.interactable = value;
+        bool canSelect =
+            cardView != null &&
+            !cardView.IsFlipping &&
+            currentPrediction == Prediction.None;
+
+        SetButtonsInteractable(canSelect);
     }
 
-    // HIGHボタン
+    private void SetButtonsInteractable(bool value)
+    {
+        bool highAllowed = abilityManager == null ||
+            !abilityManager.IsPredictionBlocked(
+                turnManager.CurrentPlayer,
+                Prediction.High
+            );
+
+        bool lowAllowed = abilityManager == null ||
+            !abilityManager.IsPredictionBlocked(
+                turnManager.CurrentPlayer,
+                Prediction.Low
+            );
+
+        if (highButton != null)
+            highButton.interactable = value && highAllowed;
+
+        if (lowButton != null)
+            lowButton.interactable = value && lowAllowed;
+    }
+
     private void OnHighButtonClicked()
     {
         SelectPrediction(Prediction.High);
     }
 
-    // LOWボタン
     private void OnLowButtonClicked()
     {
         SelectPrediction(Prediction.Low);
     }
 
-    // 予想選択
     private void SelectPrediction(Prediction prediction)
     {
-        // アニメーション中は操作禁止
         HighLowCardView cardView =
             currentCardObject != null
             ? currentCardObject.GetComponent<HighLowCardView>()
@@ -205,13 +224,32 @@ public class HLManager : MonoBehaviour
         if (turnManager.BothPlayersPredicted())
             return;
 
+        int predictingPlayer = turnManager.CurrentPlayer;
+
+        // 妨害されている予想なら操作禁止
+        if (abilityManager != null &&
+            abilityManager.IsPredictionBlocked(
+                predictingPlayer,
+                prediction))
+        {
+            Debug.Log("この予想は妨害されています！");
+            return;
+        }
+
         currentPrediction = prediction;
 
         Debug.Log(
-            $"PLAYER {turnManager.CurrentPlayer} の予想：{prediction}"
+            $"PLAYER {predictingPlayer} の予想：{prediction}"
         );
 
         turnManager.SetPrediction(prediction);
+
+        // 妨害対象の予想が終わったら効果解除
+        if (abilityManager != null)
+        {
+            abilityManager.OnPredictionMade(predictingPlayer);
+            abilityManager.RefreshAbilityButtons();
+        }
 
         if (turnManager.BothPlayersPredicted())
         {
@@ -229,29 +267,32 @@ public class HLManager : MonoBehaviour
         else
         {
             currentPrediction = Prediction.None;
+
+            RefreshPredictionButtons();
         }
     }
 
-    // 次のカードを表示
     private void ShowNextCard()
     {
         previousCard = currentCard;
 
         HighLowDeck.CardData nextCard = deck.DrawCard();
 
-        //currentCard = deck.DrawCard();
         UpdateRemainingCards();
 
         if (nextCard == null)
         {
             Debug.Log("デッキがなくなりました");
 
-            highButton.interactable = false;
-            lowButton.interactable = false;
+            if (highButton != null)
+                highButton.interactable = false;
+
+            if (lowButton != null)
+                lowButton.interactable = false;
+
             return;
         }
 
-        // 2人の予想を判定して加点
         CheckPredictions(nextCard);
 
         currentCard = nextCard;
@@ -263,7 +304,6 @@ public class HLManager : MonoBehaviour
         );
     }
 
-    // 正解判定
     private void CheckPredictions(HighLowDeck.CardData nextCard)
     {
         int oldNumber = previousCard.number;
@@ -278,20 +318,11 @@ public class HLManager : MonoBehaviour
             return;
         }
 
-        Prediction correctPrediction;
-
-        if (newNumber > oldNumber)
-        {
-            correctPrediction = Prediction.High;
-        }
-        else
-        {
-            correctPrediction = Prediction.Low;
-        }
+        Prediction correctPrediction =
+            newNumber > oldNumber ? Prediction.High : Prediction.Low;
 
         Debug.Log($"正解は：{correctPrediction}");
 
-        // Player1の判定
         if (turnManager.Player1Prediction == correctPrediction)
         {
             scoreManager.AddPlayer1Score(1);
@@ -302,7 +333,6 @@ public class HLManager : MonoBehaviour
             Debug.Log("Player1 不正解");
         }
 
-        // Player2の判定
         if (turnManager.Player2Prediction == correctPrediction)
         {
             scoreManager.AddPlayer2Score(1);
@@ -314,27 +344,18 @@ public class HLManager : MonoBehaviour
         }
     }
 
-    // 選択リセット
     private void ResetSelection()
     {
         currentPrediction = Prediction.None;
-
-        // カードのアニメーション中ならボタンを有効にしない
-        HighLowCardView cardView =
-            currentCardObject != null
-            ? currentCardObject.GetComponent<HighLowCardView>()
-            : null;
-
-        bool canSelect = cardView != null && !cardView.IsFlipping;
-
-        SetButtonsInteractable(canSelect);
+        RefreshPredictionButtons();
     }
 
     private void UpdateRemainingCards()
     {
         if (remainingCardsText != null)
         {
-            remainingCardsText.text = "残 : " + deck.RemainingCards + "枚";
+            remainingCardsText.text =
+                "残 : " + deck.RemainingCards + "枚";
         }
     }
 }
