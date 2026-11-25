@@ -733,6 +733,9 @@ public class BJdraw : MonoBehaviour
         bustGuardUsed2 = false;
         bustGuardUsed3 = false;
 
+        // P1のディーラー情報能力をリセット
+        abilityManager.hasDealerInfo[0] = false;
+
         turnManager.ResetTurn();
 
         UpdateRoundText();
@@ -951,6 +954,35 @@ public class BJdraw : MonoBehaviour
         UpdatePoint2();
 
         Debug.Log("P2 引き直し完了！");
+    }
+
+    public void CheckDealerInfo1()
+    {
+        if (abilityManager == null)
+        {
+            Debug.LogError("BJAbilityManagerが設定されていません！");
+            return;
+        }
+
+        // 能力を所持しているか確認
+        if (!abilityManager.UseDealerInfo(0))
+        {
+            Debug.Log("ディーラー情報能力を持っていません！");
+            return;
+        }
+
+        // ディーラーの合計点を取得
+        int dealerPoint = bjDealer.GetDealerTotal();
+
+        // 17以上か未満か表示
+        if (dealerPoint >= 17)
+        {
+            Debug.Log("ディーラーの手札は17以上！");
+        }
+        else
+        {
+            Debug.Log("ディーラーの手札は17未満！");
+        }
     }
 }
 //ここから下 変更用
