@@ -1917,7 +1917,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HighLowTimerManager
   timerText: {fileID: 1822777679}
-  gameTimeLimit: 60
+  gameTimeLimit: 150
 --- !u!4 &1690278762
 Transform:
   m_ObjectHideFlags: 0
