@@ -827,6 +827,8 @@ public class BJdraw : MonoBehaviour
 
         // P1のディーラー情報能力をリセット
         abilityManager.hasDealerInfo[0] = false;
+        abilityManager.hasDealerInfo[1] = false;
+        abilityManager.hasDealerInfo[2] = false;
 
         turnManager.ResetTurn();
 
@@ -1114,8 +1116,15 @@ public class BJdraw : MonoBehaviour
         }
     }
 
-    public void CheckDealerInfo1()
+    
+
+    public void CheckDealerInfoCurrentPlayer()
     {
+        int playerIndex = turnManager.GetCurrentTurn() - 1;
+
+        if (playerIndex < 0 || playerIndex >= 3)
+            return;
+
         if (abilityManager == null)
         {
             Debug.LogError("BJAbilityManagerが設定されていません！");
@@ -1123,7 +1132,7 @@ public class BJdraw : MonoBehaviour
         }
 
         // 能力を所持しているか確認
-        if (!abilityManager.UseDealerInfo(0))
+        if (!abilityManager.UseDealerInfo(playerIndex))
         {
             Debug.Log("ディーラー情報能力を持っていません！");
             return;
@@ -1132,7 +1141,6 @@ public class BJdraw : MonoBehaviour
         // ディーラーの合計点を取得
         int dealerPoint = bjDealer.GetDealerTotal();
 
-        // 17以上か未満か表示
         if (dealerPoint >= 17)
         {
             Debug.Log("ディーラーの手札は17以上！");
