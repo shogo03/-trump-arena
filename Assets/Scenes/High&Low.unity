@@ -2099,6 +2099,7 @@ MonoBehaviour:
   deck: {fileID: 126362696}
   cardPrefab: {fileID: 269407260684178881, guid: b9a7ff65a06e15d4680a0c845f22d685, type: 3}
   cardArea: {fileID: 1314168055}
+  backImage: {fileID: 6785808537490883368, guid: e1f3e3c372788cb499b4dc9bc126a335, type: 3}
   highButton: {fileID: 1218741129}
   lowButton: {fileID: 1481852338}
   turnManager: {fileID: 631786184}
