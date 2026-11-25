@@ -52,6 +52,14 @@ public class BJdraw : MonoBehaviour
     private bool isStand2 = false;
     private bool isStand3 = false;
 
+    // P1の引き直し管理
+    private bool hasHit1 = false;
+    private bool hasRedrawn1 = false;
+
+    // P2の引き直し管理
+    private bool hasHit2 = false;
+    private bool hasRedrawn2 = false;
+
     // バースト無効で返金されたか
     private bool bustGuardUsed1 = false;
     private bool bustGuardUsed2 = false;
@@ -122,6 +130,11 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
+        if (!isInitialDeal)
+        {
+            hasHit1 = true;
+        }
+
         cardManager.DrawAndDisplayCard(deck, cardManager.hand, handArea, cardPrefab, cardSize, isInitialDeal);
 
         UpdatePoint();
@@ -157,6 +170,11 @@ public class BJdraw : MonoBehaviour
         {
             Debug.LogError("BJCardManagerが設定されていません！");
             return;
+        }
+
+        if (!isInitialDeal)
+        {
+            hasHit2 = true;
         }
 
         cardManager.DrawAndDisplayCard(deck, cardManager.hand2, handArea2, cardPrefab, cardSize, isInitialDeal);
@@ -790,7 +808,7 @@ public class BJdraw : MonoBehaviour
  
  // BET変更
 
-public void IncreaseBet1()
+    public void IncreaseBet1()
     {
         if (turnManager.GetCurrentTurn() != 1)
             return;
@@ -823,7 +841,6 @@ public void IncreaseBet1()
         moneyManager.DecreaseBet2();
     }
 
-
     public void IncreaseBet3()
     {
         if (turnManager.GetCurrentTurn() != 3)
@@ -840,15 +857,101 @@ public void IncreaseBet1()
         moneyManager.DecreaseBet3();
     }
 
+    public void Redraw1()
+    {
+        // P1のターンか確認
+        if (turnManager.GetCurrentTurn() != 1)
+            return;
+
+        // BET確定前なら使えない
+        if (!betConfirmed1)
+            return;
+
+        // HIT後・使用済みなら使えない
+        if (hasHit1 || hasRedrawn1)
+            return;
+
+        // 引き直し能力を持っているか確認
+        if (abilityManager == null ||
+            !abilityManager.UseRedraw(0))
+        {
+            Debug.Log("引き直し能力を持っていません！");
+            return;
+        }
+
+        // 古い手札を消す
+        cardManager.hand.Clear();
+        cardManager.ClearCards(handArea);
+
+        // 状態をリセット
+        isBust = false;
+        isStand = false;
+        hasRedrawn1 = true;
+
+        // 新しいカードを2枚配る
+        cardManager.DrawAndDisplayCard(
+            deck, cardManager.hand, handArea,
+            cardPrefab, cardSize, false
+        );
+
+        cardManager.DrawAndDisplayCard(
+            deck, cardManager.hand, handArea,
+            cardPrefab, cardSize, false
+        );
+
+        // 点数更新
+        UpdatePoint();
+
+        Debug.Log("P1 引き直し完了！");
+    }
+
+    public void Redraw2()
+    {
+        // P2のターンか確認
+        if (turnManager.GetCurrentTurn() != 2)
+            return;
+
+        // BET確定前なら使えない
+        if (!betConfirmed2)
+            return;
+
+        // HIT後・使用済みなら使えない
+        if (hasHit2 || hasRedrawn2)
+            return;
+
+        // 引き直し能力を持っているか確認
+        if (abilityManager == null ||
+            !abilityManager.UseRedraw(1))
+        {
+            Debug.Log("P2は引き直し能力を持っていません！");
+            return;
+        }
+
+        // 古い手札を消す
+        cardManager.hand2.Clear();
+        cardManager.ClearCards(handArea2);
+
+        // 状態をリセット
+        isBust2 = false;
+        isStand2 = false;
+        hasRedrawn2 = true;
+
+        // 新しいカードを2枚配る
+        cardManager.DrawAndDisplayCard(
+            deck, cardManager.hand2, handArea2,
+            cardPrefab, cardSize, false
+        );
+
+        cardManager.DrawAndDisplayCard(
+            deck, cardManager.hand2, handArea2,
+            cardPrefab, cardSize, false
+        );
+
+        // 点数更新
+        UpdatePoint2();
+
+        Debug.Log("P2 引き直し完了！");
+    }
 }
 //ここから下 変更用
-//a
-//i
-//u
-//e
-//o
-//ka
-//ki
-//ku
-//ke
-//ko
+
