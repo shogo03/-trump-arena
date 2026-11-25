@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1857975770621971326}
   - component: {fileID: 8926362927900221097}
   - component: {fileID: 2484432465643465312}
+  - component: {fileID: -4905634962886256240}
   m_Layer: 5
   m_Name: HLCard
   m_TagString: Untagged
@@ -34,7 +35,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 5, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8926362927900221097
@@ -75,3 +76,17 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &-4905634962886256240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 269407260684178881}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6219d5ab88ac874984a2724f7d0b8ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HighLowCardView
+  cardImage: {fileID: 2484432465643465312}
+  flipDuration: 0.8

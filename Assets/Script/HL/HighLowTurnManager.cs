@@ -1,16 +1,23 @@
+
+using System.Collections;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class HighLowTurnManager : MonoBehaviour
 {
-    [Header("プレイヤー表示")]
+    [Header("ターン表示")]
     [SerializeField] private TextMeshProUGUI playerTurnText;
 
-    //現在のプレイヤー
-    private int currentPlayer = 1;
+    [Header("ポップアップ表示")]
+    [SerializeField] private GameObject turnPopup;
+    [SerializeField] private TextMeshProUGUI popupText;
 
-    //それぞれの予想
+    [Header("表示設定")]
+    [SerializeField] private float switchDelay = 0.3f;
+
+    private int currentPlayer = 1;
+    private Coroutine popupCoroutine;
+
     private HLManager.Prediction player1Prediction;
     private HLManager.Prediction player2Prediction;
 
@@ -19,8 +26,6 @@ public class HighLowTurnManager : MonoBehaviour
     public HLManager.Prediction Player1Prediction => player1Prediction;
     public HLManager.Prediction Player2Prediction => player2Prediction;
 
-
-    //初期化
     public void Initialize()
     {
         currentPlayer = 1;
@@ -29,34 +34,31 @@ public class HighLowTurnManager : MonoBehaviour
         player2Prediction = HLManager.Prediction.None;
 
         UpdateTurnText();
+        ShowTurnPopup();
     }
 
-  
-    //予想を登録
     public void SetPrediction(HLManager.Prediction prediction)
     {
-        if(currentPlayer == 1)
+        if (currentPlayer == 1)
         {
             player1Prediction = prediction;
             currentPlayer = 2;
-        }
 
+            UpdateTurnText();
+            ShowTurnPopup();
+        }
         else
         {
             player2Prediction = prediction;
         }
-
-        UpdateTurnText();
     }
 
-    //二人とも予想したか
     public bool BothPlayersPredicted()
     {
         return player1Prediction != HLManager.Prediction.None &&
                player2Prediction != HLManager.Prediction.None;
     }
-   
-    //次のラウンドへ
+
     public void NextRound()
     {
         currentPlayer = 1;
@@ -65,14 +67,45 @@ public class HighLowTurnManager : MonoBehaviour
         player2Prediction = HLManager.Prediction.None;
 
         UpdateTurnText();
+        ShowTurnPopup();
     }
 
-    //ターン表示
     private void UpdateTurnText()
     {
-        if(playerTurnText != null)
-        {
+        if (playerTurnText != null)
             playerTurnText.text = "PLAYER " + currentPlayer + " TURN";
+    }
+
+    private void ShowTurnPopup()
+    {
+        if (popupCoroutine != null)
+            StopCoroutine(popupCoroutine);
+
+        popupCoroutine = StartCoroutine(SwitchPopup());
+    }
+
+    private IEnumerator SwitchPopup()
+    {
+        // いったん非表示
+        if (turnPopup != null)
+            turnPopup.SetActive(false);
+
+        // 少し待つ
+        yield return new WaitForSeconds(switchDelay);
+
+        if (turnPopup != null && popupText != null)
+        {
+            popupText.text = "PLAYER " + currentPlayer + " TURN";
+
+            // プレイヤーごとに文字色を変更
+            popupText.color = currentPlayer == 1
+                ? Color.white
+                : Color.red;
+
+            // 再表示
+            turnPopup.SetActive(true);
         }
+
+        popupCoroutine = null;
     }
 }

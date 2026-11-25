@@ -1,5 +1,6 @@
 
-using Unity.VisualScripting;
+using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,7 @@ public class HLManager : MonoBehaviour
     [Header("カード表示")]
     [SerializeField] private GameObject cardPrefab;
     [SerializeField] private Transform cardArea;
+    [SerializeField] private Sprite backImage;
 
     [Header("HIGH・LOWボタン")]
     [SerializeField] private Button highButton;
@@ -26,6 +28,9 @@ public class HLManager : MonoBehaviour
     [SerializeField] private HighLowAbilityManager abilityManager;
 
     [SerializeField] private HighLowTimerManager timerManager;
+
+    [Header("残り枚数表示")]
+    [SerializeField] private TextMeshProUGUI remainingCardsText;
 
     public enum Prediction
     {
@@ -82,6 +87,9 @@ public class HLManager : MonoBehaviour
     {
         currentCard = deck.DrawCard();
 
+        currentCard = deck.DrawCard();
+        UpdateRemainingCards();
+
         if (currentCard == null)
             return;
 
@@ -90,12 +98,18 @@ public class HLManager : MonoBehaviour
         Debug.Log($"最初のカード：{currentCard.suit} {currentCard.number}");
     }
 
-    // カード表示
+    // カード表示・めくるアニメーション
     private void DisplayCard(HighLowDeck.CardData card)
     {
         if (card == null || card.image == null)
         {
             Debug.LogError("カードデータまたは画像がありません");
+            return;
+        }
+
+        if (backImage == null)
+        {
+            Debug.LogError("カード裏面画像が設定されていません");
             return;
         }
 
@@ -110,23 +124,55 @@ public class HLManager : MonoBehaviour
         rect.anchorMin = new Vector2(0.5f, 0.5f);
         rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = new Vector2(150f, 100f);
-        rect.sizeDelta = new Vector2(170f, 310f);
+        rect.anchoredPosition = new Vector2(0f, 100f);
+        rect.sizeDelta = new Vector2(210f, 350f);
         rect.localScale = Vector3.one;
 
-        Image cardImage =
-            currentCardObject.GetComponentInChildren<Image>(true);
+        // アニメーション用スクリプトを取得
+        HighLowCardView cardView =
+            currentCardObject.GetComponent<HighLowCardView>();
 
-        if (cardImage == null)
+        if (cardView == null)
         {
-            Debug.LogError("カードのImageがありません");
+            Debug.LogError("HighLowCardViewがPrefabにありません");
             return;
         }
 
-        cardImage.sprite = card.image;
-        cardImage.color = Color.white;
-        cardImage.enabled = true;
-        cardImage.preserveAspect = true;
+        // 裏面を表示してからめくる
+        cardView.Setup(card.image, backImage);
+
+        // アニメーション中はボタンを無効化
+        SetButtonsInteractable(false);
+
+        cardView.Flip();
+
+        StartCoroutine(WaitForFlip(cardView));
+    }
+
+    // アニメーション終了まで待つ
+    private IEnumerator WaitForFlip(HighLowCardView cardView)
+    {
+        while (cardView != null && cardView.IsFlipping)
+        {
+            yield return null;
+        }
+
+        // 現在表示中のカードか確認
+        if (currentCardObject != null &&
+            currentCardObject.GetComponent<HighLowCardView>() == cardView)
+        {
+            SetButtonsInteractable(true);
+        }
+    }
+
+    // ボタンの有効・無効
+    private void SetButtonsInteractable(bool value)
+    {
+        if (highButton != null)
+            highButton.interactable = value;
+
+        if (lowButton != null)
+            lowButton.interactable = value;
     }
 
     // HIGHボタン
@@ -144,6 +190,15 @@ public class HLManager : MonoBehaviour
     // 予想選択
     private void SelectPrediction(Prediction prediction)
     {
+        // アニメーション中は操作禁止
+        HighLowCardView cardView =
+            currentCardObject != null
+            ? currentCardObject.GetComponent<HighLowCardView>()
+            : null;
+
+        if (cardView == null || cardView.IsFlipping)
+            return;
+
         if (currentPrediction != Prediction.None)
             return;
 
@@ -183,6 +238,9 @@ public class HLManager : MonoBehaviour
         previousCard = currentCard;
 
         HighLowDeck.CardData nextCard = deck.DrawCard();
+
+        currentCard = deck.DrawCard();
+        UpdateRemainingCards();
 
         if (nextCard == null)
         {
@@ -261,7 +319,22 @@ public class HLManager : MonoBehaviour
     {
         currentPrediction = Prediction.None;
 
-        highButton.interactable = true;
-        lowButton.interactable = true;
+        // カードのアニメーション中ならボタンを有効にしない
+        HighLowCardView cardView =
+            currentCardObject != null
+            ? currentCardObject.GetComponent<HighLowCardView>()
+            : null;
+
+        bool canSelect = cardView != null && !cardView.IsFlipping;
+
+        SetButtonsInteractable(canSelect);
+    }
+
+    private void UpdateRemainingCards()
+    {
+        if (remainingCardsText != null)
+        {
+            remainingCardsText.text = "残 : " + deck.RemainingCards + "枚";
+        }
     }
 }
