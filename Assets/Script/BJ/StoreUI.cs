@@ -18,14 +18,63 @@ public class StoreUI : MonoBehaviour
 
     public void OpenStore()
     {
+        Debug.Log("OpenStore() が呼ばれました");
+
+        if (turnManager == null)
+        {
+            Debug.LogError("StoreUIのTurn Managerが設定されていません！");
+            return;
+        }
+
+        if (moneyManager == null)
+        {
+            Debug.LogError("StoreUIのMoney Managerが設定されていません！");
+            return;
+        }
+
+        int player = turnManager.GetCurrentTurn();
+
+        Debug.Log("現在のターン：" + player);
+
+        if (player < 1 || player > 3)
+        {
+            Debug.LogError("ショップを開けるプレイヤーではありません！");
+            return;
+        }
+
+        // ★現在ターンのプレイヤーをショップ利用者にする
+        moneyManager.SetShopPlayer(player);
+
         // ストア表示
         storePanel.SetActive(true);
 
-        // ゲーム側UIを非表示
         if (gameUI != null)
             gameUI.SetActive(false);
 
+        if (moneyText1 != null)
+            moneyText1.SetActive(false);
+
+        if (moneyText2 != null)
+            moneyText2.SetActive(false);
+
+        if (moneyText3 != null)
+            moneyText3.SetActive(false);
+    
+
+
+    // ストア表示
+
+    storePanel.SetActive(true);
+
+
+        // ゲーム側UIを非表示
+
+        if (gameUI != null)
+            gameUI.SetActive(false);
+
+
         // 所持金表示も非表示
+
         if (moneyText1 != null)
             moneyText1.SetActive(false);
 
@@ -42,9 +91,11 @@ public class StoreUI : MonoBehaviour
         // ストア非表示
         storePanel.SetActive(false);
 
+
         // ゲーム側UIを再表示
         if (gameUI != null)
             gameUI.SetActive(true);
+
 
         // 所持金表示も再表示
         if (moneyText1 != null)

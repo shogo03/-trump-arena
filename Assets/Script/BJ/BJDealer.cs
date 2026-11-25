@@ -139,7 +139,6 @@ public class BJDealer : MonoBehaviour
     }
 
     // 次のラウンドに向けてディーラーをリセット
-    // 次のラウンドに向けてディーラーをリセット
     public void ResetDealer()
     {
         dealerHand.Clear();
