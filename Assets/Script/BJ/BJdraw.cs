@@ -65,6 +65,9 @@ public class BJdraw : MonoBehaviour
     private bool bustGuardUsed2 = false;
     private bool bustGuardUsed3 = false;
 
+    private bool forceCardHidden2 = false;
+    private bool forceCardHidden3 = false;
+
     public BJCardManager cardManager;
     public BJTurnManager turnManager;
     public BJRoundManager roundManager;
@@ -142,6 +145,13 @@ public class BJdraw : MonoBehaviour
 
     public void DrawCard2()
     {
+        // 強制追加されたカードを表向きにする
+        if (!isInitialDeal && forceCardHidden2)
+        {
+            cardManager.RevealCards(cardManager.hand2, handArea2);
+            forceCardHidden2 = false;
+        }
+
         if (!isInitialDeal && turnManager.GetCurrentTurn() != 2)
         {
             Debug.Log("現在はP2のターンではありません");
@@ -178,11 +188,27 @@ public class BJdraw : MonoBehaviour
         }
 
         cardManager.DrawAndDisplayCard(deck, cardManager.hand2, handArea2, cardPrefab, cardSize, isInitialDeal);
-        UpdatePoint2();
+
+        if (cardManager.hand2.Count > handArea2.childCount)
+        {
+            cardManager.RevealCards(cardManager.hand2, handArea2);
+        }
+
+        if (!forceCardHidden2)
+        {
+            UpdatePoint2();
+        }
     }
 
     public void DrawCard3()
     {
+        // 強制追加されたカードを表向きにする
+        if (!isInitialDeal && forceCardHidden3)
+        {
+            cardManager.RevealCards(cardManager.hand3, handArea3);
+            forceCardHidden3 = false;
+        }
+
         if (!isInitialDeal && turnManager.GetCurrentTurn() != 3)
         {
             Debug.Log("現在はP3のターンではありません");
@@ -214,7 +240,58 @@ public class BJdraw : MonoBehaviour
         }
 
         cardManager.DrawAndDisplayCard(deck, cardManager.hand3, handArea3, cardPrefab, cardSize, isInitialDeal);
-        UpdatePoint3();
+        if (!forceCardHidden3)
+        {
+            UpdatePoint3();
+        }
+    }
+
+    public void ForceRedraw1()
+    {
+        // P1のターンでなければ使用できない
+        if (turnManager.GetCurrentTurn() != 1)
+        {
+            Debug.Log("P1のターンではありません！");
+            return;
+        }
+
+        // P1がBET確定していなければ使用できない
+        if (!betConfirmed1)
+        {
+            Debug.Log("先にBETを確定してください！");
+            return;
+        }
+
+        // 能力を持っているか確認して消費
+        if (abilityManager == null || !abilityManager.UseForceRedraw(0))
+        {
+            Debug.Log("強制引き直し能力を持っていません！");
+            return;
+        }
+
+        // P2が参加中で、バースト・STANDしていなければ1枚引く
+        if (GameSettings.IsActive[1] && !isBust2 && !isStand2)
+        {
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand2, handArea2,
+                cardPrefab, cardSize, true
+            );
+
+            forceCardHidden2 = true;
+        }
+
+        // P3が参加中で、バースト・STANDしていなければ1枚引く
+        if (GameSettings.IsActive[2] && !isBust3 && !isStand3)
+        {
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand3, handArea3,
+                cardPrefab, cardSize, true
+            );
+
+            forceCardHidden3 = true;
+        }
+
+        Debug.Log("強制引き直しを発動！P2・P3にカードを配りました！");
     }
 
     public void ConfirmBet1()
@@ -428,8 +505,6 @@ public class BJdraw : MonoBehaviour
 
         NextTurn();
     }
-
-
 
     public void Stand()
     {
