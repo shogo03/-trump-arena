@@ -1,8 +1,9 @@
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 
 public class BJdraw : MonoBehaviour
@@ -26,7 +27,8 @@ public class BJdraw : MonoBehaviour
     public BJDealer bjDealer;
     public BJResult bjResult;
 
-   
+    public TMP_Text dealerInfoText;
+
     public Vector2 cardSize = new Vector2(60, 80);
 
     public Text roundText;
@@ -1142,6 +1144,34 @@ public class BJdraw : MonoBehaviour
             Debug.Log("ディーラーの手札は17未満！");
         }
     }
+
+    public void UseDealerInfo()
+    {
+        int currentPlayer = turnManager.GetCurrentTurn();
+
+        // 17サーチを所持しているか確認
+        if (!abilityManager.UseDealerInfo(currentPlayer - 1))
+        {
+            Debug.Log("17サーチを持っていません！");
+            return;
+        }
+
+        int dealerTotal = bjDealer.GetDealerTotal();
+
+        if (dealerTotal >= 17)
+        {
+            dealerInfoText.text = "ディーラーは17以上です";
+        }
+        else
+        {
+            dealerInfoText.text = "ディーラーは17未満です";
+        }
+
+        dealerInfoText.gameObject.SetActive(true);
+
+        Debug.Log("17サーチ結果：" + dealerTotal);
+    }
+
 }
 //ここから下 変更用
 

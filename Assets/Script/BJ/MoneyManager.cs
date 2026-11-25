@@ -37,6 +37,7 @@ public class MoneyManager : MonoBehaviour
     public int betUpStage3 = 0;
 
     public BJdraw bjDraw;
+    public TMP_Text dealerInfoText;
 
 
     void Awake()
