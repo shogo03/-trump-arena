@@ -87,7 +87,7 @@ public class HLManager : MonoBehaviour
     {
         currentCard = deck.DrawCard();
 
-        currentCard = deck.DrawCard();
+       
         UpdateRemainingCards();
 
         if (currentCard == null)
@@ -239,7 +239,7 @@ public class HLManager : MonoBehaviour
 
         HighLowDeck.CardData nextCard = deck.DrawCard();
 
-        currentCard = deck.DrawCard();
+        //currentCard = deck.DrawCard();
         UpdateRemainingCards();
 
         if (nextCard == null)
