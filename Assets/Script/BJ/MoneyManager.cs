@@ -36,6 +36,8 @@ public class MoneyManager : MonoBehaviour
     public int betUpStage2 = 0;
     public int betUpStage3 = 0;
 
+    public BJdraw bjDraw;
+
 
     void Awake()
     {
@@ -49,15 +51,12 @@ public class MoneyManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-
     void Start()
     {
         UpdateUI();
     }
 
     // ベットする
-
-
     public void PlaceBet(int player)
     {
         if (player == 1)
@@ -103,7 +102,6 @@ public class MoneyManager : MonoBehaviour
     }
 
     // 勝ち
-
     public void Win(int player)
     {
         int bet = 0;
@@ -137,9 +135,7 @@ public class MoneyManager : MonoBehaviour
         UpdateUI();
     }
 
-
     // 負け
-
     public void Lose(int player)
     {
         // BETした時点でお金を引いているので、
@@ -173,7 +169,6 @@ public class MoneyManager : MonoBehaviour
     }
 
     // 引き分け
-
     public void Draw(int player)
     {
         if (player == 1)
@@ -248,7 +243,6 @@ public class MoneyManager : MonoBehaviour
     }
 
     // P1 BET -10
-
     public void DecreaseBet1()
     {
         bet1 -= 10;
@@ -281,7 +275,6 @@ public class MoneyManager : MonoBehaviour
         UpdateUI();
     }
     // UI更新
-
 
     void UpdateUI()
     {
@@ -398,9 +391,8 @@ public class MoneyManager : MonoBehaviour
         UpdateUI();
     }
 
-// 引き直しを購入
-
-public void BuyRedraw()
+    // 引き直しを購入
+    public void BuyRedraw()
     {
         int price = 100;
         int player = currentShopPlayer;
@@ -437,9 +429,7 @@ public void BuyRedraw()
         UpdateUI();
     }
 
-
     // 強制1枚追加を購入
-
     public void BuyForceRedraw()
     {
         int price = 700;
@@ -477,9 +467,7 @@ public void BuyRedraw()
         UpdateUI();
     }
 
-
     // ディーラー情報を購入
-
     public void BuyDealerInfo()
     {
         int price = 50;
@@ -514,9 +502,15 @@ public void BuyRedraw()
         abilityManager.AddDealerInfo(player - 1);
 
         Debug.Log("P" + player + " 17サーチを購入！");
-        UpdateUI();
-    }
 
+        UpdateUI();
+
+        // P1が購入したらすぐ発動
+        if (player == 1 && bjDraw != null)
+        {
+            bjDraw.CheckDealerInfo1();
+        }
+    }
 
     private bool hasRedrawAlready(int playerIndex)
     {
