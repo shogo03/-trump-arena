@@ -11,7 +11,9 @@ public class HighLowTurnManager : MonoBehaviour
     [Header("ポップアップ表示")]
     [SerializeField] private GameObject turnPopup;
     [SerializeField] private TextMeshProUGUI popupText;
-    [SerializeField] private float popupDuration = 1.5f;
+
+    [Header("表示設定")]
+    [SerializeField] private float switchDelay = 0.3f;
 
     private int currentPlayer = 1;
     private Coroutine popupCoroutine;
@@ -53,16 +55,16 @@ public class HighLowTurnManager : MonoBehaviour
 
     public bool BothPlayersPredicted()
     {
-        return player1Prediction !=HLManager.Prediction.None &&
-               player2Prediction !=HLManager.Prediction.None;
+        return player1Prediction != HLManager.Prediction.None &&
+               player2Prediction != HLManager.Prediction.None;
     }
 
     public void NextRound()
     {
         currentPlayer = 1;
 
-        player1Prediction =HLManager.Prediction.None;
-        player2Prediction =HLManager.Prediction.None;
+        player1Prediction = HLManager.Prediction.None;
+        player2Prediction = HLManager.Prediction.None;
 
         UpdateTurnText();
         ShowTurnPopup();
@@ -74,39 +76,35 @@ public class HighLowTurnManager : MonoBehaviour
             playerTurnText.text = "PLAYER " + currentPlayer + " TURN";
     }
 
-
     private void ShowTurnPopup()
     {
-        if (turnPopup == null || popupText == null)
-            return;
-
-        popupText.text = "PLAYER " + currentPlayer + " TURN";
-
-        // プレイヤーごとに文字色を変更
-        if (currentPlayer == 1)
-        {
-            popupText.color = Color.white;
-        }
-        else
-        {
-            popupText.color = Color.red;
-        }
-
-        turnPopup.SetActive(true);
-
         if (popupCoroutine != null)
             StopCoroutine(popupCoroutine);
 
-        popupCoroutine = StartCoroutine(HidePopup());
+        popupCoroutine = StartCoroutine(SwitchPopup());
     }
 
-
-    private IEnumerator HidePopup()
+    private IEnumerator SwitchPopup()
     {
-        yield return new WaitForSeconds(popupDuration);
-
+        // いったん非表示
         if (turnPopup != null)
             turnPopup.SetActive(false);
+
+        // 少し待つ
+        yield return new WaitForSeconds(switchDelay);
+
+        if (turnPopup != null && popupText != null)
+        {
+            popupText.text = "PLAYER " + currentPlayer + " TURN";
+
+            // プレイヤーごとに文字色を変更
+            popupText.color = currentPlayer == 1
+                ? Color.white
+                : Color.red;
+
+            // 再表示
+            turnPopup.SetActive(true);
+        }
 
         popupCoroutine = null;
     }

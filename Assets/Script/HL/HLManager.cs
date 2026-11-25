@@ -1,5 +1,6 @@
 
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,6 +28,9 @@ public class HLManager : MonoBehaviour
     [SerializeField] private HighLowAbilityManager abilityManager;
 
     [SerializeField] private HighLowTimerManager timerManager;
+
+    [Header("残り枚数表示")]
+    [SerializeField] private TextMeshProUGUI remainingCardsText;
 
     public enum Prediction
     {
@@ -82,6 +86,9 @@ public class HLManager : MonoBehaviour
     private void ShowFirstCard()
     {
         currentCard = deck.DrawCard();
+
+        currentCard = deck.DrawCard();
+        UpdateRemainingCards();
 
         if (currentCard == null)
             return;
@@ -232,6 +239,9 @@ public class HLManager : MonoBehaviour
 
         HighLowDeck.CardData nextCard = deck.DrawCard();
 
+        currentCard = deck.DrawCard();
+        UpdateRemainingCards();
+
         if (nextCard == null)
         {
             Debug.Log("デッキがなくなりました");
@@ -318,5 +328,13 @@ public class HLManager : MonoBehaviour
         bool canSelect = cardView != null && !cardView.IsFlipping;
 
         SetButtonsInteractable(canSelect);
+    }
+
+    private void UpdateRemainingCards()
+    {
+        if (remainingCardsText != null)
+        {
+            remainingCardsText.text = "残 : " + deck.RemainingCards + "枚";
+        }
     }
 }
