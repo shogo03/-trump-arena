@@ -8183,7 +8183,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2031883185}
         m_TargetAssemblyTypeName: BJdraw, Assembly-CSharp
-        m_MethodName: ForceRedraw1
+        m_MethodName: ForceRedrawCurrentPlayer
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

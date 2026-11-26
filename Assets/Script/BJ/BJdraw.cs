@@ -70,6 +70,7 @@ public class BJdraw : MonoBehaviour
     private bool bustGuardUsed2 = false;
     private bool bustGuardUsed3 = false;
 
+
     private bool forceCardHidden2 = false;
     private bool forceCardHidden3 = false;
 
@@ -254,54 +255,6 @@ public class BJdraw : MonoBehaviour
         {
             UpdatePoint3();
         }
-    }
-
-    public void ForceRedraw1()
-    {
-        // P1のターンでなければ使用できない
-        if (turnManager.GetCurrentTurn() != 1)
-        {
-            Debug.Log("P1のターンではありません！");
-            return;
-        }
-
-        // P1がBET確定していなければ使用できない
-        if (!betConfirmed1)
-        {
-            Debug.Log("先にBETを確定してください！");
-            return;
-        }
-
-        // 能力を持っているか確認して消費
-        if (abilityManager == null || !abilityManager.UseForceRedraw(0))
-        {
-            Debug.Log("強制引き直し能力を持っていません！");
-            return;
-        }
-
-        // P2が参加中で、バースト・STANDしていなければ1枚引く
-        if (GameSettings.IsActive[1] && !isBust2 && !isStand2)
-        {
-            cardManager.DrawAndDisplayCard(
-                deck, cardManager.hand2, handArea2,
-                cardPrefab, cardSize, true
-            );
-
-            forceCardHidden2 = true;
-        }
-
-        // P3が参加中で、バースト・STANDしていなければ1枚引く
-        if (GameSettings.IsActive[2] && !isBust3 && !isStand3)
-        {
-            cardManager.DrawAndDisplayCard(
-                deck, cardManager.hand3, handArea3,
-                cardPrefab, cardSize, true
-            );
-
-            forceCardHidden3 = true;
-        }
-
-        Debug.Log("強制引き直しを発動！P2・P3にカードを配りました！");
     }
 
     public void ConfirmBet1()
@@ -1118,8 +1071,6 @@ public class BJdraw : MonoBehaviour
         }
     }
 
-    
-
     public void CheckDealerInfoCurrentPlayer()
     {
         int playerIndex = turnManager.GetCurrentTurn() - 1;
@@ -1178,6 +1129,158 @@ public class BJdraw : MonoBehaviour
         dealerInfoText.gameObject.SetActive(true);
 
         Debug.Log("17サーチ結果：" + dealerTotal);
+    }
+
+    public void ForceRedraw1()
+    {
+        // P1のターンでなければ使用できない
+        if (turnManager.GetCurrentTurn() != 1)
+        {
+            Debug.Log("P1のターンではありません！");
+            return;
+        }
+
+        // P1がBET確定していなければ使用できない
+        if (!betConfirmed1)
+        {
+            Debug.Log("先にBETを確定してください！");
+            return;
+        }
+
+        // 能力を持っているか確認して消費
+        if (abilityManager == null || !abilityManager.UseForceRedraw(0))
+        {
+            Debug.Log("強制引き直し能力を持っていません！");
+            return;
+        }
+
+        // P2が参加中で、バースト・STANDしていなければ1枚引く
+        if (GameSettings.IsActive[1] && !isBust2 && !isStand2)
+        {
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand2, handArea2,
+                cardPrefab, cardSize, true
+            );
+
+            forceCardHidden2 = true;
+        }
+
+        // P3が参加中で、バースト・STANDしていなければ1枚引く
+        if (GameSettings.IsActive[2] && !isBust3 && !isStand3)
+        {
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand3, handArea3,
+                cardPrefab, cardSize, true
+            );
+
+            forceCardHidden3 = true;
+        }
+
+        Debug.Log("強制引き直しを発動！P2・P3にカードを配りました！");
+    }
+
+    public void ForceRedraw2()
+    {
+        // P2のターンでなければ使用できない
+        if (turnManager.GetCurrentTurn() != 2)
+        {
+            Debug.Log("P2のターンではありません！");
+            return;
+        }
+
+        // P2がBET確定していなければ使用できない
+        if (!betConfirmed2)
+        {
+            Debug.Log("先にBETを確定してください！");
+            return;
+        }
+
+        // 能力を持っているか確認して消費
+        if (abilityManager == null || !abilityManager.UseForceRedraw(1))
+        {
+            Debug.Log("強制引き直し能力を持っていません！");
+            return;
+        }
+
+        // P1に強制で1枚追加
+        if (GameSettings.IsActive[0] && !isBust)
+        {
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand, handArea,
+                cardPrefab, cardSize, false
+            );
+
+            cardManager.UpdatePointText(cardManager.hand, pointText);
+        }
+
+        // P3に1枚追加
+        if (GameSettings.IsActive[2] && !isBust3 && !isStand3)
+        {
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand3, handArea3,
+                cardPrefab, cardSize, true
+            );
+
+            forceCardHidden3 = true;
+        }
+
+        Debug.Log("P2が強制引き直しを発動！P1・P3にカードを配りました！");
+    }
+
+    public void ForceRedraw3()
+    {
+        // P3のターンでなければ使用できない
+        if (turnManager.GetCurrentTurn() != 3)
+        {
+            Debug.Log("P3のターンではありません！");
+            return;
+        }
+
+        // P3がBET確定していなければ使用できない
+        if (!betConfirmed3)
+        {
+            Debug.Log("先にBETを確定してください！");
+            return;
+        }
+
+        // 能力を持っているか確認して消費
+        if (abilityManager == null || !abilityManager.UseForceRedraw(2))
+        {
+            Debug.Log("強制引き直し能力を持っていません！");
+            return;
+        }
+
+        // P1に1枚追加（すでにターン終了しているため表向き）
+        if (GameSettings.IsActive[0] && !isBust && !isStand)
+        {
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand, handArea,
+                cardPrefab, cardSize, false
+            );
+        }
+
+        // P2に1枚追加（すでにターン終了しているため表向き）
+        if (GameSettings.IsActive[1] && !isBust2 && !isStand2)
+        {
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand2, handArea2,
+                cardPrefab, cardSize, false
+            );
+        }
+
+        Debug.Log("P3が強制引き直しを発動！P1・P2にカードを配りました！");
+    }
+
+    public void ForceRedrawCurrentPlayer()
+    {
+        int turn = turnManager.GetCurrentTurn();
+
+        if (turn == 1)
+            ForceRedraw1();
+        else if (turn == 2)
+            ForceRedraw2();
+        else if (turn == 3)
+            ForceRedraw3();
     }
 
 }
