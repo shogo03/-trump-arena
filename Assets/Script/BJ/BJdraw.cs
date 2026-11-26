@@ -1154,26 +1154,31 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        // P2が参加中で、バースト・STANDしていなければ1枚引く
-        if (GameSettings.IsActive[1] && !isBust2 && !isStand2)
+        if (GameSettings.IsActive[1] && !isBust2)
         {
             cardManager.DrawAndDisplayCard(
                 deck, cardManager.hand2, handArea2,
-                cardPrefab, cardSize, true
+                cardPrefab, cardSize, false
             );
 
-            forceCardHidden2 = true;
+            UpdatePoint2();
         }
 
-        // P3が参加中で、バースト・STANDしていなければ1枚引く
-        if (GameSettings.IsActive[2] && !isBust3 && !isStand3)
+        if (GameSettings.IsActive[2] && !isBust3)
         {
             cardManager.DrawAndDisplayCard(
                 deck, cardManager.hand3, handArea3,
-                cardPrefab, cardSize, true
+                cardPrefab, cardSize, !isStand3
             );
 
-            forceCardHidden3 = true;
+            if (isStand3)
+            {
+                UpdatePoint3();
+            }
+            else
+            {
+                forceCardHidden3 = true;
+            }
         }
 
         Debug.Log("強制引き直しを発動！P2・P3にカードを配りました！");
@@ -1210,18 +1215,26 @@ public class BJdraw : MonoBehaviour
                 cardPrefab, cardSize, false
             );
 
-            cardManager.UpdatePointText(cardManager.hand, pointText);
+            UpdatePoint();
         }
 
-        // P3に1枚追加
-        if (GameSettings.IsActive[2] && !isBust3 && !isStand3)
+        // P3に強制で1枚追加
+        if (GameSettings.IsActive[2] && !isBust3)
         {
+            // スタンド済みなら表向き、まだなら裏向き
             cardManager.DrawAndDisplayCard(
                 deck, cardManager.hand3, handArea3,
-                cardPrefab, cardSize, true
+                cardPrefab, cardSize, !isStand3
             );
 
-            forceCardHidden3 = true;
+            if (isStand3)
+            {
+                UpdatePoint3();
+            }
+            else
+            {
+                forceCardHidden3 = true;
+            }
         }
 
         Debug.Log("P2が強制引き直しを発動！P1・P3にカードを配りました！");
@@ -1258,7 +1271,7 @@ public class BJdraw : MonoBehaviour
                 cardPrefab, cardSize, false
             );
 
-            cardManager.UpdatePointText(cardManager.hand, pointText);
+            UpdatePoint();
         }
 
         // P2に強制で1枚追加
@@ -1269,7 +1282,7 @@ public class BJdraw : MonoBehaviour
                 cardPrefab, cardSize, false
             );
 
-            cardManager.UpdatePointText(cardManager.hand2, pointText2);
+            UpdatePoint2();
         }
 
         Debug.Log("P3が強制引き直しを発動！P1・P2にカードを配りました！");
