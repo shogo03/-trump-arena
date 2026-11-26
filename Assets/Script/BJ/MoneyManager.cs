@@ -5,6 +5,7 @@ public class MoneyManager : MonoBehaviour
 {
     private static MoneyManager instance;
     public BJAbilityManager abilityManager;
+    public AbilityShopUI abilityShopUI;
     // 所持金
 
     public int money1 = 1000;
@@ -321,6 +322,8 @@ public class MoneyManager : MonoBehaviour
 
         abilityManager?.SyncMoneyAbilities(this);
 
+        if (abilityShopUI != null)
+            abilityShopUI.UpdateShopImages();
 
         UpdateUI();
     }
@@ -357,9 +360,19 @@ public class MoneyManager : MonoBehaviour
             money3 -= price;
             betUpStage3++;
         }
+        else
+        {
+            return;
+        }
 
         Debug.Log("P" + player + " 掛け金UP！");
+
         abilityManager?.SyncMoneyAbilities(this);
+
+        // ★購入直後に画像を更新
+        if (abilityShopUI != null)
+            abilityShopUI.UpdateShopImages();
+
         UpdateUI();
     }
 

@@ -1076,35 +1076,41 @@ public class BJdraw : MonoBehaviour
 
     public void CheckDealerInfoCurrentPlayer()
     {
-        int playerIndex = turnManager.GetCurrentTurn() - 1;
+        int player = turnManager.GetCurrentTurn();
 
-        if (playerIndex < 0 || playerIndex >= 3)
-            return;
-
-        if (abilityManager == null)
+        if (bjDealer == null)
         {
-            Debug.LogError("BJAbilityManagerが設定されていません！");
+            Debug.LogError("BJDealerが設定されていません！");
             return;
         }
 
-        // 能力を所持しているか確認
-        if (!abilityManager.UseDealerInfo(playerIndex))
-        {
-            Debug.Log("ディーラー情報能力を持っていません！");
-            return;
-        }
+        int dealerTotal = bjDealer.GetDealerTotal();
 
-        // ディーラーの合計点を取得
-        int dealerPoint = bjDealer.GetDealerTotal();
+        string result;
 
-        if (dealerPoint >= 17)
+        if (dealerTotal >= 17)
         {
-            Debug.Log("ディーラーの手札は17以上！");
+            result = "ディーラーは17以上です";
         }
         else
         {
-            Debug.Log("ディーラーの手札は17未満！");
+            result = "ディーラーは17未満です";
         }
+
+        if (dealerInfoText != null)
+        {
+            dealerInfoText.text = result;
+            dealerInfoText.gameObject.SetActive(true);
+        }
+
+        Debug.Log(
+            "P" + player +
+            " 17サーチ結果：" +
+            result +
+            "（現在の点数：" +
+            dealerTotal +
+            "）"
+        );
     }
 
     public void UseDealerInfo()
