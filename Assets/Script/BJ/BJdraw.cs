@@ -1250,22 +1250,26 @@ public class BJdraw : MonoBehaviour
             return;
         }
 
-        // P1に1枚追加（すでにターン終了しているため表向き）
-        if (GameSettings.IsActive[0] && !isBust && !isStand)
+        // P1に強制で1枚追加
+        if (GameSettings.IsActive[0] && !isBust)
         {
             cardManager.DrawAndDisplayCard(
                 deck, cardManager.hand, handArea,
                 cardPrefab, cardSize, false
             );
+
+            cardManager.UpdatePointText(cardManager.hand, pointText);
         }
 
-        // P2に1枚追加（すでにターン終了しているため表向き）
-        if (GameSettings.IsActive[1] && !isBust2 && !isStand2)
+        // P2に強制で1枚追加
+        if (GameSettings.IsActive[1] && !isBust2)
         {
             cardManager.DrawAndDisplayCard(
                 deck, cardManager.hand2, handArea2,
                 cardPrefab, cardSize, false
             );
+
+            cardManager.UpdatePointText(cardManager.hand2, pointText2);
         }
 
         Debug.Log("P3が強制引き直しを発動！P1・P2にカードを配りました！");
