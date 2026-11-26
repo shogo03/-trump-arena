@@ -24,8 +24,6 @@ public class BJAbilityManager : MonoBehaviour
     // ディーラーが17以上か分かる
     public bool[] hasDealerInfo = new bool[3];
 
-    private bool dealerInfoPurchasedThisRound = false;
-
     // MoneyManagerとの同期
 
     public void SyncMoneyAbilities(MoneyManager money)
