@@ -70,10 +70,12 @@ public class HLManager : MonoBehaviour
     {
         deck.CreateDeck();
 
+        // ターン管理を先に初期化
+        turnManager.Initialize();
+
         if (abilityManager != null)
             abilityManager.Initialize();
 
-        turnManager.Initialize();
         scoreManager.Initialize();
 
         timerManager.Initialize();
@@ -244,7 +246,6 @@ public class HLManager : MonoBehaviour
 
         turnManager.SetPrediction(prediction);
 
-        // 妨害対象の予想が終わったら効果解除
         if (abilityManager != null)
         {
             abilityManager.OnPredictionMade(predictingPlayer);
@@ -304,6 +305,10 @@ public class HLManager : MonoBehaviour
         );
     }
 
+    // =========================
+    // 正解判定
+    // =========================
+
     private void CheckPredictions(HighLowDeck.CardData nextCard)
     {
         int oldNumber = previousCard.number;
@@ -318,11 +323,27 @@ public class HLManager : MonoBehaviour
             return;
         }
 
+        // 通常の正解判定
         Prediction correctPrediction =
-            newNumber > oldNumber ? Prediction.High : Prediction.Low;
+            newNumber > oldNumber
+            ? Prediction.High
+            : Prediction.Low;
+
+        // 革命中ならHIGHとLOWを逆転
+        if (abilityManager != null &&
+            abilityManager.ShouldReverseHighLow)
+        {
+            correctPrediction =
+                correctPrediction == Prediction.High
+                ? Prediction.Low
+                : Prediction.High;
+
+            Debug.Log("【革命発動中】HIGHとLOWの判定が逆転！");
+        }
 
         Debug.Log($"正解は：{correctPrediction}");
 
+        // Player1の判定
         if (turnManager.Player1Prediction == correctPrediction)
         {
             scoreManager.AddPlayer1Score(1);
@@ -333,6 +354,7 @@ public class HLManager : MonoBehaviour
             Debug.Log("Player1 不正解");
         }
 
+        // Player2の判定
         if (turnManager.Player2Prediction == correctPrediction)
         {
             scoreManager.AddPlayer2Score(1);
