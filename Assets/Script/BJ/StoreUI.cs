@@ -7,6 +7,7 @@ public class StoreUI : MonoBehaviour
     public BJAbilityManager abilityManager;
     public MoneyManager moneyManager;
     public BJTurnManager turnManager;
+    public AbilityShopUI abilityShopUI;
 
     // ストアを開いている間に無効にするゲームUI
     public GameObject gameUI;
@@ -44,6 +45,11 @@ public class StoreUI : MonoBehaviour
 
         // ★現在ターンのプレイヤーをショップ利用者にする
         moneyManager.SetShopPlayer(player);
+
+        if (abilityShopUI != null)
+        {
+            abilityShopUI.UpdateShopImages();
+        }
 
         // ストア表示
         storePanel.SetActive(true);
