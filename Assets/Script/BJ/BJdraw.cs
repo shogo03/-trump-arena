@@ -367,31 +367,31 @@ public class BJdraw : MonoBehaviour
         }
     }
 
-    void UpdatePoint()
+    void UpdatePoint(bool advanceTurn = true)
     {
         if (isInitialDeal) return;
 
         cardManager.UpdatePointText(cardManager.hand, pointText);
-        CheckBust(cardManager.hand, pointText);
+        CheckBust(cardManager.hand, pointText, advanceTurn);
     }
 
-    void UpdatePoint2()
+    void UpdatePoint2(bool advanceTurn = true)
     {
         if (isInitialDeal) return;
 
         cardManager.UpdatePointText(cardManager.hand2, pointText2);
-        CheckBust(cardManager.hand2, pointText2);
+        CheckBust(cardManager.hand2, pointText2, advanceTurn);
     }
 
-    void UpdatePoint3()
+    void UpdatePoint3(bool advanceTurn = true)
     {
         if (isInitialDeal) return;
 
         cardManager.UpdatePointText(cardManager.hand3, pointText3);
-        CheckBust(cardManager.hand3, pointText3);
+        CheckBust(cardManager.hand3, pointText3, advanceTurn);
     }
 
-    void CheckBust(List<Card> playerHand, Text targetText)
+    void CheckBust(List<Card> playerHand, Text targetText, bool advanceTurn = true)
     {
 
         Debug.Log("CheckBustÇ™åƒÇŒÇÍÇΩÅI");
@@ -466,7 +466,10 @@ public class BJdraw : MonoBehaviour
             isStand3 = true;
         }
 
-        NextTurn();
+        if (advanceTurn)
+        {
+            NextTurn();
+        }
     }
 
     public void Stand()
