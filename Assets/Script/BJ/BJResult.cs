@@ -12,10 +12,16 @@ public class BJResult : MonoBehaviour
         string playerName,
         int dealerTotal,
         bool playerBust,
-        MoneyManager moneyManager)
+        MoneyManager moneyManager,
+        bool bustGuardUsed = false)
     {
         int playerTotal = CalculateHandTotal(playerHand);
-
+        // バースト無効を使用した場合
+        if (bustGuardUsed)
+        {
+            targetText.text = "バースト無効！";
+            return;
+        }
         int playerNumber = 0;
 
         if (playerName == "P1") playerNumber = 1;

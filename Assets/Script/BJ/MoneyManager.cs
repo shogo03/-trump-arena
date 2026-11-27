@@ -40,6 +40,9 @@ public class MoneyManager : MonoBehaviour
     public BJdraw bjDraw;
     public TMP_Text dealerInfoText;
 
+    private bool refunded1 = false;
+    private bool refunded2 = false;
+    private bool refunded3 = false;
 
     void Awake()
     {
@@ -153,21 +156,37 @@ public class MoneyManager : MonoBehaviour
     {
         if (player == 1)
         {
+            if (refunded1) return;
+            refunded1 = true;
             money1 += bet1;
         }
         else if (player == 2)
         {
+            if (refunded2) return;
+            refunded2 = true;
             money2 += bet2;
         }
         else if (player == 3)
         {
+            if (refunded3) return;
+            refunded3 = true;
             money3 += bet3;
         }
+        else
+        {
+            return;
+        }
 
-        Debug.Log("P" + player + " バースト無効！掛け金返却：" +
-            (player == 1 ? bet1 : player == 2 ? bet2 : bet3));
+        Debug.Log("P" + player + " バースト無効！掛け金返却");
 
         UpdateUI();
+    }
+
+    public void ResetRefundFlags()
+    {
+        refunded1 = false;
+        refunded2 = false;
+        refunded3 = false;
     }
 
     // 引き分け

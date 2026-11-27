@@ -11,7 +11,7 @@ public class BJAbilityManager : MonoBehaviour
     // バースト無効の所持数
 
     public int[] bustGuardCount = new int[3];
-
+    public bool[] bustGuardActive = new bool[3];
 
     // その他の能力
 
@@ -75,6 +75,44 @@ public class BJAbilityManager : MonoBehaviour
         return true;
     }
 
+    public void ActivateBustGuard(int playerIndex)
+    {
+        if (playerIndex < 0 || playerIndex >= 3)
+            return;
+
+        if (bustGuardCount[playerIndex] <= 0)
+        {
+            Debug.Log("バースト無効を持っていません！");
+            return;
+        }
+
+        if (bustGuardActive[playerIndex])
+        {
+            Debug.Log("すでに発動中です！");
+            return;
+        }
+
+        bustGuardActive[playerIndex] = true;
+
+        // 発動した瞬間に回数を消費
+        bustGuardCount[playerIndex]--;
+
+        Debug.Log("P" + (playerIndex + 1) +
+            " バースト無効を発動！残り回数：" + bustGuardCount[playerIndex]);
+    }
+
+    public bool IsBustGuardActive(int playerIndex)
+    {
+        if (playerIndex < 0 || playerIndex >= 3) return false;
+
+        if (!bustGuardActive[playerIndex]) return false;
+
+        // 発動状態だけ解除する（回数は減らさない）
+        bustGuardActive[playerIndex] = false;
+
+        Debug.Log("P" + (playerIndex + 1) + " バースト無効が発動しました！");
+        return true;
+    }
 
     // 引き直しを購入
 
@@ -183,5 +221,15 @@ public class BJAbilityManager : MonoBehaviour
         );
 
         return true;
+    }
+
+    public void ResetBustGuardActive()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            bustGuardActive[i] = false;
+        }
+
+        Debug.Log("バースト無効の発動状態をリセットしました！");
     }
 }
