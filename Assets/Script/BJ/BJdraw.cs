@@ -410,7 +410,7 @@ public class BJdraw : MonoBehaviour
             Debug.Log("P1のバースト無効所持数：" + abilityManager.bustGuardCount[0]);
 
             // バースト無効を持っている場合
-            if (abilityManager != null && abilityManager.UseBustGuard(0))
+            if (abilityManager != null && abilityManager.IsBustGuardActive(0))
             {
                 bustGuardUsed1 = true;
                 moneyManager.RefundBet(1);
@@ -418,7 +418,10 @@ public class BJdraw : MonoBehaviour
 
                 targetText.text = "バースト無効！掛け金返却！";
                 Debug.Log("P1返金処理を実行！ BET額：" + moneyManager.bet1);
-                NextTurn();
+                if (advanceTurn)
+                {
+                    NextTurn();
+                }
                 return;
             }
 
@@ -430,7 +433,7 @@ public class BJdraw : MonoBehaviour
         {
             if (isBust2) return;
 
-            if (abilityManager != null && abilityManager.UseBustGuard(1))
+            if (abilityManager != null && abilityManager.IsBustGuardActive(1))
             {
                 bustGuardUsed2 = true;
                 moneyManager.RefundBet(2);
@@ -438,7 +441,10 @@ public class BJdraw : MonoBehaviour
 
                 targetText.text = "バースト無効！掛け金返却！";
                 Debug.Log("P2返金処理を実行！ BET額：" + moneyManager.bet2);
-                NextTurn();
+                if (advanceTurn)
+                {
+                    NextTurn();
+                }
                 return;
             }
 
@@ -450,7 +456,7 @@ public class BJdraw : MonoBehaviour
         {
             if (isBust3) return;
 
-            if (abilityManager != null && abilityManager.UseBustGuard(2))
+            if (abilityManager != null && abilityManager.IsBustGuardActive(2))
             {
                 bustGuardUsed3 = true;
                 moneyManager.RefundBet(3);
@@ -458,7 +464,10 @@ public class BJdraw : MonoBehaviour
 
                 targetText.text = "バースト無効！掛け金返却！";
                 Debug.Log("P3返金処理を実行！ BET額：" + moneyManager.bet3);
-                NextTurn();
+                if (advanceTurn)
+                {
+                    NextTurn();
+                }
                 return;
             }
 
@@ -1167,10 +1176,17 @@ public class BJdraw : MonoBehaviour
         {
             cardManager.DrawAndDisplayCard(
                 deck, cardManager.hand2, handArea2,
-                cardPrefab, cardSize, false
+                cardPrefab, cardSize, !isStand2
             );
 
-            UpdatePoint2();
+            if (isStand2)
+            {
+                UpdatePoint2(false);
+            }
+            else
+            {
+                forceCardHidden2 = true;
+            }
         }
 
         if (GameSettings.IsActive[2] && !isBust3)
@@ -1182,7 +1198,7 @@ public class BJdraw : MonoBehaviour
 
             if (isStand3)
             {
-                UpdatePoint3();
+                UpdatePoint3(false);
             }
             else
             {
@@ -1224,7 +1240,7 @@ public class BJdraw : MonoBehaviour
                 cardPrefab, cardSize, false
             );
 
-            UpdatePoint();
+            UpdatePoint(false);
         }
 
         // P3に強制で1枚追加
@@ -1238,7 +1254,7 @@ public class BJdraw : MonoBehaviour
 
             if (isStand3)
             {
-                UpdatePoint3();
+                UpdatePoint3(false);
             }
             else
             {
@@ -1280,7 +1296,7 @@ public class BJdraw : MonoBehaviour
                 cardPrefab, cardSize, false
             );
 
-            UpdatePoint();
+            UpdatePoint(false);
         }
 
         // P2に強制で1枚追加
@@ -1291,7 +1307,7 @@ public class BJdraw : MonoBehaviour
                 cardPrefab, cardSize, false
             );
 
-            UpdatePoint2();
+            UpdatePoint2(false);
         }
 
         Debug.Log("P3が強制引き直しを発動！P1・P2にカードを配りました！");

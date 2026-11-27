@@ -11,7 +11,7 @@ public class BJAbilityManager : MonoBehaviour
     // バースト無効の所持数
 
     public int[] bustGuardCount = new int[3];
-
+    public bool[] bustGuardActive = new bool[3];
 
     // その他の能力
 
