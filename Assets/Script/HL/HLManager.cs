@@ -33,6 +33,9 @@ public class HLManager : MonoBehaviour
     [Header("残り枚数表示")]
     [SerializeField] private TextMeshProUGUI remainingCardsText;
 
+    [Header("UI管理")]
+    [SerializeField] private HLUIManager uiManager;
+
     public enum Prediction
     {
         None,
@@ -49,12 +52,22 @@ public class HLManager : MonoBehaviour
 
     public Prediction CurrentPrediction => currentPrediction;
 
+    // 最後に反映した革命状態
+    private bool lastRevolutionState;
+    private bool revolutionStateInitialized = false;
+
     private void Start()
     {
         highButton.onClick.AddListener(OnHighButtonClicked);
         lowButton.onClick.AddListener(OnLowButtonClicked);
 
         StartGame();
+    }
+
+    private void Update()
+    {
+        // 革命状態を常に監視
+        CheckRevolutionState();
     }
 
     private void OnDestroy()
@@ -65,6 +78,10 @@ public class HLManager : MonoBehaviour
         if (lowButton != null)
             lowButton.onClick.RemoveListener(OnLowButtonClicked);
     }
+
+    // =========================
+    // ゲーム開始
+    // =========================
 
     public void StartGame()
     {
@@ -85,6 +102,10 @@ public class HLManager : MonoBehaviour
 
         previousCard = null;
 
+        // 革命状態を初期化
+        revolutionStateInitialized = false;
+        CheckRevolutionState();
+
         ShowFirstCard();
     }
 
@@ -101,6 +122,10 @@ public class HLManager : MonoBehaviour
 
         Debug.Log($"最初のカード：{currentCard.suit} {currentCard.number}");
     }
+
+    // =========================
+    // カード表示
+    // =========================
 
     private void DisplayCard(HighLowDeck.CardData card)
     {
@@ -163,7 +188,10 @@ public class HLManager : MonoBehaviour
         }
     }
 
-    // HIGH・LOWボタンの状態更新
+    // =========================
+    // HIGH・LOWボタン
+    // =========================
+
     public void RefreshPredictionButtons()
     {
         HighLowCardView cardView =
@@ -273,6 +301,10 @@ public class HLManager : MonoBehaviour
         }
     }
 
+    // =========================
+    // 次のカード
+    // =========================
+
     private void ShowNextCard()
     {
         previousCard = currentCard;
@@ -309,6 +341,7 @@ public class HLManager : MonoBehaviour
     // 正解判定
     // =========================
 
+
     private void CheckPredictions(HighLowDeck.CardData nextCard)
     {
         int oldNumber = previousCard.number;
@@ -317,17 +350,23 @@ public class HLManager : MonoBehaviour
         Debug.Log($"前のカード：{oldNumber}");
         Debug.Log($"次のカード：{newNumber}");
 
+        Prediction correctPrediction;
+
+        // 同じ数字の場合
         if (newNumber == oldNumber)
         {
-            Debug.Log("同じ数字！今回は両者ポイントなし");
-            return;
-        }
+            correctPrediction = Prediction.High;
 
-        // 通常の正解判定
-        Prediction correctPrediction =
-            newNumber > oldNumber
-            ? Prediction.High
-            : Prediction.Low;
+            Debug.Log("同じ数字！HIGHが正解！");
+        }
+        else
+        {
+            // 通常の正解判定
+            correctPrediction =
+                newNumber > oldNumber
+                ? Prediction.High
+                : Prediction.Low;
+        }
 
         // 革命中ならHIGHとLOWを逆転
         if (abilityManager != null &&
@@ -365,6 +404,44 @@ public class HLManager : MonoBehaviour
             Debug.Log("Player2 不正解");
         }
     }
+
+    // =========================
+    // 革命背景管理
+    // =========================
+
+    private void CheckRevolutionState()
+    {
+        if (uiManager == null || abilityManager == null)
+            return;
+
+        bool currentRevolutionState =
+            abilityManager.ShouldReverseHighLow;
+
+        // 初回または革命状態が変化したときだけ更新
+        if (!revolutionStateInitialized ||
+            lastRevolutionState != currentRevolutionState)
+        {
+            lastRevolutionState = currentRevolutionState;
+            revolutionStateInitialized = true;
+
+            uiManager.SetRevolutionBackground(
+                currentRevolutionState
+            );
+
+            if (currentRevolutionState)
+            {
+                Debug.Log("革命開始！背景を群青色に変更");
+            }
+            else
+            {
+                Debug.Log("革命終了！背景を通常色に戻しました");
+            }
+        }
+    }
+
+    // =========================
+    // その他
+    // =========================
 
     private void ResetSelection()
     {

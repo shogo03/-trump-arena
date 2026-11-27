@@ -17,35 +17,43 @@ public class HighLowAbilityManager : MonoBehaviour
 
     [Header("使用回数")]
     [SerializeField] private int maxUses = 2;
+    [SerializeField] private int maxRevolutionUses = 2;
 
     [Header("革命設定")]
-    [SerializeField] private int revolutionDuration = 5;
+    [SerializeField] private int revolutionDuration = 10;
 
-    // 妨害能力の使用回数
+    // 妨害使用回数
     private int[] useCounts = new int[2];
 
-    // 妨害されている予想
+    // 妨害対象
     private HLManager.Prediction[] blockedPredictions =
         new HLManager.Prediction[2];
 
-    // 革命の使用済み判定
-    private bool[] revolutionUsed = new bool[2];
+    // 革命使用回数
+    private int[] revolutionUseCounts = new int[2];
 
-    // 革命の状態
-    private bool isRevolutionActive = false;
-    private int revolutionRemainingTurns = 0;
+    // 各プレイヤーが現在のターンに能力を使ったか
+    private bool[] abilityUsedThisTurn = new bool[2];
+
+    // 革命状態
+    private bool isRevolutionActive;
+    private int revolutionPlayer;
+    private int revolutionRemainingTurns;
 
     // ターン監視
-    private int lastObservedPlayer = 0;
+    private int lastObservedPlayer;
 
     public int Player1Uses => useCounts[0];
     public int Player2Uses => useCounts[1];
 
+    public int Player1RevolutionUses => revolutionUseCounts[0];
+    public int Player2RevolutionUses => revolutionUseCounts[1];
+
     public bool IsRevolutionActive => isRevolutionActive;
     public int RevolutionRemainingTurns => revolutionRemainingTurns;
 
-    // HLManagerから参照する
     public bool ShouldReverseHighLow => isRevolutionActive;
+
 
     private void Start()
     {
@@ -67,6 +75,7 @@ public class HighLowAbilityManager : MonoBehaviour
         RefreshAbilityButtons();
     }
 
+
     private void Update()
     {
         if (turnManager == null)
@@ -74,29 +83,29 @@ public class HighLowAbilityManager : MonoBehaviour
 
         int currentPlayer = turnManager.CurrentPlayer;
 
-        // プレイヤーが切り替わったか確認
         if (currentPlayer != lastObservedPlayer)
         {
             lastObservedPlayer = currentPlayer;
 
-            // 革命中なら残りターンを減らす
+            // 新しいターンなので能力使用権を回復
+            if (currentPlayer >= 1 && currentPlayer <= 2)
+                abilityUsedThisTurn[currentPlayer - 1] = false;
+
+            // 革命の残りターンを減らす
             if (isRevolutionActive)
             {
                 revolutionRemainingTurns--;
 
-                Debug.Log(
-                    $"革命残りターン：{revolutionRemainingTurns}"
-                );
+                Debug.Log($"革命残りターン：{revolutionRemainingTurns}");
 
                 if (revolutionRemainingTurns <= 0)
-                {
                     EndRevolution();
-                }
             }
 
             RefreshAbilityButtons();
         }
     }
+
 
     private void OnDestroy()
     {
@@ -113,26 +122,74 @@ public class HighLowAbilityManager : MonoBehaviour
             player2RevolutionButton.onClick.RemoveListener(UseRevolutionAbility);
     }
 
-    // ゲーム開始時に初期化
+
+    // =========================
+    // 初期化
+    // =========================
+
     public void Initialize()
     {
         useCounts[0] = 0;
         useCounts[1] = 0;
 
+        revolutionUseCounts[0] = 0;
+        revolutionUseCounts[1] = 0;
+
+        abilityUsedThisTurn[0] = false;
+        abilityUsedThisTurn[1] = false;
+
         blockedPredictions[0] = HLManager.Prediction.None;
         blockedPredictions[1] = HLManager.Prediction.None;
 
-        revolutionUsed[0] = false;
-        revolutionUsed[1] = false;
-
         isRevolutionActive = false;
+        revolutionPlayer = 0;
         revolutionRemainingTurns = 0;
 
         if (turnManager != null)
             lastObservedPlayer = turnManager.CurrentPlayer;
 
         RefreshAbilityButtons();
+
+        Debug.Log("能力を初期化しました。");
     }
+
+
+    // =========================
+    // 能力使用チェック
+    // =========================
+
+    private bool CanUseAbility(int player)
+    {
+        if (player < 1 || player > 2)
+            return false;
+
+        int index = player - 1;
+
+        if (turnManager == null)
+            return false;
+
+        // 自分のターンでなければ不可
+        if (turnManager.CurrentPlayer != player)
+            return false;
+
+        // このターンにすでに能力を使っていたら不可
+        if (abilityUsedThisTurn[index])
+            return false;
+
+        // 予想済みなら不可
+        if (turnManager.GetPrediction(player) != HLManager.Prediction.None)
+            return false;
+
+        return true;
+    }
+
+
+    private void ConsumeAbility(int player)
+    {
+        abilityUsedThisTurn[player - 1] = true;
+        RefreshAbilityButtons();
+    }
+
 
     // =========================
     // 妨害能力
@@ -144,17 +201,12 @@ public class HighLowAbilityManager : MonoBehaviour
             return;
 
         int currentPlayer = turnManager.CurrentPlayer;
-
-        if (currentPlayer < 1 || currentPlayer > 2)
-            return;
-
         int index = currentPlayer - 1;
 
-        if (useCounts[index] >= maxUses)
+        if (!CanUseAbility(currentPlayer))
             return;
 
-        if (turnManager.GetPrediction(currentPlayer) !=
-            HLManager.Prediction.None)
+        if (useCounts[index] >= maxUses)
             return;
 
         int targetPlayer = currentPlayer == 1 ? 2 : 1;
@@ -168,16 +220,16 @@ public class HighLowAbilityManager : MonoBehaviour
 
         useCounts[index]++;
 
+        // このターンの能力使用権を消費
+        ConsumeAbility(currentPlayer);
+
         Debug.Log($"PLAYER {currentPlayer} が妨害能力を使用！");
-        Debug.Log(
-            $"PLAYER {targetPlayer} の {randomPrediction} を禁止！"
-        );
+        Debug.Log($"PLAYER {targetPlayer} の {randomPrediction} を禁止！");
+        Debug.Log($"妨害残り回数：{maxUses - useCounts[index]}");
 
-        RefreshAbilityButtons();
-
-        FindFirstObjectByType<HLManager>()?
-            .RefreshPredictionButtons();
+        FindFirstObjectByType<HLManager>()?.RefreshPredictionButtons();
     }
+
 
     public bool IsPredictionBlocked(
         int playerNumber,
@@ -189,6 +241,7 @@ public class HighLowAbilityManager : MonoBehaviour
         return blockedPredictions[playerNumber - 1] == prediction;
     }
 
+
     public void OnPredictionMade(int playerNumber)
     {
         if (playerNumber < 1 || playerNumber > 2)
@@ -196,19 +249,18 @@ public class HighLowAbilityManager : MonoBehaviour
 
         int index = playerNumber - 1;
 
-        if (blockedPredictions[index] ==
-            HLManager.Prediction.None)
+        if (blockedPredictions[index] == HLManager.Prediction.None)
             return;
-
-        Debug.Log($"PLAYER {playerNumber} の妨害解除！");
 
         blockedPredictions[index] = HLManager.Prediction.None;
 
         RefreshAbilityButtons();
 
-        FindFirstObjectByType<HLManager>()?
-            .RefreshPredictionButtons();
+        FindFirstObjectByType<HLManager>()?.RefreshPredictionButtons();
+
+        Debug.Log($"PLAYER {playerNumber} の妨害解除！");
     }
+
 
     // =========================
     // 革命能力
@@ -220,55 +272,67 @@ public class HighLowAbilityManager : MonoBehaviour
             return;
 
         int currentPlayer = turnManager.CurrentPlayer;
-
-        if (currentPlayer < 1 || currentPlayer > 2)
-            return;
-
         int index = currentPlayer - 1;
 
-        // すでに使用済みなら不可
-        if (revolutionUsed[index])
+        if (!CanUseAbility(currentPlayer))
             return;
 
-        // すでに革命中なら不可
+        if (revolutionUseCounts[index] >= maxRevolutionUses)
+            return;
+
+        // 革命中の場合
         if (isRevolutionActive)
+        {
+            // 発動した本人は解除できない
+            if (currentPlayer == revolutionPlayer)
+                return;
+
+            revolutionUseCounts[index]++;
+
+            ConsumeAbility(currentPlayer);
+
+            Debug.Log($"PLAYER {currentPlayer} が革命を解除！");
+
+            EndRevolution();
+
             return;
+        }
 
-        // 予想済みなら不可
-        if (turnManager.GetPrediction(currentPlayer) !=
-            HLManager.Prediction.None)
-            return;
+        // 革命を発動
+        revolutionUseCounts[index]++;
 
-        // 使用済みにする
-        revolutionUsed[index] = true;
-
-        // 革命開始
         isRevolutionActive = true;
+        revolutionPlayer = currentPlayer;
         revolutionRemainingTurns = revolutionDuration;
 
+        ConsumeAbility(currentPlayer);
+
         Debug.Log($"PLAYER {currentPlayer} が革命を発動！");
-        Debug.Log("HIGHとLOWの正解判定が逆転！");
-        Debug.Log($"革命はあと{revolutionRemainingTurns}ターン！");
+        Debug.Log("HIGHとLOWの判定が逆転！");
+        Debug.Log($"革命残りターン：{revolutionRemainingTurns}");
+        Debug.Log($"革命残り使用回数：{maxRevolutionUses - revolutionUseCounts[index]}");
 
-        RefreshAbilityButtons();
-
-        FindFirstObjectByType<HLManager>()?
-            .RefreshPredictionButtons();
+        FindFirstObjectByType<HLManager>()?.RefreshPredictionButtons();
     }
 
-    // 革命解除
+
+    // =========================
+    // 革命終了
+    // =========================
+
     private void EndRevolution()
     {
         isRevolutionActive = false;
+        revolutionPlayer = 0;
         revolutionRemainingTurns = 0;
 
-        Debug.Log("革命終了！通常のHIGH・LOW判定に戻りました。");
+        Debug.Log("革命終了！通常の判定に戻りました。");
 
         RefreshAbilityButtons();
 
-        FindFirstObjectByType<HLManager>()?
-            .RefreshPredictionButtons();
+        FindFirstObjectByType<HLManager>()?.RefreshPredictionButtons();
     }
+
 
     // =========================
     // ボタン更新
@@ -281,12 +345,12 @@ public class HighLowAbilityManager : MonoBehaviour
 
         int currentPlayer = turnManager.CurrentPlayer;
 
-        bool canUse =
-            currentPlayer >= 1 &&
-            currentPlayer <= 2 &&
-            turnManager.GetPrediction(currentPlayer) ==
-            HLManager.Prediction.None;
+        bool validPlayer = currentPlayer >= 1 && currentPlayer <= 2;
 
+        bool canUse = validPlayer &&
+            CanUseAbility(currentPlayer);
+
+        // 妨害ボタン
         if (player1DisruptButton != null)
         {
             player1DisruptButton.interactable =
@@ -303,22 +367,23 @@ public class HighLowAbilityManager : MonoBehaviour
                 canUse;
         }
 
+        // 革命ボタン
         if (player1RevolutionButton != null)
         {
             player1RevolutionButton.interactable =
                 currentPlayer == 1 &&
-                !revolutionUsed[0] &&
-                !isRevolutionActive &&
-                canUse;
+                revolutionUseCounts[0] < maxRevolutionUses &&
+                canUse &&
+                (!isRevolutionActive || revolutionPlayer != 1);
         }
 
         if (player2RevolutionButton != null)
         {
             player2RevolutionButton.interactable =
                 currentPlayer == 2 &&
-                !revolutionUsed[1] &&
-                !isRevolutionActive &&
-                canUse;
+                revolutionUseCounts[1] < maxRevolutionUses &&
+                canUse &&
+                (!isRevolutionActive || revolutionPlayer != 2);
         }
     }
 }

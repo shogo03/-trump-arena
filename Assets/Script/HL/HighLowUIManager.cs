@@ -1,43 +1,23 @@
 
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HighLowUIManager : MonoBehaviour
+public class HLUIManager : MonoBehaviour
 {
-    [Header("背景")]
+    [Header("背景画像")]
     [SerializeField] private Image backgroundImage;
+
+    [Header("背景スプライト")]
     [SerializeField] private Sprite normalBackground;
     [SerializeField] private Sprite revolutionBackground;
 
-    [Header("革命表示")]
-    [SerializeField] private GameObject revolutionPanel;
-    [SerializeField] private TextMeshProUGUI remainingTurnText;
-
-    // 革命状態の変更
-    public void SetRevolutionUI(bool active, int remainingTurns)
+    // 革命状態に応じて背景を変更
+    public void SetRevolutionBackground(bool isRevolution)
     {
-        if (backgroundImage != null)
-        {
-            backgroundImage.sprite = active
-                ? revolutionBackground
-                : normalBackground;
-        }
+        if (backgroundImage == null) return;
 
-        if (revolutionPanel != null)
-            revolutionPanel.SetActive(active);
-
-        if (active)
-            UpdateRemainingTurns(remainingTurns);
-    }
-
-    // 残りターン更新
-    public void UpdateRemainingTurns(int remainingTurns)
-    {
-        if (remainingTurnText != null)
-        {
-            remainingTurnText.text =
-                "REMAINING : " + remainingTurns;
-        }
+        backgroundImage.sprite = isRevolution
+            ? revolutionBackground
+            : normalBackground;
     }
 }
