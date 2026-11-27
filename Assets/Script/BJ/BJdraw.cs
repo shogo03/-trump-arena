@@ -70,6 +70,8 @@ public class BJdraw : MonoBehaviour
     private bool bustGuardUsed2 = false;
     private bool bustGuardUsed3 = false;
 
+
+
     private bool forceCardHidden2 = false;
     private bool forceCardHidden3 = false;
 
@@ -256,54 +258,6 @@ public class BJdraw : MonoBehaviour
         }
     }
 
-    public void ForceRedraw1()
-    {
-        // P1のターンでなければ使用できない
-        if (turnManager.GetCurrentTurn() != 1)
-        {
-            Debug.Log("P1のターンではありません！");
-            return;
-        }
-
-        // P1がBET確定していなければ使用できない
-        if (!betConfirmed1)
-        {
-            Debug.Log("先にBETを確定してください！");
-            return;
-        }
-
-        // 能力を持っているか確認して消費
-        if (abilityManager == null || !abilityManager.UseForceRedraw(0))
-        {
-            Debug.Log("強制引き直し能力を持っていません！");
-            return;
-        }
-
-        // P2が参加中で、バースト・STANDしていなければ1枚引く
-        if (GameSettings.IsActive[1] && !isBust2 && !isStand2)
-        {
-            cardManager.DrawAndDisplayCard(
-                deck, cardManager.hand2, handArea2,
-                cardPrefab, cardSize, true
-            );
-
-            forceCardHidden2 = true;
-        }
-
-        // P3が参加中で、バースト・STANDしていなければ1枚引く
-        if (GameSettings.IsActive[2] && !isBust3 && !isStand3)
-        {
-            cardManager.DrawAndDisplayCard(
-                deck, cardManager.hand3, handArea3,
-                cardPrefab, cardSize, true
-            );
-
-            forceCardHidden3 = true;
-        }
-
-        Debug.Log("強制引き直しを発動！P2・P3にカードを配りました！");
-    }
-
     public void ConfirmBet1()
     {
         if (turnManager.GetCurrentTurn() != 1 || betConfirmed1)
@@ -414,31 +368,31 @@ public class BJdraw : MonoBehaviour
         }
     }
 
-    void UpdatePoint()
+    void UpdatePoint(bool advanceTurn = true)
     {
         if (isInitialDeal) return;
 
         cardManager.UpdatePointText(cardManager.hand, pointText);
-        CheckBust(cardManager.hand, pointText);
+        CheckBust(cardManager.hand, pointText, advanceTurn);
     }
 
-    void UpdatePoint2()
+    void UpdatePoint2(bool advanceTurn = true)
     {
         if (isInitialDeal) return;
 
         cardManager.UpdatePointText(cardManager.hand2, pointText2);
-        CheckBust(cardManager.hand2, pointText2);
+        CheckBust(cardManager.hand2, pointText2, advanceTurn);
     }
 
-    void UpdatePoint3()
+    void UpdatePoint3(bool advanceTurn = true)
     {
         if (isInitialDeal) return;
 
         cardManager.UpdatePointText(cardManager.hand3, pointText3);
-        CheckBust(cardManager.hand3, pointText3);
+        CheckBust(cardManager.hand3, pointText3, advanceTurn);
     }
 
-    void CheckBust(List<Card> playerHand, Text targetText)
+    void CheckBust(List<Card> playerHand, Text targetText, bool advanceTurn = true)
     {
 
         Debug.Log("CheckBustが呼ばれた！");
@@ -457,7 +411,7 @@ public class BJdraw : MonoBehaviour
             Debug.Log("P1のバースト無効所持数：" + abilityManager.bustGuardCount[0]);
 
             // バースト無効を持っている場合
-            if (abilityManager != null && abilityManager.UseBustGuard(0))
+            if (abilityManager != null && abilityManager.IsBustGuardActive(0))
             {
                 bustGuardUsed1 = true;
                 moneyManager.RefundBet(1);
@@ -465,7 +419,10 @@ public class BJdraw : MonoBehaviour
 
                 targetText.text = "バースト無効！掛け金返却！";
                 Debug.Log("P1返金処理を実行！ BET額：" + moneyManager.bet1);
-                NextTurn();
+                if (advanceTurn)
+                {
+                    NextTurn();
+                }
                 return;
             }
 
@@ -477,7 +434,7 @@ public class BJdraw : MonoBehaviour
         {
             if (isBust2) return;
 
-            if (abilityManager != null && abilityManager.UseBustGuard(1))
+            if (abilityManager != null && abilityManager.IsBustGuardActive(1))
             {
                 bustGuardUsed2 = true;
                 moneyManager.RefundBet(2);
@@ -485,7 +442,10 @@ public class BJdraw : MonoBehaviour
 
                 targetText.text = "バースト無効！掛け金返却！";
                 Debug.Log("P2返金処理を実行！ BET額：" + moneyManager.bet2);
-                NextTurn();
+                if (advanceTurn)
+                {
+                    NextTurn();
+                }
                 return;
             }
 
@@ -497,7 +457,7 @@ public class BJdraw : MonoBehaviour
         {
             if (isBust3) return;
 
-            if (abilityManager != null && abilityManager.UseBustGuard(2))
+            if (abilityManager != null && abilityManager.IsBustGuardActive(2))
             {
                 bustGuardUsed3 = true;
                 moneyManager.RefundBet(3);
@@ -505,7 +465,10 @@ public class BJdraw : MonoBehaviour
 
                 targetText.text = "バースト無効！掛け金返却！";
                 Debug.Log("P3返金処理を実行！ BET額：" + moneyManager.bet3);
-                NextTurn();
+                if (advanceTurn)
+                {
+                    NextTurn();
+                }
                 return;
             }
 
@@ -513,7 +476,10 @@ public class BJdraw : MonoBehaviour
             isStand3 = true;
         }
 
-        NextTurn();
+        if (advanceTurn)
+        {
+            NextTurn();
+        }
     }
 
     public void Stand()
@@ -642,54 +608,42 @@ public class BJdraw : MonoBehaviour
         // ディーラーのターン
         int dealerTotal = bjDealer.DealerTurn();
 
-        // P1の勝敗判定（常に参加）
-        if (bustGuardUsed1)
-        {
-            resultText.text = "バースト無効！掛け金返却！";
-        }
-        else
+        // P1の勝敗判定
+        bjResult.CheckWinner(
+            cardManager.hand,
+            resultText,
+            "P1",
+            dealerTotal,
+            isBust,
+            moneyManager,
+            bustGuardUsed1
+        );
+
+        // P2の勝敗判定
+        if (GameSettings.IsActive[1])
         {
             bjResult.CheckWinner(
-                cardManager.hand, resultText, "P1",
-                dealerTotal, isBust, moneyManager
+                cardManager.hand2,
+                resultText2,
+                "P2",
+                dealerTotal,
+                isBust2,
+                moneyManager,
+                bustGuardUsed2
             );
         }
 
-        // P2が参加している場合
-        if (GameSettings.IsActive[1])
-        {
-            if (GameSettings.IsActive[1])
-            {
-                if (bustGuardUsed2)
-                {
-                    resultText2.text = "バースト無効！掛け金返却！";
-                }
-                else
-                {
-                    if (GameSettings.IsActive[2])
-                    {
-                        if (bustGuardUsed3)
-                        {
-                            resultText3.text = "バースト無効！掛け金返却！";
-                        }
-                        else
-                        {
-                            bjResult.CheckWinner(
-                                cardManager.hand3, resultText3, "P3",
-                                dealerTotal, isBust3, moneyManager
-                            );
-                        }
-                    }
-                }
-            }
-        }
-
-        // P3が参加している場合
+        // P3の勝敗判定
         if (GameSettings.IsActive[2])
         {
             bjResult.CheckWinner(
-                cardManager.hand3, resultText3, "P3",
-                dealerTotal, isBust3, moneyManager
+                cardManager.hand3,
+                resultText3,
+                "P3",
+                dealerTotal,
+                isBust3,
+                moneyManager,
+                bustGuardUsed3
             );
         }
 
@@ -773,6 +727,9 @@ public class BJdraw : MonoBehaviour
         // 次のラウンドへ
         roundManager.NextRound();
 
+        // 返金済みフラグをリセット
+        moneyManager.ResetRefundFlags();
+
         StartNextRound();
     }
 
@@ -817,6 +774,11 @@ public class BJdraw : MonoBehaviour
         bustGuardUsed1 = false;
         bustGuardUsed2 = false;
         bustGuardUsed3 = false;
+
+        if (abilityManager != null)
+        {
+            abilityManager.ResetBustGuardActive();
+        }
 
         // 引き直し能力の使用状態をリセット
         hasHit1 = false;
@@ -1118,39 +1080,43 @@ public class BJdraw : MonoBehaviour
         }
     }
 
-    
-
     public void CheckDealerInfoCurrentPlayer()
     {
-        int playerIndex = turnManager.GetCurrentTurn() - 1;
+        int player = turnManager.GetCurrentTurn();
 
-        if (playerIndex < 0 || playerIndex >= 3)
-            return;
-
-        if (abilityManager == null)
+        if (bjDealer == null)
         {
-            Debug.LogError("BJAbilityManagerが設定されていません！");
+            Debug.LogError("BJDealerが設定されていません！");
             return;
         }
 
-        // 能力を所持しているか確認
-        if (!abilityManager.UseDealerInfo(playerIndex))
-        {
-            Debug.Log("ディーラー情報能力を持っていません！");
-            return;
-        }
+        int dealerTotal = bjDealer.GetDealerTotal();
 
-        // ディーラーの合計点を取得
-        int dealerPoint = bjDealer.GetDealerTotal();
+        string result;
 
-        if (dealerPoint >= 17)
+        if (dealerTotal >= 17)
         {
-            Debug.Log("ディーラーの手札は17以上！");
+            result = "ディーラーは17以上です";
         }
         else
         {
-            Debug.Log("ディーラーの手札は17未満！");
+            result = "ディーラーは17未満です";
         }
+
+        if (dealerInfoText != null)
+        {
+            dealerInfoText.text = result;
+            dealerInfoText.gameObject.SetActive(true);
+        }
+
+        Debug.Log(
+            "P" + player +
+            " 17サーチ結果：" +
+            result +
+            "（現在の点数：" +
+            dealerTotal +
+            "）"
+        );
     }
 
     public void UseDealerInfo()
@@ -1178,6 +1144,195 @@ public class BJdraw : MonoBehaviour
         dealerInfoText.gameObject.SetActive(true);
 
         Debug.Log("17サーチ結果：" + dealerTotal);
+    }
+
+    public void ForceRedraw1()
+    {
+        // P1のターンでなければ使用できない
+        if (turnManager.GetCurrentTurn() != 1)
+        {
+            Debug.Log("P1のターンではありません！");
+            return;
+        }
+
+        // P1がBET確定していなければ使用できない
+        if (!betConfirmed1)
+        {
+            Debug.Log("先にBETを確定してください！");
+            return;
+        }
+
+        // 能力を持っているか確認して消費
+        if (abilityManager == null || !abilityManager.UseForceRedraw(0))
+        {
+            Debug.Log("強制引き直し能力を持っていません！");
+            return;
+        }
+
+        if (GameSettings.IsActive[1] && !isBust2)
+        {
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand2, handArea2,
+                cardPrefab, cardSize, !isStand2
+            );
+
+            if (isStand2)
+            {
+                UpdatePoint2(false);
+            }
+            else
+            {
+                forceCardHidden2 = true;
+            }
+        }
+
+        if (GameSettings.IsActive[2] && !isBust3)
+        {
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand3, handArea3,
+                cardPrefab, cardSize, !isStand3
+            );
+
+            if (isStand3)
+            {
+                UpdatePoint3(false);
+            }
+            else
+            {
+                forceCardHidden3 = true;
+            }
+        }
+
+        Debug.Log("強制引き直しを発動！P2・P3にカードを配りました！");
+    }
+
+    public void ForceRedraw2()
+    {
+        // P2のターンでなければ使用できない
+        if (turnManager.GetCurrentTurn() != 2)
+        {
+            Debug.Log("P2のターンではありません！");
+            return;
+        }
+
+        // P2がBET確定していなければ使用できない
+        if (!betConfirmed2)
+        {
+            Debug.Log("先にBETを確定してください！");
+            return;
+        }
+
+        // 能力を持っているか確認して消費
+        if (abilityManager == null || !abilityManager.UseForceRedraw(1))
+        {
+            Debug.Log("強制引き直し能力を持っていません！");
+            return;
+        }
+
+        // P1に強制で1枚追加
+        if (GameSettings.IsActive[0] && !isBust)
+        {
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand, handArea,
+                cardPrefab, cardSize, false
+            );
+
+            UpdatePoint(false);
+        }
+
+        // P3に強制で1枚追加
+        if (GameSettings.IsActive[2] && !isBust3)
+        {
+            // スタンド済みなら表向き、まだなら裏向き
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand3, handArea3,
+                cardPrefab, cardSize, !isStand3
+            );
+
+            if (isStand3)
+            {
+                UpdatePoint3(false);
+            }
+            else
+            {
+                forceCardHidden3 = true;
+            }
+        }
+
+        Debug.Log("P2が強制引き直しを発動！P1・P3にカードを配りました！");
+    }
+
+    public void ForceRedraw3()
+    {
+        // P3のターンでなければ使用できない
+        if (turnManager.GetCurrentTurn() != 3)
+        {
+            Debug.Log("P3のターンではありません！");
+            return;
+        }
+
+        // P3がBET確定していなければ使用できない
+        if (!betConfirmed3)
+        {
+            Debug.Log("先にBETを確定してください！");
+            return;
+        }
+
+        // 能力を持っているか確認して消費
+        if (abilityManager == null || !abilityManager.UseForceRedraw(2))
+        {
+            Debug.Log("強制引き直し能力を持っていません！");
+            return;
+        }
+
+        // P1に強制で1枚追加
+        if (GameSettings.IsActive[0] && !isBust)
+        {
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand, handArea,
+                cardPrefab, cardSize, false
+            );
+
+            UpdatePoint(false);
+        }
+
+        // P2に強制で1枚追加
+        if (GameSettings.IsActive[1] && !isBust2)
+        {
+            cardManager.DrawAndDisplayCard(
+                deck, cardManager.hand2, handArea2,
+                cardPrefab, cardSize, false
+            );
+
+            UpdatePoint2(false);
+        }
+
+        Debug.Log("P3が強制引き直しを発動！P1・P2にカードを配りました！");
+    }
+
+    public void ForceRedrawCurrentPlayer()
+    {
+        int turn = turnManager.GetCurrentTurn();
+
+        if (turn == 1)
+            ForceRedraw1();
+        else if (turn == 2)
+            ForceRedraw2();
+        else if (turn == 3)
+            ForceRedraw3();
+    }
+
+    public void ActivateBustGuardCurrentPlayer()
+    {
+        int playerIndex = turnManager.GetCurrentTurn() - 1;
+
+        if (abilityManager == null)
+        {
+            Debug.LogError("BJAbilityManagerが設定されていません！");
+            return;
+        }
+
+        abilityManager.ActivateBustGuard(playerIndex);
     }
 
 }

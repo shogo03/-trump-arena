@@ -5,6 +5,7 @@ public class MoneyManager : MonoBehaviour
 {
     private static MoneyManager instance;
     public BJAbilityManager abilityManager;
+    public AbilityShopUI abilityShopUI;
     // 所持金
 
     public int money1 = 1000;
@@ -39,6 +40,9 @@ public class MoneyManager : MonoBehaviour
     public BJdraw bjDraw;
     public TMP_Text dealerInfoText;
 
+    private bool refunded1 = false;
+    private bool refunded2 = false;
+    private bool refunded3 = false;
 
     void Awake()
     {
@@ -152,21 +156,37 @@ public class MoneyManager : MonoBehaviour
     {
         if (player == 1)
         {
+            if (refunded1) return;
+            refunded1 = true;
             money1 += bet1;
         }
         else if (player == 2)
         {
+            if (refunded2) return;
+            refunded2 = true;
             money2 += bet2;
         }
         else if (player == 3)
         {
+            if (refunded3) return;
+            refunded3 = true;
             money3 += bet3;
         }
+        else
+        {
+            return;
+        }
 
-        Debug.Log("P" + player + " バースト無効！掛け金返却：" +
-            (player == 1 ? bet1 : player == 2 ? bet2 : bet3));
+        Debug.Log("P" + player + " バースト無効！掛け金返却");
 
         UpdateUI();
+    }
+
+    public void ResetRefundFlags()
+    {
+        refunded1 = false;
+        refunded2 = false;
+        refunded3 = false;
     }
 
     // 引き分け
@@ -321,6 +341,8 @@ public class MoneyManager : MonoBehaviour
 
         abilityManager?.SyncMoneyAbilities(this);
 
+        if (abilityShopUI != null)
+            abilityShopUI.UpdateShopImages();
 
         UpdateUI();
     }
@@ -357,9 +379,19 @@ public class MoneyManager : MonoBehaviour
             money3 -= price;
             betUpStage3++;
         }
+        else
+        {
+            return;
+        }
 
         Debug.Log("P" + player + " 掛け金UP！");
+
         abilityManager?.SyncMoneyAbilities(this);
+
+        // ★購入直後に画像を更新
+        if (abilityShopUI != null)
+            abilityShopUI.UpdateShopImages();
+
         UpdateUI();
     }
 

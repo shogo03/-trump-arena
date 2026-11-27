@@ -15,7 +15,11 @@ public class HighLowTurnManager : MonoBehaviour
     [Header("表示設定")]
     [SerializeField] private float switchDelay = 0.3f;
 
+    [Header("カーソル管理")]
     [SerializeField] private HighLowCursorManager cursorManager;
+
+    [Header("能力管理")]
+    [SerializeField] private HighLowAbilityManager abilityManager;
 
     private int currentPlayer = 1;
     private Coroutine popupCoroutine;
@@ -27,6 +31,17 @@ public class HighLowTurnManager : MonoBehaviour
 
     public HLManager.Prediction Player1Prediction => player1Prediction;
     public HLManager.Prediction Player2Prediction => player2Prediction;
+
+    public HLManager.Prediction GetPrediction(int playerNumber)
+    {
+        if (playerNumber == 1)
+            return player1Prediction;
+
+        if (playerNumber == 2)
+            return player2Prediction;
+
+        return HLManager.Prediction.None;
+    }
 
     public void Initialize()
     {
@@ -40,6 +55,7 @@ public class HighLowTurnManager : MonoBehaviour
 
         UpdateTurnText();
         ShowTurnPopup();
+        RefreshAbilityButtons();
     }
 
     public void SetPrediction(HLManager.Prediction prediction)
@@ -51,14 +67,15 @@ public class HighLowTurnManager : MonoBehaviour
 
             if (cursorManager != null)
                 cursorManager.SetCurrentTurn(2);
-
-            UpdateTurnText();
-            ShowTurnPopup();
         }
         else
         {
             player2Prediction = prediction;
         }
+
+        UpdateTurnText();
+        ShowTurnPopup();
+        RefreshAbilityButtons();
     }
 
     public bool BothPlayersPredicted()
@@ -79,6 +96,7 @@ public class HighLowTurnManager : MonoBehaviour
 
         UpdateTurnText();
         ShowTurnPopup();
+        RefreshAbilityButtons();
     }
 
     private void UpdateTurnText()
@@ -97,26 +115,28 @@ public class HighLowTurnManager : MonoBehaviour
 
     private IEnumerator SwitchPopup()
     {
-        // いったん非表示
         if (turnPopup != null)
             turnPopup.SetActive(false);
 
-        // 少し待つ
         yield return new WaitForSeconds(switchDelay);
 
         if (turnPopup != null && popupText != null)
         {
             popupText.text = "PLAYER " + currentPlayer + " TURN";
 
-            // プレイヤーごとに文字色を変更
             popupText.color = currentPlayer == 1
                 ? Color.white
                 : Color.red;
 
-            // 再表示
             turnPopup.SetActive(true);
         }
 
         popupCoroutine = null;
+    }
+
+    private void RefreshAbilityButtons()
+    {
+        if (abilityManager != null)
+            abilityManager.RefreshAbilityButtons();
     }
 }
