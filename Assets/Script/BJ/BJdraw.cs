@@ -607,54 +607,42 @@ public class BJdraw : MonoBehaviour
         // ディーラーのターン
         int dealerTotal = bjDealer.DealerTurn();
 
-        // P1の勝敗判定（常に参加）
-        if (bustGuardUsed1)
-        {
-            resultText.text = "バースト無効！掛け金返却！";
-        }
-        else
+        // P1の勝敗判定
+        bjResult.CheckWinner(
+            cardManager.hand,
+            resultText,
+            "P1",
+            dealerTotal,
+            isBust,
+            moneyManager,
+            bustGuardUsed1
+        );
+
+        // P2の勝敗判定
+        if (GameSettings.IsActive[1])
         {
             bjResult.CheckWinner(
-                cardManager.hand, resultText, "P1",
-                dealerTotal, isBust, moneyManager
+                cardManager.hand2,
+                resultText2,
+                "P2",
+                dealerTotal,
+                isBust2,
+                moneyManager,
+                bustGuardUsed2
             );
         }
 
-        // P2が参加している場合
-        if (GameSettings.IsActive[1])
-        {
-            if (GameSettings.IsActive[1])
-            {
-                if (bustGuardUsed2)
-                {
-                    resultText2.text = "バースト無効！掛け金返却！";
-                }
-                else
-                {
-                    if (GameSettings.IsActive[2])
-                    {
-                        if (bustGuardUsed3)
-                        {
-                            resultText3.text = "バースト無効！掛け金返却！";
-                        }
-                        else
-                        {
-                            bjResult.CheckWinner(
-                                cardManager.hand3, resultText3, "P3",
-                                dealerTotal, isBust3, moneyManager
-                            );
-                        }
-                    }
-                }
-            }
-        }
-
-        // P3が参加している場合
+        // P3の勝敗判定
         if (GameSettings.IsActive[2])
         {
             bjResult.CheckWinner(
-                cardManager.hand3, resultText3, "P3",
-                dealerTotal, isBust3, moneyManager
+                cardManager.hand3,
+                resultText3,
+                "P3",
+                dealerTotal,
+                isBust3,
+                moneyManager,
+                bustGuardUsed3
             );
         }
 
@@ -737,6 +725,9 @@ public class BJdraw : MonoBehaviour
 
         // 次のラウンドへ
         roundManager.NextRound();
+
+        // 返金済みフラグをリセット
+        moneyManager.ResetRefundFlags();
 
         StartNextRound();
     }
