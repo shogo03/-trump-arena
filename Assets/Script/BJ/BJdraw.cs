@@ -71,6 +71,7 @@ public class BJdraw : MonoBehaviour
     private bool bustGuardUsed3 = false;
 
 
+
     private bool forceCardHidden2 = false;
     private bool forceCardHidden3 = false;
 
@@ -773,6 +774,11 @@ public class BJdraw : MonoBehaviour
         bustGuardUsed1 = false;
         bustGuardUsed2 = false;
         bustGuardUsed3 = false;
+
+        if (abilityManager != null)
+        {
+            abilityManager.ResetBustGuardActive();
+        }
 
         // 引き直し能力の使用状態をリセット
         hasHit1 = false;

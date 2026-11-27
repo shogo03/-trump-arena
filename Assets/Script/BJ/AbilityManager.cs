@@ -94,28 +94,23 @@ public class BJAbilityManager : MonoBehaviour
 
         bustGuardActive[playerIndex] = true;
 
-        Debug.Log("P" + (playerIndex + 1) + " バースト無効を発動！");
+        // 発動した瞬間に回数を消費
+        bustGuardCount[playerIndex]--;
+
+        Debug.Log("P" + (playerIndex + 1) +
+            " バースト無効を発動！残り回数：" + bustGuardCount[playerIndex]);
     }
 
     public bool IsBustGuardActive(int playerIndex)
     {
-        if (playerIndex < 0 || playerIndex >= 3)
-            return false;
+        if (playerIndex < 0 || playerIndex >= 3) return false;
 
-        if (!bustGuardActive[playerIndex])
-            return false;
+        if (!bustGuardActive[playerIndex]) return false;
 
-        if (bustGuardCount[playerIndex] <= 0)
-            return false;
-
-        // 発動状態を解除
+        // 発動状態だけ解除する（回数は減らさない）
         bustGuardActive[playerIndex] = false;
 
-        // 所持数を1回分消費
-        bustGuardCount[playerIndex]--;
-
-        Debug.Log("P" + (playerIndex + 1) + " バースト無効を使用！");
-
+        Debug.Log("P" + (playerIndex + 1) + " バースト無効が発動しました！");
         return true;
     }
 
@@ -226,5 +221,15 @@ public class BJAbilityManager : MonoBehaviour
         );
 
         return true;
+    }
+
+    public void ResetBustGuardActive()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            bustGuardActive[i] = false;
+        }
+
+        Debug.Log("バースト無効の発動状態をリセットしました！");
     }
 }
