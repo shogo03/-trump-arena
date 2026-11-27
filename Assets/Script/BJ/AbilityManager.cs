@@ -75,6 +75,49 @@ public class BJAbilityManager : MonoBehaviour
         return true;
     }
 
+    public void ActivateBustGuard(int playerIndex)
+    {
+        if (playerIndex < 0 || playerIndex >= 3)
+            return;
+
+        if (bustGuardCount[playerIndex] <= 0)
+        {
+            Debug.Log("バースト無効を持っていません！");
+            return;
+        }
+
+        if (bustGuardActive[playerIndex])
+        {
+            Debug.Log("すでに発動中です！");
+            return;
+        }
+
+        bustGuardActive[playerIndex] = true;
+
+        Debug.Log("P" + (playerIndex + 1) + " バースト無効を発動！");
+    }
+
+    public bool IsBustGuardActive(int playerIndex)
+    {
+        if (playerIndex < 0 || playerIndex >= 3)
+            return false;
+
+        if (!bustGuardActive[playerIndex])
+            return false;
+
+        if (bustGuardCount[playerIndex] <= 0)
+            return false;
+
+        // 発動状態を解除
+        bustGuardActive[playerIndex] = false;
+
+        // 所持数を1回分消費
+        bustGuardCount[playerIndex]--;
+
+        Debug.Log("P" + (playerIndex + 1) + " バースト無効を使用！");
+
+        return true;
+    }
 
     // 引き直しを購入
 

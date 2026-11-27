@@ -1325,6 +1325,19 @@ public class BJdraw : MonoBehaviour
             ForceRedraw3();
     }
 
+    public void ActivateBustGuardCurrentPlayer()
+    {
+        int playerIndex = turnManager.GetCurrentTurn() - 1;
+
+        if (abilityManager == null)
+        {
+            Debug.LogError("BJAbilityManager‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñI");
+            return;
+        }
+
+        abilityManager.ActivateBustGuard(playerIndex);
+    }
+
 }
 //‚±‚±‚©‚ç‰º •ÏX—p
 

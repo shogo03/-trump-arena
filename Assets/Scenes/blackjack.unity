@@ -1501,6 +1501,7 @@ MonoBehaviour:
   winMoneyLevel: 000000000000000000000000
   betLimitLevel: 000000000000000000000000
   bustGuardCount: 000000000000000000000000
+  bustGuardActive: 000000
   hasRedraw: 000000
   hasForceRedraw: 000000
   hasDealerInfo: 000000
@@ -1691,7 +1692,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 170544958}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 1327.5, y: 307.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -5355,7 +5356,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 782490547}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2031883185}
+        m_TargetAssemblyTypeName: BJdraw, Assembly-CSharp
+        m_MethodName: ActivateBustGuardCurrentPlayer
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &782490547
 MonoBehaviour:
   m_ObjectHideFlags: 0
